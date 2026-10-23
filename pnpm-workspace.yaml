@@ -1,0 +1,29 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# pnpm 12 reads its settings from THIS file (not .npmrc).
+# Flat npm-style node_modules: Metro, Jest and Expo autolinking resolve the
+# workspace reliably without symlink tricks (monorepo best practice for RN).
+nodeLinker: hoisted
+strictPeerDependencies: false
+autoInstallPeers: true
+
+# Install-script allow-list (pnpm 12 `allowBuilds`) - supply-chain guardrail, see SECURITY.md §6.
+# Everything not listed here is blocked from running install/postinstall scripts.
+allowBuilds:
+  '@parcel/watcher': true # native file watcher used by Metro/Jest tooling
+  '@prisma/engines': true # Prisma engine binaries (packages/db CLI only)
+  prisma: true # Prisma CLI postinstall
+  supabase: true # Supabase CLI binary download (packages/db only)
+  unrs-resolver: true # napi resolver used by the TS/ESLint toolchain
+
+minimumReleaseAgeExclude:
+  - '@turbo/darwin-64@2.11.10'
+  - '@turbo/darwin-arm64@2.11.10'
+  - '@turbo/linux-64@2.11.10'
+  - '@turbo/linux-arm64@2.11.10'
+  - '@turbo/windows-64@2.11.10'
+  - '@turbo/windows-arm64@2.11.10'
+  - turbo@2.11.10
+  - lucide-react@1.61.0

@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Operate Mode base layer (DESIGN.md). Flat, high-contrast, no decoration. */
+@layer base {
+  /*
+   * Theme tokens (R1.3, R1.4, R1.6). Each color is defined as space-separated
+   * RGB channels so the Tailwind preset's `rgb(var(--color-*) / <alpha-value>)`
+   * form keeps opacity modifiers working (e.g. `bg-ink/85`).
+   *
+   * Dark is the source-of-truth default: every channel equals the exact hex the
+   * Tailwind preset assigned before the CSS-variable refactor (R1.4). `:root`
+   * and `[data-theme='dark']` share the dark set so an unresolved document root
+   * still renders dark.
+   */
+  :root,
+  [data-theme='dark'] {
+    --color-ink: 11 15 20; /* #0B0F14 app background */
+    --color-surface: 18 24 31; /* #12181F panels, sidebar */
+    --color-raised: 26 34 44; /* #1A222C cards, elevated rows */
+    --color-line: 42 52 65; /* #2A3441 hairline borders */
+    --color-fg: 242 245 248; /* #F2F5F8 primary text */
+    --color-muted: 147 161 176; /* #93A1B0 secondary text */
+
+    --color-emergency-sunog: 255 59 31; /* #FF3B1F fire */
+    --color-emergency-medikal: 0 208 138; /* #00D08A medical */
+    --color-emergency-krimen: 255 197 61; /* #FFC53D crime */
+    --color-emergency-baha: 76 194 255; /* #4CC2FF flood */
+
+    --color-status-queued: 255 197 61; /* #FFC53D */
+    --color-status-dispatched: 76 194 255; /* #4CC2FF */
+    --color-status-enroute: 94 211 192; /* #5ED3C0 */
+    --color-status-onscene: 255 176 32; /* #FFB020 */
+    --color-status-resolved: 0 208 138; /* #00D08A */
+    --color-status-success: 0 208 138; /* #00D08A */
+    --color-status-error: 255 59 31; /* #FF3B1F */
+    --color-status-info: 76 194 255; /* #4CC2FF */
+  }
+
+  /*
+   * Light theme (R1.3, R1.7). Values chosen for WCAG 2.1 AA: 4.5:1 for normal
+   * text, 3:1 for large text and UI-component boundaries, measured against the
+   * surfaces the token renders on.
+   *
+   * Contrast against the lightest surface (#F4F6F8) / ink (#FFFFFF):
+   *   fg (#0B0F14)      -> 17.7:1 on surface, 19.2:1 on ink  (body text)
+   *   muted (#5A6B7B)   -> 5.07:1 on surface, 5.49:1 on ink  (secondary text, >=4.5:1)
+   * The emergency/status tones are darkened from their dark-theme hues so each
+   * clears 4.5:1 on surface (>=3:1 for the large/UI-boundary uses they serve):
+   *   sunog/error #C41E0A 5.48, medikal/resolved/success #007A52 4.96,
+   *   krimen/queued #8A6300 5.01, baha/dispatched/info #0B6FB0 4.95,
+   *   enroute #0F7A6E 4.81, onscene #9A5B00 5.01.
+   * `line` (#CBD3DB) is a decorative hairline divider, exempt from 1.4.11; it
+   * stays a subtle 1.4:1 boundary while interactive boundaries use the tones above.
+   */
+  [data-theme='light'] {
+    --color-ink: 255 255 255; /* #FFFFFF app background */
+    --color-surface: 244 246 248; /* #F4F6F8 panels, sidebar */
+    --color-raised: 233 237 241; /* #E9EDF1 cards, elevated rows */
+    --color-line: 203 211 219; /* #CBD3DB hairline borders */
+    --color-fg: 11 15 20; /* #0B0F14 primary text */
+    --color-muted: 90 107 123; /* #5A6B7B secondary text */
+
+    --color-emergency-sunog: 196 30 10; /* #C41E0A fire */
+    --color-emergency-medikal: 0 122 82; /* #007A52 medical */
+    --color-emergency-krimen: 138 99 0; /* #8A6300 crime */
+    --color-emergency-baha: 11 111 176; /* #0B6FB0 flood */
+
+    --color-status-queued: 138 99 0; /* #8A6300 */
+    --color-status-dispatched: 11 111 176; /* #0B6FB0 */
+    --color-status-enroute: 15 122 110; /* #0F7A6E */
+    --color-status-onscene: 154 91 0; /* #9A5B00 */
+    --color-status-resolved: 0 122 82; /* #007A52 */
+    --color-status-success: 0 122 82; /* #007A52 */
+    --color-status-error: 196 30 10; /* #C41E0A */
+    --color-status-info: 11 111 176; /* #0B6FB0 */
+  }
+
+  /* Bind the native form/scrollbar palette per theme (R1.5). */
+  :root {
+    color-scheme: dark;
+  }
+
+  [data-theme='light'] {
+    color-scheme: light;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink font-sans text-fg antialiased;
+  }
+
+  ::selection {
+    @apply bg-fg text-ink;
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "extends": "@aira/typescript-config/library.json",
+  "include": ["src", "vitest.config.mts"]
+}

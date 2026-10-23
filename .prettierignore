@@ -1,0 +1,8 @@
+node_modules
+.turbo
+.next
+.expo
+coverage
+pnpm-lock.yaml
+apps/web/next-env.d.ts
+apps/mobile/nativewind-env.d.ts

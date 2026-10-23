@@ -1,0 +1,23 @@
+node_modules/
+.next/
+.turbo/
+.expo/
+dist/
+build/
+coverage/
+web-build/
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+
+android/
+ios/
+*.log
+.DS_Store
+Thumbs.db
+
+# Supabase CLI local state (packages/db) — never commit runtime artifacts.
+packages/db/supabase/.temp/
+packages/db/supabase/.branches/

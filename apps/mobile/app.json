@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "AIRA",
+    "slug": "aira",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0F14",
+    "android": {
+      "package": "ph.aira.citizen"
+    },
+    "platforms": ["android", "ios"]
+  }
+}

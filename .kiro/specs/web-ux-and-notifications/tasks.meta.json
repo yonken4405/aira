@@ -1,0 +1,1322 @@
+{
+  "pbtResults": {
+    "5.3 Write property test for the theme-preference resolver": {
+      "status": "passed",
+      "lastRunTimestamp": 1792676011231
+    }
+  },
+  "executionHistory": {
+    "1.1 Write failing tests for the channelized token preset": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664894788
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664918942
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665386911
+      }
+    ],
+    "1.2 Refactor `packages/tailwind-config/index.js` to satisfy the tests": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664894976
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665398368
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665660232
+      }
+    ],
+    "2. Define theme variable sets and bind color-scheme in globals.css": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664895210
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665399325
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665660909
+      }
+    ],
+    "3. Add the pre-paint theme script to the root layout": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664895360
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792666638995
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792666802798
+      }
+    ],
+    "4. Enable React component testing in `@aira/ui`": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664895512
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664919674
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665387427
+      }
+    ],
+    "5.1 Write failing tests for ThemeProvider / useTheme / ThemeToggle": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664895738
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665400768
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665664225
+      }
+    ],
+    "5.2 Implement the theme module and export it": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664896123
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792666812901
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667176399
+      }
+    ],
+    "6.1 Write failing tests for Textarea, Checkbox, Radio, Switch": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664896383
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665401741
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665663265
+      }
+    ],
+    "6.2 Implement the primitives and export them": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664896625
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792666813832
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667177324
+      }
+    ],
+    "7.1 Write a failing test for Field error wiring": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664896849
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665402451
+      },
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665662344
+      }
+    ],
+    "7.2 Upgrade `Field` to clone the child control with a11y props": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664897065
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792666815257
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667178689
+      }
+    ],
+    "8.1 Write failing tests for NavLink active-state computation": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664897482
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792666639856
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792666803644
+      }
+    ],
+    "8.2 Implement `NavLink` and export it": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664897693
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792666815771
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667179420
+      }
+    ],
+    "9.1 Write failing tests for AppShellHeader": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664897923
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667208100
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667433874
+      }
+    ],
+    "9.2 Implement `AppShell` (server) + `AppShellHeader` (client island)": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664898099
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667441024
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667795017
+      }
+    ],
+    "10.1 Write a failing test for IncidentConsole reuse": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664898343
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667209011
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667434505
+      }
+    ],
+    "10.2 Extract map+queue into `IncidentConsole` and dedupe": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664898563
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667441815
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667795789
+      }
+    ],
+    "11.1 Write failing tests for AdminSurface tab gating and deep-linking": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664898730
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667807448
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792668098626
+      }
+    ],
+    "11.2 Implement `AdminSurface` and route it from the three admin URLs": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664898901
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792668107431
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792669682948
+      }
+    ],
+    "11.3 Redirect `/admin/overview` to the surviving map+queue view": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664899074
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792668108389
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792669684007
+      }
+    ],
+    "12.1 Write a failing test asserting no legacy header usages remain": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664899408
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792669692873
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792669880711
+      }
+    ],
+    "12.2 Adopt App_Shell in console/admin/platform layouts and delete the old headers": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664899639
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792669881780
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792670312414
+      }
+    ],
+    "13.1 Write a failing test for shell chrome on the password page": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664899825
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667808420
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792668099266
+      }
+    ],
+    "13.2 Relocate `/account/password` into the Profile/Settings area under App_Shell": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664899997
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792668109592
+      },
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792669681676
+      }
+    ],
+    "14.1 Write failing tests for the Profile view": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664900166
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792675889973
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792676145396
+      }
+    ],
+    "14.2 Implement `ProfileView` and per-tier Profile routes": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664900348
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677173610
+      }
+    ],
+    "15.1 Write failing tests for the Settings view": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664900744
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792675890853
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792676146150
+      }
+    ],
+    "15.2 Implement `SettingsView` and per-tier Settings routes": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664900913
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677171842
+      }
+    ],
+    "16.1 Write failing tests for the NotificationCenter": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664901068
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792675891817
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792676144442
+      }
+    ],
+    "16.2 Implement `NotificationCenter` and mount it in the shell header": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664901228
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677172778
+      }
+    ],
+    "17. Add the notification schema and citizen area linkage migration": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664901383
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792670846193
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671038004
+      }
+    ],
+    "18. Define notification ports and domain types": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664901544
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792670847530
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671038887
+      }
+    ],
+    "19. Implement the in-memory NotificationStore (test seam)": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664901751
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671049885
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671247070
+      }
+    ],
+    "20.1 Write failing unit tests for `notifyOne`/`notifyMany`": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664901968
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671254365
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671458637
+      }
+    ],
+    "20.2 Implement `service.ts` (pure rules)": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664902134
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671465228
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671650030
+      }
+    ],
+    "21.1 Write failing store tests for recipient isolation and scope resolution": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664902290
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671688423
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672237626
+      }
+    ],
+    "21.2 Implement `postgres-store.ts`": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664902458
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672244147
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672464093
+      }
+    ],
+    "22. Wire the notification runtime into AppDeps": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664902625
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672478268
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672688056
+      }
+    ],
+    "23.1 Write failing tests for the EmailSender port contract": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664902794
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672696814
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672923471
+      }
+    ],
+    "23.2 Implement `EmailSender` (nodemailer Gmail SMTP) behind the port": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664902954
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672924846
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673318662
+      }
+    ],
+    "23.3 Implement `WebPushSender` (web-push VAPID) + service worker + subscribe endpoint": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664903150
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672925530
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673319227
+      }
+    ],
+    "24.1 Write a failing RBAC test": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664903313
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792670848067
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671039757
+      }
+    ],
+    "24.2 Add `civilian-broadcast` permission and platform capability constant": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664903464
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671050778
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671248052
+      }
+    ],
+    "25.1 Write failing integration tests for the notifications routes": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664903629
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673341118
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673699824
+      }
+    ],
+    "25.2 Implement notifications handlers and routes": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664903929
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673712071
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674263620
+      }
+    ],
+    "26.1 Write failing integration tests for broadcasts incl. tenant-isolation denial": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664904133
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673342053
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673701198
+      }
+    ],
+    "26.2 Implement `broadcast-handlers.ts` and `/api/broadcasts`": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664904307
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673713456
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674262680
+      }
+    ],
+    "27.1 Write failing integration tests for system notices": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664904467
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673343005
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673702182
+      }
+    ],
+    "27.2 Implement `system-notice-handlers.ts` and `/api/system-notices`": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664904638
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673714413
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674261794
+      }
+    ],
+    "28.1 Write failing tests for each event hook": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664904808
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673343808
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673702958
+      }
+    ],
+    "28.2 Call `notify*` at the verified hook points": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664904969
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673715202
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674264732
+      }
+    ],
+    "29. Checkpoint — notification engine": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664905143
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792675585773
+      }
+    ],
+    "30.1 Write failing tests for logout and transaction toasts": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664905311
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677181066
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677578848
+      }
+    ],
+    "30.2 Implement logout toasts and audit remaining mutations for coverage": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664905576
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677585929
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677839863
+      }
+    ],
+    "31.1 Write failing tests for the new confirm dialogs": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664905751
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677182022
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677579766
+      }
+    ],
+    "31.2 Wire `ConfirmDialog` into the listed actions": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664905929
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677856504
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792678479398
+      }
+    ],
+    "32.1 Write failing tests for map/tracking skeletons and LoadError retry": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664906101
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677182819
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677580536
+      }
+    ],
+    "32.2 Add `loading.tsx` for each async segment and the two new skeletons": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664906262
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677586448
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677839215
+      }
+    ],
+    "33.1 Update PRODUCT.md and DESIGN.md": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664906425
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792678500148
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792678701226
+      }
+    ],
+    "33.2 Update SECURITY.md, apps/web README, .env.example, and AGENTS.md": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664906583
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792678500768
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792678700478
+      }
+    ],
+    "34. Final checkpoint — run the quality gate": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792664906798
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792678711380
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792678839830
+      }
+    ],
+    "1. Refactor the Tailwind preset to CSS-variable tokens": [
+      {
+        "executionId": "8f7562da-d8ea-4603-bbab-ef39893142d9",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792665660450
+      }
+    ],
+    "5. Implement the theme runtime in `@aira/ui/web`": [
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667176688
+      }
+    ],
+    "6. Add accessible form primitives to `@aira/ui/web`": [
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667177541
+      }
+    ],
+    "7. Auto-wire Field error association": [
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667178880
+      }
+    ],
+    "8. Implement the shared NavLink": [
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667179689
+      }
+    ],
+    "9. Implement App_Shell and its header island": [
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667795344
+      }
+    ],
+    "10. Extract the shared IncidentConsole": [
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792667795985
+      }
+    ],
+    "13. Move the account/password page under the shell": [
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792669681879
+      }
+    ],
+    "11. Build the tabbed Admin surface": [
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792669684401
+      }
+    ],
+    "12. Replace the three hand-rolled headers with App_Shell": [
+      {
+        "executionId": "6886a591-de90-4bbe-ac5d-017cd38653ce",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792670312616
+      }
+    ],
+    "24. Add RBAC entries for broadcast and system-notice": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671248144
+      }
+    ],
+    "20. Implement the notification service core": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671650233
+      }
+    ],
+    "20.3 Write property test — fixed channel order, one outcome per channel": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671687629
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672232312
+      }
+    ],
+    "20.4 Write property test — fail-soft dispatch never throws": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671694617
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672233210
+      }
+    ],
+    "20.5 Write property test — missing credential yields not_attempted": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671695606
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672234723
+      }
+    ],
+    "20.6 Write property test — preference honored, In_App forced for critical": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671696950
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672235553
+      }
+    ],
+    "20.7 Write property test — forced-critical policy is uniform and records overrides": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792671697602
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672236590
+      }
+    ],
+    "21. Implement the Postgres NotificationStore": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672464193
+      }
+    ],
+    "21.3 Write property test — recipient isolation": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672477304
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792672688863
+      }
+    ],
+    "23. Implement the real channel senders and push client assets": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792673319310
+      }
+    ],
+    "27. Implement the system-notice API": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674261907
+      }
+    ],
+    "26. Implement the civilian-broadcast API": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674262792
+      }
+    ],
+    "25. Implement the notifications API (list/unread/mark-read/mark-all-read, preferences)": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674263707
+      }
+    ],
+    "28. Wire notification events into existing handlers (fail-soft)": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674264831
+      }
+    ],
+    "26.3 Write property test — tenant-scope targeting is authoritative": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674272740
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792675584037
+      }
+    ],
+    "26.4 Write property test — out-of-subtree targeting denied atomically": [
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792674273503
+      },
+      {
+        "executionId": "f60a9ce5-be5c-48b3-bb78-e188bd66ad83",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792675584957
+      }
+    ],
+    "5.3 Write property test for the theme-preference resolver": [
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792675892783
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792676143555
+      }
+    ],
+    "8.3 Write property test for NavLink active-state": [
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792675893660
+      },
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792676142131
+      }
+    ],
+    "15. Build the Settings pages": [
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677171981
+      }
+    ],
+    "16. Build the Notification Center bell island": [
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677172877
+      }
+    ],
+    "14. Build the Profile pages": [
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677173723
+      }
+    ],
+    "32. Add route-level loading and skeletons": [
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677839374
+      }
+    ],
+    "30. Add toast coverage for logout and audit mutation flows": [
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792677839972
+      }
+    ],
+    "31. Add confirmation gating to high-impact actions": [
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792678479513
+      }
+    ],
+    "33. Update governing documentation": [
+      {
+        "executionId": "da3169cc-32fb-453a-bd64-6e8a3aebf753",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1792678701338
+      }
+    ]
+  }
+}

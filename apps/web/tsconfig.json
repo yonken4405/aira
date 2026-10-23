@@ -1,0 +1,22 @@
+{
+  "extends": "@aira/typescript-config/next.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"],
+    "incremental": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "vitest.config.mts",
+    "vitest.setup.ts",
+    "tailwind.config.ts",
+    "next.config.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@aira/tailwind-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Single shared Tailwind CSS preset (design tokens) for AIRA - web + mobile.",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^3.4.19"
+  },
+  "devDependencies": {
+    "vitest": "5.0.5"
+  }
+}

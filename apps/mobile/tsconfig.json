@@ -1,0 +1,9 @@
+{
+  "extends": "@aira/typescript-config/react-native.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["jest", "nativewind/types"]
+  },
+  "include": ["App.tsx", "src/**/*.ts", "src/**/*.tsx", "types/**/*.d.ts", "nativewind-env.d.ts"],
+  "exclude": ["node_modules"]
+}

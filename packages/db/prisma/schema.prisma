@@ -1,0 +1,200 @@
+// AIRA data layer (typed-client mirror; apps talk to Postgres through `pg`).
+//
+// Schema ownership: supabase/migrations/*.sql (Supabase CLI) is the source of truth.
+// This Prisma schema is generated from those migrations with `pnpm --filter @aira/db db:pull`;
+// never run `prisma migrate` here.
+//
+// Auth: AIRA does NOT use Supabase Auth - there is no `auth.users` reference, no Supabase JWT.
+// Responders authenticate against `responders` + `responder_sessions` (SECURITY.md §4), which
+// keeps the database portable to any Postgres provider.
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Responder {
+  id                                             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  callsign                                       String             @unique
+  role                                           ResponderRole
+  /// argon2id hash - the app owns authentication, not Supabase Auth.
+  passwordHash                                   String             @map("password_hash")
+  active                                         Boolean            @default(true)
+  createdAt                                      DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                                      DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  office_id                                      String             @db.Uuid
+  agency_id                                      String?            @db.Uuid
+  must_change_password                           Boolean            @default(false)
+  failed_attempts                                Int                @default(0)
+  locked_until                                   DateTime?          @db.Timestamptz(6)
+  last_login_at                                  DateTime?          @db.Timestamptz(6)
+  auth_events                                    auth_events[]
+  incident_events                                incident_events[]
+  incidents_incidents_assigned_by_idToresponders Incident[]         @relation("incidents_assigned_by_idToresponders")
+  assignments                                    Incident[]         @relation("AssignedIncidents")
+  sessions                                       ResponderSession[]
+  agencies                                       agencies?          @relation(fields: [agency_id], references: [id], onUpdate: NoAction)
+  offices                                        offices            @relation(fields: [office_id], references: [id], onUpdate: NoAction)
+
+  @@index([agency_id], where: raw("(agency_id IS NOT NULL)"))
+  @@index([office_id])
+  @@map("responders")
+}
+
+model ResponderSession {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  responderId         String        @map("responder_id") @db.Uuid
+  /// Only the hash of the opaque session token is stored.
+  tokenHash           String        @unique @map("token_hash")
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt           DateTime      @map("expires_at") @db.Timestamptz(6)
+  revokedAt           DateTime?     @map("revoked_at") @db.Timestamptz(6)
+  last_seen_at        DateTime      @default(now()) @db.Timestamptz(6)
+  absolute_expires_at DateTime      @default(dbgenerated("(now() + '24:00:00'::interval)")) @db.Timestamptz(6)
+  revoked_reason      String?
+  auth_events         auth_events[]
+  responder           Responder     @relation(fields: [responderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([responderId])
+  @@index([expiresAt], map: "responder_sessions_live_idx", where: raw("(revoked_at IS NULL)"))
+  @@map("responder_sessions")
+}
+
+model Incident {
+  id                                              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  category                                        EmergencyCategory
+  /// WGS84, 4 decimal places (~11 m) - SECURITY.md §5.
+  lat                                             Float
+  lon                                             Float
+  status                                          IncidentStatus    @default(QUEUED)
+  source                                          IncidentSource    @default(mesh)
+  reportedAt                                      DateTime          @default(now()) @map("reported_at") @db.Timestamptz(6)
+  assignedToId                                    String?           @map("assigned_to_id") @db.Uuid
+  assignedAt                                      DateTime?         @map("assigned_at") @db.Timestamptz(6)
+  resolvedAt                                      DateTime?         @map("resolved_at") @db.Timestamptz(6)
+  /// Responder-only operational note; never citizen-supplied free text.
+  note                                            String?
+  office_id                                       String            @db.Uuid
+  assigned_by_id                                  String?           @db.Uuid
+  incident_events                                 incident_events[]
+  responders_incidents_assigned_by_idToresponders Responder?        @relation("incidents_assigned_by_idToresponders", fields: [assigned_by_id], references: [id], onUpdate: NoAction)
+  assignedTo                                      Responder?        @relation("AssignedIncidents", fields: [assignedToId], references: [id], onUpdate: NoAction)
+  offices                                         offices           @relation(fields: [office_id], references: [id], onUpdate: NoAction)
+
+  @@index([status, reportedAt(sort: Desc)])
+  @@index([assignedToId], where: raw("(assigned_to_id IS NOT NULL)"))
+  @@index([office_id, status, reportedAt(sort: Desc)], map: "incidents_office_status_reported_idx")
+  @@map("incidents")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model agencies {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  code       String
+  active     Boolean     @default(true)
+  created_at DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at DateTime    @default(now()) @db.Timestamptz(6)
+  responders Responder[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model auth_events {
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  responder_id       String?           @db.Uuid
+  session_id         String?           @db.Uuid
+  event              String
+  callsign           String?
+  detail             String?
+  created_at         DateTime          @default(now()) @db.Timestamptz(6)
+  responders         Responder?        @relation(fields: [responder_id], references: [id], onUpdate: NoAction)
+  responder_sessions ResponderSession? @relation(fields: [session_id], references: [id], onUpdate: NoAction)
+
+  @@index([created_at(sort: Desc)])
+  @@index([responder_id], where: raw("(responder_id IS NOT NULL)"))
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model incident_events {
+  id                                              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  incident_id                                     String          @db.Uuid
+  actor_id                                        String?         @db.Uuid
+  event                                           String
+  from_office_id                                  String?         @db.Uuid
+  to_office_id                                    String?         @db.Uuid
+  from_status                                     IncidentStatus?
+  to_status                                       IncidentStatus?
+  detail                                          String?
+  created_at                                      DateTime        @default(now()) @db.Timestamptz(6)
+  responders                                      Responder?      @relation(fields: [actor_id], references: [id], onUpdate: NoAction)
+  offices_incident_events_from_office_idTooffices offices?        @relation("incident_events_from_office_idTooffices", fields: [from_office_id], references: [id], onUpdate: NoAction)
+  incidents                                       Incident        @relation(fields: [incident_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  offices_incident_events_to_office_idTooffices   offices?        @relation("incident_events_to_office_idTooffices", fields: [to_office_id], references: [id], onUpdate: NoAction)
+
+  @@index([incident_id, created_at(sort: Desc)], map: "incident_events_incident_created_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model offices {
+  id                                                      String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                                    String
+  kind                                                    String            @unique(map: "offices_one_lgu_per_deployment", where: raw("(kind = 'LGU'::text)"))
+  parent_id                                               String?           @db.Uuid
+  lat                                                     Float?
+  lon                                                     Float?
+  active                                                  Boolean           @default(true)
+  created_at                                              DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at                                              DateTime          @default(now()) @db.Timestamptz(6)
+  incident_events_incident_events_from_office_idTooffices incident_events[] @relation("incident_events_from_office_idTooffices")
+  incident_events_incident_events_to_office_idTooffices   incident_events[] @relation("incident_events_to_office_idTooffices")
+  incidents                                               Incident[]
+  offices                                                 offices?          @relation("officesTooffices", fields: [parent_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  other_offices                                           offices[]         @relation("officesTooffices")
+  responders                                              Responder[]
+
+  @@index([parent_id], where: raw("(parent_id IS NOT NULL)"))
+}
+
+/// The four emergency categories - MUST match packages/ui (PRODUCT.md §3).
+enum EmergencyCategory {
+  SUNOG
+  MEDIKAL
+  KRIMEN
+  BAHA
+
+  @@map("emergency_category")
+}
+
+/// RBAC roles (SECURITY.md §4). Citizens never hold accounts.
+enum ResponderRole {
+  RESPONDER
+  DISPATCHER
+  ADMIN
+
+  @@map("responder_role")
+}
+
+enum IncidentStatus {
+  QUEUED
+  DISPATCHED
+  EN_ROUTE
+  ON_SCENE
+  RESOLVED
+
+  @@map("incident_status")
+}
+
+/// "mesh" | "manual" - no citizen free text exists (PRODUCT.md §2/§4).
+enum IncidentSource {
+  mesh
+  manual
+
+  @@map("incident_source")
+}
