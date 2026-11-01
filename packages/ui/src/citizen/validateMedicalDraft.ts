@@ -37,13 +37,7 @@ export interface MedicalDraft {
 
 /** Profile-level fields that `validateMedicalDraft` can flag. */
 export type MedicalField =
-  | 'bloodType'
-  | 'ageBand'
-  | 'allergies'
-  | 'conditions'
-  | 'medications'
-  | 'notes'
-  | 'contacts';
+  'bloodType' | 'ageBand' | 'allergies' | 'conditions' | 'medications' | 'notes' | 'contacts';
 
 /** Result of validating a draft: a per-field error map + a positional per-contact array. */
 export interface ValidationResult {
@@ -109,8 +103,7 @@ export function validateMedicalDraft(draft: MedicalDraft): ValidationResult {
     isContactValid(c) ? null : 'citizenContactInvalid',
   );
 
-  const valid =
-    Object.keys(fields).length === 0 && contacts.every((entry) => entry === null);
+  const valid = Object.keys(fields).length === 0 && contacts.every((entry) => entry === null);
 
   return { valid, errors: { fields, contacts } };
 }

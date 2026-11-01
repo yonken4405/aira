@@ -19,7 +19,7 @@ The backend for this feature **already exists** in `apps/web` and is consumed, n
 
 The product law that frames every requirement below: the **SOS grid is the first screen and is never
 gated** by an account (PRODUCT.md §6); registration and the medical profile are **optional, Tier-2
-online enrichment** reached from a *secondary* surface and must **degrade honestly to "unavailable"
+online enrichment** reached from a _secondary_ surface and must **degrade honestly to "unavailable"
 offline** without ever blocking a Tier-0 SOS action (PRODUCT.md §1a/§1b). The anonymous mesh SOS path is
 frozen and unchanged by this feature.
 
@@ -204,7 +204,7 @@ an assigned responder can see triage-relevant details during my emergency.
 10. IF `PUT /api/citizen/medical` returns a status other than `200` and other than `401 unauthenticated`, or does not respond within 10 seconds, or fails due to a network error, THEN THE Mobile_App SHALL preserve the Citizen's in-progress edits and SHALL display a save-failure message from the Copy_Catalog.
 11. THE Mobile_App SHALL NOT write any Medical_Profile field to application logs, analytics, or error reports.
 12. THE Mobile_App SHALL NOT request device-contacts, microphone, camera, photo/media, or SMS permissions
-   while editing the Medical_Profile.
+    while editing the Medical_Profile.
 
 ### Requirement 8: Emergency-contact management
 

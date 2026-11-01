@@ -84,7 +84,7 @@ verbatim.
   - [x] 2.1 Write failing tests for `MEDICAL_BOUNDS` mirror + server cross-check
     - Add `packages/ui/src/citizen/medicalBounds.test.ts`: assert `MEDICAL_BOUNDS` equals
       `{MAX_ITEMS:20, MAX_ITEM_LEN:80, MAX_NOTES_LEN:1000, MAX_CONTACTS:5, MAX_NAME_LEN:80,
-      MAX_PHONE_LEN:32, MAX_RELATION_LEN:40}` and that `BLOOD_TYPES`/`AGE_BANDS` re-exported here equal the
+MAX_PHONE_LEN:32, MAX_RELATION_LEN:40}` and that `BLOOD_TYPES`/`AGE_BANDS` re-exported here equal the
       server's. Cross-check against `apps/web/src/lib/medical/profile.ts` so the two can never drift
       (import the server module in the test and assert equality / non-exceedance).
     - _Requirements: 7.7, 8.5_
@@ -208,7 +208,7 @@ verbatim.
     - _Requirements: 10.1, 10.4, 10.5, 10.7_
   - [~] 7.3 Write failing handler/route tests mirroring existing citizen-handler tests
     - Add tests to `apps/web/tests/api-citizen.test.ts` (in-memory store, no Postgres): no session → `401
-      unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204` + cleared
+unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204` + cleared
       `aira_citizen_session` cookie + revoked session; a pre-existing anonymous incident is untouched; a
       console/log spy confirms no identity/profile/contact value is logged.
     - _Requirements: 10.2, 10.3, 10.4, 10.5, 10.7_

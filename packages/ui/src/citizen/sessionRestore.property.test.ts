@@ -59,7 +59,10 @@ describe('sessionRestore — property', () => {
         // The spec mapping, exactly, for each outcome kind.
         switch (outcome.kind) {
           case 'noToken':
-            expect(result).toEqual<RestoreResult>({ state: { kind: 'anonymous' }, clearToken: false });
+            expect(result).toEqual<RestoreResult>({
+              state: { kind: 'anonymous' },
+              clearToken: false,
+            });
             break;
           case 'validated':
             // The validated citizen is carried through verbatim (including a null email).
@@ -69,10 +72,16 @@ describe('sessionRestore — property', () => {
             });
             break;
           case 'unauthenticated':
-            expect(result).toEqual<RestoreResult>({ state: { kind: 'anonymous' }, clearToken: true });
+            expect(result).toEqual<RestoreResult>({
+              state: { kind: 'anonymous' },
+              clearToken: true,
+            });
             break;
           case 'unreachable':
-            expect(result).toEqual<RestoreResult>({ state: { kind: 'unknown' }, clearToken: false });
+            expect(result).toEqual<RestoreResult>({
+              state: { kind: 'unknown' },
+              clearToken: false,
+            });
             break;
         }
 

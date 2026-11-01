@@ -60,7 +60,11 @@ const apiErrorArb: fc.Arbitrary<ApiError> = fc.record(
       fc.constant(undefined),
     ),
     afterRetry: fc.boolean(),
-    clientValidation: fc.constantFrom<ApiError['clientValidation']>('medical', 'contact', undefined),
+    clientValidation: fc.constantFrom<ApiError['clientValidation']>(
+      'medical',
+      'contact',
+      undefined,
+    ),
   },
   { requiredKeys: ['kind'] },
 );
