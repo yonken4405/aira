@@ -5,7 +5,7 @@
 This feature adds the **citizen account and medical-profile UI** to `apps/mobile` (React Native /
 Expo). Today the app is a single, frozen Tier-0 surface: `App.tsx` renders exactly one screen,
 `EmergencyGridScreen`, backed by a mock mesh transport. This design adds a set of **Secondary_Surfaces**
-(register, login, profile/account hub, medical editor) that are reached *from* the SOS grid, consume the
+(register, login, profile/account hub, medical editor) that are reached _from_ the SOS grid, consume the
 **already-existing** `/api/citizen/*` backend in `apps/web`, persist the session on-device, and degrade
 honestly to "unavailable offline" — while leaving the survival core (the SOS grid and its mesh wire
 format) completely untouched.
@@ -37,16 +37,16 @@ real email verification, no WebSockets.
 
 Read from the live source in `apps/web`. These are the exact shapes the mobile client codes against.
 
-| Route | Method | Success | Body in | Body out / headers |
-| --- | --- | --- | --- | --- |
-| `/api/citizen/register` | POST | `201` | `{email,password}` | `{ok:true,citizen:{id,email,emailVerified}}` + `Set-Cookie: aira_citizen_session` |
-| `/api/citizen/login` | POST | `200` | `{email,password}` | same as register |
-| `/api/citizen/device` | POST | `200` | `{deviceKey}` | same as register (register-or-login in one step) |
-| `/api/citizen/session` | GET | `200` | – | `{ok:true,citizen}` (or `401 unauthenticated`) |
-| `/api/citizen/session` | DELETE | `204` | – | cleared cookie (**this is logout** — see note) |
-| `/api/citizen/medical` | GET | `200` | – | `{ok:true,profile}` (`no-store`) |
-| `/api/citizen/medical` | PUT | `200` | profile body | `{ok:true,profile}` canonical |
-| `/api/citizen/medical` | DELETE | `204` | – | – |
+| Route                   | Method | Success | Body in            | Body out / headers                                                                |
+| ----------------------- | ------ | ------- | ------------------ | --------------------------------------------------------------------------------- |
+| `/api/citizen/register` | POST   | `201`   | `{email,password}` | `{ok:true,citizen:{id,email,emailVerified}}` + `Set-Cookie: aira_citizen_session` |
+| `/api/citizen/login`    | POST   | `200`   | `{email,password}` | same as register                                                                  |
+| `/api/citizen/device`   | POST   | `200`   | `{deviceKey}`      | same as register (register-or-login in one step)                                  |
+| `/api/citizen/session`  | GET    | `200`   | –                  | `{ok:true,citizen}` (or `401 unauthenticated`)                                    |
+| `/api/citizen/session`  | DELETE | `204`   | –                  | cleared cookie (**this is logout** — see note)                                    |
+| `/api/citizen/medical`  | GET    | `200`   | –                  | `{ok:true,profile}` (`no-store`)                                                  |
+| `/api/citizen/medical`  | PUT    | `200`   | profile body       | `{ok:true,profile}` canonical                                                     |
+| `/api/citizen/medical`  | DELETE | `204`   | –                  | –                                                                                 |
 
 **Note (logout route):** there is no `/api/citizen/logout` route in the codebase. `handleCitizenLogout`
 is wired to **`DELETE /api/citizen/session`** (`apps/web/app/api/citizen/session/route.ts`). The
@@ -56,20 +56,20 @@ requirements refer to it as "`/api/citizen/logout`"; this design maps that inten
 **Error contract** (from `citizen-handlers.ts` / `medical-handlers.ts` / `http.ts`), all shaped
 `{ok:false,error:"<code>",...}`:
 
-| Status | `error` code | Extra | Source |
-| --- | --- | --- | --- |
-| 400 | `invalid_email` | – | register |
-| 400 | `weak_password` | `{problem}` | register |
-| 400 | `invalid_credentials` | – | register/login (missing/oversized fields) |
-| 400 | `invalid_device_key` | – | device |
-| 400 | `invalid_json` | – | all mutations |
-| 401 | `invalid_credentials` | – | login (wrong email/password) |
-| 401 | `unauthenticated` | – | session/medical/account |
-| 403 | `forbidden_origin` | – | all same-origin-guarded mutations |
-| 409 | `registration_unavailable` | – | register (generic, no enumeration) |
-| 423 | `account_locked` | `{retryAfterSeconds}` + `retry-after` header | login |
-| 429 | `rate_limited` | `retry-after` header | register/login |
-| 503 | `service_unavailable` | – | any route when DB not configured |
+| Status | `error` code               | Extra                                        | Source                                    |
+| ------ | -------------------------- | -------------------------------------------- | ----------------------------------------- |
+| 400    | `invalid_email`            | –                                            | register                                  |
+| 400    | `weak_password`            | `{problem}`                                  | register                                  |
+| 400    | `invalid_credentials`      | –                                            | register/login (missing/oversized fields) |
+| 400    | `invalid_device_key`       | –                                            | device                                    |
+| 400    | `invalid_json`             | –                                            | all mutations                             |
+| 401    | `invalid_credentials`      | –                                            | login (wrong email/password)              |
+| 401    | `unauthenticated`          | –                                            | session/medical/account                   |
+| 403    | `forbidden_origin`         | –                                            | all same-origin-guarded mutations         |
+| 409    | `registration_unavailable` | –                                            | register (generic, no enumeration)        |
+| 423    | `account_locked`           | `{retryAfterSeconds}` + `retry-after` header | login                                     |
+| 429    | `rate_limited`             | `retry-after` header                         | register/login                            |
+| 503    | `service_unavailable`      | –                                            | any route when DB not configured          |
 
 **Medical bounds** (from `apps/web/src/lib/medical/profile.ts`) — the client MUST mirror these exactly
 (R7.7): `BLOOD_TYPES` = 8 values, `AGE_BANDS` = 5 values, `MAX_ITEMS` = 20, `MAX_ITEM_LEN` = 80,
@@ -82,7 +82,7 @@ requirements refer to it as "`/api/citizen/logout`"; this design maps that inten
 
 ### Guiding principles
 
-1. **The grid is the root and is never unmounted.** Secondary surfaces are rendered *over or beside* the
+1. **The grid is the root and is never unmounted.** Secondary surfaces are rendered _over or beside_ the
    grid via a state-driven screen switch. The grid never depends on auth or connectivity (R1.1/R1.2/R1.4,
    R11.3).
 2. **Tier isolation.** The citizen API client lives entirely in `apps/mobile` and talks only to
@@ -118,11 +118,11 @@ union-typed `Screen` value, **not** a navigation library.
 
 Per AGENTS.md rule 10, each is justified and minimal:
 
-| Package | Why | Budget note |
-| --- | --- | --- |
-| `expo-secure-store` | R6.6 requires the device's **secure storage facility** (Keychain / Keystore) for the session token + device key. First-party Expo module. | Tiny; native-backed. |
-| `lucide-react-native` | R12.6 requires the Lucide icon set; `lucide-react` from `@aira/ui/web` is DOM-only. | Tree-shaken SVG icons; import only the few used. |
-| `@react-native-community/netinfo` (candidate) | R11 connectivity detection. **Alternative preferred:** derive connectivity from request outcome (timeout / network error) and skip this dep. See §Connectivity. | Avoided if possible. |
+| Package                                       | Why                                                                                                                                                             | Budget note                                      |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `expo-secure-store`                           | R6.6 requires the device's **secure storage facility** (Keychain / Keystore) for the session token + device key. First-party Expo module.                       | Tiny; native-backed.                             |
+| `lucide-react-native`                         | R12.6 requires the Lucide icon set; `lucide-react` from `@aira/ui/web` is DOM-only.                                                                             | Tree-shaken SVG icons; import only the few used. |
+| `@react-native-community/netinfo` (candidate) | R11 connectivity detection. **Alternative preferred:** derive connectivity from request outcome (timeout / network error) and skip this dep. See §Connectivity. | Avoided if possible.                             |
 
 `fast-check` is already present in the monorepo (`packages/ui` devDependency) and is reused for
 property-based tests; `@testing-library/react-native` + `jest-expo` are already configured in
@@ -252,14 +252,14 @@ and keep the `SessionStore` and state in sync:
 
 ```ts
 interface CitizenAuth {
-  readonly state: CitizenAuthState;            // anonymous | registered | unknown
-  readonly connectivity: Connectivity;          // online | offline | unknown
+  readonly state: CitizenAuthState; // anonymous | registered | unknown
+  readonly connectivity: Connectivity; // online | offline | unknown
   register(email: string, password: string): Promise<AuthOutcome>;
   login(email: string, password: string): Promise<AuthOutcome>;
-  deviceAuth(): Promise<AuthOutcome>;           // R3: generate/reuse key, retry-once
-  restore(): Promise<void>;                     // R6 launch validation
-  logout(): Promise<void>;                      // R5: always clears local state
-  deleteAccount(): Promise<AccountDeleteOutcome>;// R10
+  deviceAuth(): Promise<AuthOutcome>; // R3: generate/reuse key, retry-once
+  restore(): Promise<void>; // R6 launch validation
+  logout(): Promise<void>; // R5: always clears local state
+  deleteAccount(): Promise<AccountDeleteOutcome>; // R10
 }
 
 type AuthOutcome =
@@ -333,12 +333,16 @@ Added to the DOM-free core so they are reusable and property-testable with `fast
 ### Auth state model (anonymous ↔ registered)
 
 ```ts
-type CitizenView = { readonly id: string; readonly email: string | null; readonly emailVerified: boolean };
+type CitizenView = {
+  readonly id: string;
+  readonly email: string | null;
+  readonly emailVerified: boolean;
+};
 
 type CitizenAuthState =
   | { readonly kind: 'anonymous' }
   | { readonly kind: 'registered'; readonly citizen: CitizenView }
-  | { readonly kind: 'unknown' };   // token exists but not yet validated (offline at launch, R6.4)
+  | { readonly kind: 'unknown' }; // token exists but not yet validated (offline at launch, R6.4)
 ```
 
 ```mermaid
@@ -369,22 +373,31 @@ Derived primarily from request outcomes (a timeout or network error flips the re
 
 ```ts
 interface MedicalDraft {
-  bloodType: BloodType | null;                // BLOOD_TYPES ∪ {null}
-  ageBand: AgeBand | null;                     // AGE_BANDS ∪ {null}
-  allergies: string[];                         // ≤ MAX_ITEMS, each ≤ MAX_ITEM_LEN
+  bloodType: BloodType | null; // BLOOD_TYPES ∪ {null}
+  ageBand: AgeBand | null; // AGE_BANDS ∪ {null}
+  allergies: string[]; // ≤ MAX_ITEMS, each ≤ MAX_ITEM_LEN
   conditions: string[];
   medications: string[];
-  notes: string | null;                        // ≤ MAX_NOTES_LEN
-  contacts: EmergencyContactDraft[];           // ≤ MAX_CONTACTS
+  notes: string | null; // ≤ MAX_NOTES_LEN
+  contacts: EmergencyContactDraft[]; // ≤ MAX_CONTACTS
 }
-interface EmergencyContactDraft { name: string; phone: string; relation: string | null; }
+interface EmergencyContactDraft {
+  name: string;
+  phone: string;
+  relation: string | null;
+}
 ```
 
 ```ts
 // Single source of mirrored bounds (R7.7). Cross-checked against apps/web by a test.
 const MEDICAL_BOUNDS = {
-  MAX_ITEMS: 20, MAX_ITEM_LEN: 80, MAX_NOTES_LEN: 1000,
-  MAX_CONTACTS: 5, MAX_NAME_LEN: 80, MAX_PHONE_LEN: 32, MAX_RELATION_LEN: 40,
+  MAX_ITEMS: 20,
+  MAX_ITEM_LEN: 80,
+  MAX_NOTES_LEN: 1000,
+  MAX_CONTACTS: 5,
+  MAX_NAME_LEN: 80,
+  MAX_PHONE_LEN: 32,
+  MAX_RELATION_LEN: 40,
 } as const;
 ```
 
@@ -400,19 +413,24 @@ interface CitizenApiClient {
   login(email: string, password: string): Promise<ApiResult<CitizenView>>;
   deviceAuth(deviceKey: string): Promise<ApiResult<CitizenView>>;
   getSession(): Promise<ApiResult<CitizenView>>;
-  logout(): Promise<ApiResult<void>>;            // DELETE /api/citizen/session
+  logout(): Promise<ApiResult<void>>; // DELETE /api/citizen/session
   getMedical(): Promise<ApiResult<MedicalProfile>>;
   putMedical(draft: MedicalDraft): Promise<ApiResult<MedicalProfile>>;
   deleteMedical(): Promise<ApiResult<void>>;
-  deleteAccount(): Promise<ApiResult<void>>;      // DELETE /api/citizen/account (new)
+  deleteAccount(): Promise<ApiResult<void>>; // DELETE /api/citizen/account (new)
 }
 
 type ApiResult<T> =
   | { readonly ok: true; readonly status: number; readonly data: T }
-  | { readonly ok: false; readonly kind: 'http'; readonly status: number; readonly code: string;
-      readonly retryAfterSeconds?: number }
-  | { readonly ok: false; readonly kind: 'offline' }       // network error
-  | { readonly ok: false; readonly kind: 'timeout' };       // exceeded 10s
+  | {
+      readonly ok: false;
+      readonly kind: 'http';
+      readonly status: number;
+      readonly code: string;
+      readonly retryAfterSeconds?: number;
+    }
+  | { readonly ok: false; readonly kind: 'offline' } // network error
+  | { readonly ok: false; readonly kind: 'timeout' }; // exceeded 10s
 ```
 
 **Behaviour:**
@@ -438,22 +456,22 @@ type ApiResult<T> =
 New keys to be added to `packages/ui/src/i18n.ts` (no literals in components, R12.5). Codes reuse
 existing keys where one already fits (e.g. `rate_limited`).
 
-| Route | Status / code | Copy key (new unless noted) | Notes |
-| --- | --- | --- | --- |
-| register | 400 `invalid_email` | `citizenInvalidEmail` | retain entered email (R2.4) |
-| register | 400 `weak_password` | `citizenWeakPassword` | R2.5 |
-| register | 409 `registration_unavailable` | `citizenRegistrationUnavailable` | generic, no enumeration (R2.6) |
-| register/login | 429 `rate_limited` | `citizenRateLimited` | disable submit for `retry-after` s (R2.7/R4.5) |
-| login | 401 `invalid_credentials` | `citizenInvalidCredentials` | no email/password distinction (R4.3) |
-| login | 423 `account_locked` | `citizenAccountLocked` | `{minutes}` from `retryAfterSeconds` (R4.4) |
-| device | 400 `invalid_device_key` (after 1 retry) | `citizenDeviceRetryFailed` | R3.5 |
-| device | other / timeout / network | `citizenDeviceUnavailable` | keep key, stay pre-registration (R3.6) |
-| medical GET | non-200 / timeout / network (not 401) | `citizenMedicalLoadFailed` | keep surface open + retry (R7.3) |
-| medical PUT | non-200 / timeout / network (not 401) | `citizenMedicalSaveFailed` | preserve edits (R7.10) |
-| medical | client validation | `citizenMedicalInvalid`, `citizenContactInvalid` | R7.7/R8.4 |
-| medical DELETE | offline | `citizenOfflineUnavailable` | retain displayed profile (R9.4) |
-| any Tier-2 | network error | `citizenOfflineUnavailable` | honest offline (R11.1/R11.5) |
-| session/medical/account | 401 `unauthenticated` | `citizenSessionExpired` | drop session (R6.3/R7.9) |
+| Route                   | Status / code                            | Copy key (new unless noted)                      | Notes                                          |
+| ----------------------- | ---------------------------------------- | ------------------------------------------------ | ---------------------------------------------- |
+| register                | 400 `invalid_email`                      | `citizenInvalidEmail`                            | retain entered email (R2.4)                    |
+| register                | 400 `weak_password`                      | `citizenWeakPassword`                            | R2.5                                           |
+| register                | 409 `registration_unavailable`           | `citizenRegistrationUnavailable`                 | generic, no enumeration (R2.6)                 |
+| register/login          | 429 `rate_limited`                       | `citizenRateLimited`                             | disable submit for `retry-after` s (R2.7/R4.5) |
+| login                   | 401 `invalid_credentials`                | `citizenInvalidCredentials`                      | no email/password distinction (R4.3)           |
+| login                   | 423 `account_locked`                     | `citizenAccountLocked`                           | `{minutes}` from `retryAfterSeconds` (R4.4)    |
+| device                  | 400 `invalid_device_key` (after 1 retry) | `citizenDeviceRetryFailed`                       | R3.5                                           |
+| device                  | other / timeout / network                | `citizenDeviceUnavailable`                       | keep key, stay pre-registration (R3.6)         |
+| medical GET             | non-200 / timeout / network (not 401)    | `citizenMedicalLoadFailed`                       | keep surface open + retry (R7.3)               |
+| medical PUT             | non-200 / timeout / network (not 401)    | `citizenMedicalSaveFailed`                       | preserve edits (R7.10)                         |
+| medical                 | client validation                        | `citizenMedicalInvalid`, `citizenContactInvalid` | R7.7/R8.4                                      |
+| medical DELETE          | offline                                  | `citizenOfflineUnavailable`                      | retain displayed profile (R9.4)                |
+| any Tier-2              | network error                            | `citizenOfflineUnavailable`                      | honest offline (R11.1/R11.5)                   |
+| session/medical/account | 401 `unauthenticated`                    | `citizenSessionExpired`                          | drop session (R6.3/R7.9)                       |
 
 ### New backend endpoint: `DELETE /api/citizen/account` (R10)
 
@@ -462,17 +480,23 @@ The one genuine backend addition. Designed minimally and consistently with `citi
 **Handler** `handleCitizenAccountDelete(request, deps)` in `apps/web/src/lib/api/citizen-handlers.ts`:
 
 ```ts
-export async function handleCitizenAccountDelete(request: Request, deps: AppDeps): Promise<Response> {
-  if (!isSameOrigin(request)) return errorResponse(403, 'forbidden_origin');        // R10.3
+export async function handleCitizenAccountDelete(
+  request: Request,
+  deps: AppDeps,
+): Promise<Response> {
+  if (!isSameOrigin(request)) return errorResponse(403, 'forbidden_origin'); // R10.3
   const principal = await authenticateCitizen(request, deps);
-  if (!principal) return errorResponse(401, 'unauthenticated');                     // R10.2
+  if (!principal) return errorResponse(401, 'unauthenticated'); // R10.2
 
-  await deleteCitizenAccount(deps.citizen, deps.medical, principal);                // R10.1/R10.4/R10.5
+  await deleteCitizenAccount(deps.citizen, deps.medical, principal); // R10.1/R10.4/R10.5
 
-  return new Response(null, {                                                        // R10.4
+  return new Response(null, {
+    // R10.4
     status: 204,
-    headers: { ...NO_STORE_HEADERS,
-      'set-cookie': serializeClearedCitizenSessionCookie({ secure: deps.secureCookies }) },
+    headers: {
+      ...NO_STORE_HEADERS,
+      'set-cookie': serializeClearedCitizenSessionCookie({ secure: deps.secureCookies }),
+    },
   });
 }
 ```
@@ -481,6 +505,7 @@ export async function handleCitizenAccountDelete(request: Request, deps: AppDeps
 `getAppDeps()` → `503 service_unavailable` guard used by the other citizen routes.
 
 **Service** `deleteCitizenAccount(citizenDeps, medicalDeps, principal)` (new, in `citizen/service.ts`):
+
 1. `revokeSession(principal.sessionId, { at: now, reason: 'account_deleted' })` (R10.4).
 2. `deleteOwnProfile(medicalDeps, principal.citizenId)` — reuses the **existing** `MedicalStore.remove`
    (already present; no new medical primitive needed).
@@ -488,10 +513,10 @@ export async function handleCitizenAccountDelete(request: Request, deps: AppDeps
 
 **Store primitives — existing vs new:**
 
-| Needed | Status |
-| --- | --- |
-| revoke the session | **exists** (`CitizenStore.revokeSession`) |
-| delete the medical profile | **exists** (`MedicalStore.remove` via `deleteOwnProfile`) |
+| Needed                                 | Status                                                                                                                                                                                                                                                 |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| revoke the session                     | **exists** (`CitizenStore.revokeSession`)                                                                                                                                                                                                              |
+| delete the medical profile             | **exists** (`MedicalStore.remove` via `deleteOwnProfile`)                                                                                                                                                                                              |
 | delete the citizen identity + contacts | **NEW** `CitizenStore.deleteCitizen(id)` on the port + `createPostgresCitizenStore` (a parameterised `delete from public.citizens where id = $1`; contacts live inside the encrypted medical row, so removing identity + medical row removes contacts) |
 
 Cascade: `citizen_sessions` rows should be removed by an `ON DELETE CASCADE` FK on `citizen_id`
@@ -507,9 +532,9 @@ statement targets only `public.citizens` (+ its medical row), so no incident is 
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a
+_A property is a characteristic or behavior that should hold true across all valid executions of a
 system — essentially, a formal statement about what the system should do. Properties serve as the bridge
-between human-readable specifications and machine-verifiable correctness guarantees.*
+between human-readable specifications and machine-verifiable correctness guarantees._
 
 These properties are implemented as property-based tests (`fast-check`, already available in the
 monorepo) running a minimum of 100 iterations each. Pure helpers (`generateDeviceKey`,
@@ -520,7 +545,7 @@ secret-non-leak properties drive the client/provider with `fast-check`-generated
 
 ### Property 1: The SOS grid is interactive under every auth and connectivity state
 
-*For any* combination of `CitizenAuthState` (anonymous / registered / unknown) and `Connectivity`
+_For any_ combination of `CitizenAuthState` (anonymous / registered / unknown) and `Connectivity`
 (online / offline / unknown), when `AppNavigator` mounts, the SOS grid is the first interactive screen
 and every Tier-0 SOS action (all four categories) submits to the outbox without being blocked, disabled,
 or delayed.
@@ -529,7 +554,7 @@ or delayed.
 
 ### Property 2: Session-restore maps each launch outcome to the correct state
 
-*For any* launch session-validation outcome in {`200`, `401 unauthenticated`, offline/timeout/network},
+_For any_ launch session-validation outcome in {`200`, `401 unauthenticated`, offline/timeout/network},
 the resulting state is exactly: `200 → registered`; `401 → anonymous` with the stored token cleared;
 offline/timeout/network `→ unknown` with the stored token retained for deferred re-validation.
 
@@ -537,7 +562,7 @@ offline/timeout/network `→ unknown` with the stored token retained for deferre
 
 ### Property 3: Client requests target only the citizen tier and the device key leaves only via `/device`
 
-*For any* sequence of operations invoked on `CitizenApiClient`, every outbound request URL is under
+_For any_ sequence of operations invoked on `CitizenApiClient`, every outbound request URL is under
 `/api/citizen/`, the citizen session cookie is attached only to those requests, and the device key value
 appears in the body of `/api/citizen/device` requests only — never in any other request, URL, or log.
 
@@ -545,7 +570,7 @@ appears in the body of `/api/citizen/device` requests only — never in any othe
 
 ### Property 4: Credentials and session tokens never leak to logs or URLs
 
-*For any* password string and *any* session token, after invoking register / login / device-auth /
+_For any_ password string and _any_ session token, after invoking register / login / device-auth /
 session / logout, the password never appears in `SessionStore` contents, captured log output, or any
 constructed URL; the session token is never written to logs, analytics, or a URL and is transmitted only
 as the `Cookie` header value.
@@ -554,14 +579,14 @@ as the `Cookie` header value.
 
 ### Property 5: Logout always clears the local session regardless of backend reachability
 
-*For any* logout response outcome in {`204`, 5xx, timeout, network error}, after logout completes the
+_For any_ logout response outcome in {`204`, 5xx, timeout, network error}, after logout completes the
 `SessionStore` holds no session token and the auth state is anonymous.
 
 **Validates: Requirements 5.2, 5.3**
 
 ### Property 6: Device-key authentication is a bounded, reuse-first retry
 
-*For any* existing-or-absent stored device key and *any* sequence of `/device` responses, the client
+_For any_ existing-or-absent stored device key and _any_ sequence of `/device` responses, the client
 reuses an existing valid stored key rather than regenerating it, issues at most two `/device` requests
 (one retry after a single `400 invalid_device_key`), and ends holding a session if and only if some
 response was `200`.
@@ -570,7 +595,7 @@ response was `200`.
 
 ### Property 7: Every known API error maps to a defined Copy_Catalog key
 
-*For any* `(route, status, errorCode)` triple drawn from the documented citizen error contract,
+_For any_ `(route, status, errorCode)` triple drawn from the documented citizen error contract,
 `errorToCopyKey` returns a defined `MessageKey` that resolves to a non-empty string via `t()`; no known
 error produces an undefined or raw-token message.
 
@@ -578,7 +603,7 @@ error produces an undefined or raw-token message.
 
 ### Property 8: Medical profile fields never leak to logs
 
-*For any* `MedicalDraft` (including all generated field values and contacts), invoking
+_For any_ `MedicalDraft` (including all generated field values and contacts), invoking
 `getMedical` / `putMedical` / `deleteMedical` writes no profile field value (blood type, age band,
 allergies, conditions, medications, notes, contact name/phone/relation) to any captured log, analytics,
 or error-report sink.
@@ -587,7 +612,7 @@ or error-report sink.
 
 ### Property 9: In-progress edits survive every non-success save outcome
 
-*For any* `MedicalDraft` and *any* save failure outcome in {non-200 HTTP (other than 401), timeout,
+_For any_ `MedicalDraft` and _any_ save failure outcome in {non-200 HTTP (other than 401), timeout,
 network/offline error}, after a save attempt the draft is unchanged from what the Citizen entered and a
 save-/offline-failure copy is shown while the surface stays open and interactive.
 
@@ -595,7 +620,7 @@ save-/offline-failure copy is shown while the surface stays open and interactive
 
 ### Property 10: Client validation accepts a draft iff it is within the mirrored bounds, and rejection blocks the PUT
 
-*For any* `MedicalDraft`, `validateMedicalDraft` returns valid if and only if `bloodType ∈ BLOOD_TYPES ∪
+_For any_ `MedicalDraft`, `validateMedicalDraft` returns valid if and only if `bloodType ∈ BLOOD_TYPES ∪
 {null}`, `ageBand ∈ AGE_BANDS ∪ {null}`, each of `allergies`/`conditions`/`medications` has at most
 `MAX_ITEMS` entries of length at most `MAX_ITEM_LEN`, `notes` is at most `MAX_NOTES_LEN`, there are at
 most `MAX_CONTACTS` contacts each with a non-empty name (≤ `MAX_NAME_LEN`) and non-empty phone
@@ -606,7 +631,7 @@ never called.
 
 ### Property 11: Client bounds never exceed server bounds
 
-*For any* bound in the mirrored `MEDICAL_BOUNDS` constant, its value equals the corresponding constant in
+_For any_ bound in the mirrored `MEDICAL_BOUNDS` constant, its value equals the corresponding constant in
 `apps/web/src/lib/medical/profile.ts` and never exceeds it, so a draft the client accepts is always
 within what the server will store without truncation.
 
@@ -614,7 +639,7 @@ within what the server will store without truncation.
 
 ### Property 12: Contact edits are reflected exactly in the next PUT body
 
-*For any* sequence of add/remove/edit operations on the contacts list, the `contacts` array in the next
+_For any_ sequence of add/remove/edit operations on the contacts list, the `contacts` array in the next
 `putMedical` request body equals the contacts remaining in the validated draft (added contacts present,
 removed contacts absent), with no extra or missing entries.
 
@@ -650,19 +675,19 @@ removed contacts absent), with no extra or missing entries.
 
 Mapped to SECURITY.md §7 (citizen identity) and §8 (medical profile).
 
-| Concern | Design response | Req / Doc |
-| --- | --- | --- |
-| Tier isolation | The citizen client targets only `/api/citizen/*`; it never holds or sends a responder/platform credential. Property 3 enforces it. | R12.2, SECURITY.md §7.2 |
-| Opaque session, hash-at-rest | The server already stores only a SHA-256 of the token; the app persists the opaque token in Keychain/Keystore via `expo-secure-store` and sends it only as the `aira_citizen_session` cookie. | R6.5/R6.6, SECURITY.md §7.4 |
-| Device key handling | Generated from 32 CSPRNG bytes → 43-char base64url, stored only in `SessionStore`, sent only to `/device` (Properties 3 & 6). Server stores only its SHA-256. | R3.1/R3.7, SECURITY.md §7.3 |
-| No enumeration oracle | Register surfaces the generic `registration_unavailable`; login shows one `invalid_credentials` message for both wrong-email and wrong-password. | R2.6/R4.3, SECURITY.md §7 |
-| No telco / phone identity | No SMS/OTP/phone-as-credential path exists; identity is email or device key only. | R12.3, SECURITY.md §7 |
-| Medical data minimization | Age is a coarse band, never a birth date; the full profile is shown only to its owner on-device; nothing is cached as "current" while offline. | R7/R11.1/R12.1, SECURITY.md §8 |
-| No secret/PII logging | Properties 4 & 8 assert passwords, tokens, device keys, and medical fields never reach logs/analytics/URLs. | R2.8/R6.5/R7.11/R10.7 |
-| HTTPS only | The client requires an `https://` base URL in release builds. | R12.4 |
-| CSRF guard compatibility | Verified: `isSameOrigin()` admits requests with no `Origin` and non-cross-site `sec-fetch-site`; native fetch sends no `Origin`, so the mobile client passes without weakening the guard. | SECURITY.md §7, `http.ts` |
-| Account deletion | `DELETE /api/citizen/account` revokes the session, clears the cookie, deletes identity + medical row (+ contacts), and leaves anonymous incidents untouched. | R10, SECURITY.md §7.5 |
-| No new attack surface | No voice/chat/AI/STT on any surface; closed-enum + boundary validation only. | R12.7, PRODUCT.md §2 |
+| Concern                      | Design response                                                                                                                                                                               | Req / Doc                      |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| Tier isolation               | The citizen client targets only `/api/citizen/*`; it never holds or sends a responder/platform credential. Property 3 enforces it.                                                            | R12.2, SECURITY.md §7.2        |
+| Opaque session, hash-at-rest | The server already stores only a SHA-256 of the token; the app persists the opaque token in Keychain/Keystore via `expo-secure-store` and sends it only as the `aira_citizen_session` cookie. | R6.5/R6.6, SECURITY.md §7.4    |
+| Device key handling          | Generated from 32 CSPRNG bytes → 43-char base64url, stored only in `SessionStore`, sent only to `/device` (Properties 3 & 6). Server stores only its SHA-256.                                 | R3.1/R3.7, SECURITY.md §7.3    |
+| No enumeration oracle        | Register surfaces the generic `registration_unavailable`; login shows one `invalid_credentials` message for both wrong-email and wrong-password.                                              | R2.6/R4.3, SECURITY.md §7      |
+| No telco / phone identity    | No SMS/OTP/phone-as-credential path exists; identity is email or device key only.                                                                                                             | R12.3, SECURITY.md §7          |
+| Medical data minimization    | Age is a coarse band, never a birth date; the full profile is shown only to its owner on-device; nothing is cached as "current" while offline.                                                | R7/R11.1/R12.1, SECURITY.md §8 |
+| No secret/PII logging        | Properties 4 & 8 assert passwords, tokens, device keys, and medical fields never reach logs/analytics/URLs.                                                                                   | R2.8/R6.5/R7.11/R10.7          |
+| HTTPS only                   | The client requires an `https://` base URL in release builds.                                                                                                                                 | R12.4                          |
+| CSRF guard compatibility     | Verified: `isSameOrigin()` admits requests with no `Origin` and non-cross-site `sec-fetch-site`; native fetch sends no `Origin`, so the mobile client passes without weakening the guard.     | SECURITY.md §7, `http.ts`      |
+| Account deletion             | `DELETE /api/citizen/account` revokes the session, clears the cookie, deletes identity + medical row (+ contacts), and leaves anonymous incidents untouched.                                  | R10, SECURITY.md §7.5          |
+| No new attack surface        | No voice/chat/AI/STT on any surface; closed-enum + boundary validation only.                                                                                                                  | R12.7, PRODUCT.md §2           |
 
 ### Top design risk: native cookie handling
 
@@ -734,20 +759,20 @@ component tests pin concrete behaviour and wiring.
 
 ### Property → test placement
 
-| Property | Where | Driver |
-| --- | --- | --- |
-| 1 Grid invariance | `apps/mobile` | jest-expo + fast-check over states |
-| 2 Session-restore mapping | `@aira/ui` (reducer) | vitest + fast-check |
-| 3 Tier/device-key data flow | `apps/mobile` (client, mocked fetch recorder) | jest-expo + fast-check |
-| 4 Credential/token non-leak | `apps/mobile` (client/provider, console spy) | jest-expo + fast-check |
-| 5 Logout always clears | `apps/mobile` (provider, mocked outcomes) | jest-expo + fast-check |
-| 6 Device-key bounded retry | `@aira/ui` (sequence model) + client | fast-check |
-| 7 Error→copy totality | `@aira/ui` (`errorToCopyKey`) | vitest + fast-check |
-| 8 Medical non-leak | `apps/mobile` (client, console spy) | jest-expo + fast-check |
-| 9 Edit preservation | `apps/mobile` (medical screen) | jest-expo + fast-check |
-| 10 Validation bounds | `@aira/ui` (`validateMedicalDraft`) | vitest + fast-check |
-| 11 Mirror bounds | `@aira/ui` (imports server constants in test) | vitest |
-| 12 Contacts round-trip | `apps/mobile` / `@aira/ui` | fast-check |
+| Property                    | Where                                         | Driver                             |
+| --------------------------- | --------------------------------------------- | ---------------------------------- |
+| 1 Grid invariance           | `apps/mobile`                                 | jest-expo + fast-check over states |
+| 2 Session-restore mapping   | `@aira/ui` (reducer)                          | vitest + fast-check                |
+| 3 Tier/device-key data flow | `apps/mobile` (client, mocked fetch recorder) | jest-expo + fast-check             |
+| 4 Credential/token non-leak | `apps/mobile` (client/provider, console spy)  | jest-expo + fast-check             |
+| 5 Logout always clears      | `apps/mobile` (provider, mocked outcomes)     | jest-expo + fast-check             |
+| 6 Device-key bounded retry  | `@aira/ui` (sequence model) + client          | fast-check                         |
+| 7 Error→copy totality       | `@aira/ui` (`errorToCopyKey`)                 | vitest + fast-check                |
+| 8 Medical non-leak          | `apps/mobile` (client, console spy)           | jest-expo + fast-check             |
+| 9 Edit preservation         | `apps/mobile` (medical screen)                | jest-expo + fast-check             |
+| 10 Validation bounds        | `@aira/ui` (`validateMedicalDraft`)           | vitest + fast-check                |
+| 11 Mirror bounds            | `@aira/ui` (imports server constants in test) | vitest                             |
+| 12 Contacts round-trip      | `apps/mobile` / `@aira/ui`                    | fast-check                         |
 
 ### Example / component tests (non-exhaustive)
 
@@ -771,20 +796,20 @@ component tests pin concrete behaviour and wiring.
 
 ## Requirements Traceability
 
-| Requirement | Satisfied by | Verified by |
-| --- | --- | --- |
-| R1 Grid never gated | `AppNavigator` root = grid; state-driven switch; grid reads no auth/connectivity state | Property 1; grid regression tests (R1.7) |
-| R2 Email registration | `RegisterScreen` + `CitizenApiClient.register` + error→copy | Examples; Properties 4, 7 |
-| R3 Device-key identity | `generateDeviceKey`, `SessionStore`, `deviceAuth` retry-once | Properties 3, 6; timeout example |
-| R4 Email login | `LoginScreen` + `login` + lock/rate copy | Examples; Properties 4, 7 |
-| R5 Logout | `logout` → `DELETE /api/citizen/session`, confirm-first, return to grid | Property 5; confirm/return examples |
-| R6 Session persistence | `SessionStore` (expo-secure-store) + launch restore reducer | Property 2, 4; secure-store example |
-| R7 Medical create/edit | `MedicalProfileScreen` + `validateMedicalDraft` + bounded editors | Properties 8, 9, 10, 11; examples |
-| R8 Emergency contacts | contacts sub-editor + validation | Properties 10, 12; examples |
-| R9 Delete medical | confirm + `deleteMedical`; offline retains profile | Examples; offline invariant (Prop 9 family) |
-| R10 Delete account endpoint | `handleCitizenAccountDelete` + `DELETE /api/citizen/account` + `deleteCitizenAccount` + new `CitizenStore.deleteCitizen` | Backend handler/service tests |
-| R11 Tier-2 offline degradation | outcome-derived connectivity; offline surfaces; preserved edits | Properties 1, 9; offline examples |
-| R12 Security & privacy | tier isolation, HTTPS, no secret logging, Lucide + NativeWind tokens, no AI | Properties 3, 4, 8; structural examples |
+| Requirement                    | Satisfied by                                                                                                             | Verified by                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| R1 Grid never gated            | `AppNavigator` root = grid; state-driven switch; grid reads no auth/connectivity state                                   | Property 1; grid regression tests (R1.7)    |
+| R2 Email registration          | `RegisterScreen` + `CitizenApiClient.register` + error→copy                                                              | Examples; Properties 4, 7                   |
+| R3 Device-key identity         | `generateDeviceKey`, `SessionStore`, `deviceAuth` retry-once                                                             | Properties 3, 6; timeout example            |
+| R4 Email login                 | `LoginScreen` + `login` + lock/rate copy                                                                                 | Examples; Properties 4, 7                   |
+| R5 Logout                      | `logout` → `DELETE /api/citizen/session`, confirm-first, return to grid                                                  | Property 5; confirm/return examples         |
+| R6 Session persistence         | `SessionStore` (expo-secure-store) + launch restore reducer                                                              | Property 2, 4; secure-store example         |
+| R7 Medical create/edit         | `MedicalProfileScreen` + `validateMedicalDraft` + bounded editors                                                        | Properties 8, 9, 10, 11; examples           |
+| R8 Emergency contacts          | contacts sub-editor + validation                                                                                         | Properties 10, 12; examples                 |
+| R9 Delete medical              | confirm + `deleteMedical`; offline retains profile                                                                       | Examples; offline invariant (Prop 9 family) |
+| R10 Delete account endpoint    | `handleCitizenAccountDelete` + `DELETE /api/citizen/account` + `deleteCitizenAccount` + new `CitizenStore.deleteCitizen` | Backend handler/service tests               |
+| R11 Tier-2 offline degradation | outcome-derived connectivity; offline surfaces; preserved edits                                                          | Properties 1, 9; offline examples           |
+| R12 Security & privacy         | tier isolation, HTTPS, no secret logging, Lucide + NativeWind tokens, no AI                                              | Properties 3, 4, 8; structural examples     |
 
 ### Glossary term coverage
 

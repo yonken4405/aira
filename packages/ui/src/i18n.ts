@@ -413,6 +413,32 @@ const EN_MESSAGES = {
   citizenDeleteProfile: 'Delete profile',
   citizenDeleteProfileConfirmTitle: 'Delete medical profile?',
   citizenDeleteProfileConfirmBody: 'This removes all of your medical details.',
+
+  // Shared secondary-surface chrome and states.
+  citizenBack: 'Back',
+  citizenBackToGrid: 'Back to SOS',
+  citizenConfirmAction: 'Confirm',
+  citizenLoading: 'Loading',
+  citizenSavingProfile: 'Saving',
+  citizenSaveProfile: 'Save profile',
+  citizenTryAgainIn: 'Try again in {seconds}s',
+  citizenAddEntry: 'Add entry',
+  citizenRemove: 'Remove',
+  citizenUnset: 'Not set',
+  citizenAccountAnonymous: 'Not signed in',
+  citizenAccountSubtitle: 'Optional. The SOS grid always works without an account.',
+  citizenRegisterTitle: 'Create an account',
+  citizenRegisterSubtitle: 'Optional. You only need an account for a medical profile.',
+  citizenLoginTitle: 'Sign in to your account',
+  citizenLoginSubtitle: 'Use the email you registered with.',
+  citizenDeviceHint: 'Create an account on this device without an email.',
+  citizenDeviceAccount: 'Device account',
+  citizenNoEmail: 'No email on this account',
+  citizenAccountDeleted: 'Account deleted',
+  citizenMedicalSubtitle: 'Only shared with responders during your emergency.',
+  citizenProfileSaved: 'Medical profile saved',
+  citizenProfileDeleted: 'Medical profile deleted',
+  citizenContactRelationHint: 'Optional',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;

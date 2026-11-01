@@ -66,7 +66,9 @@ describe('client ↔ server cross-check (so the two can never drift, R7.7/R8.5, 
   });
 
   it('every client bound equals, and never exceeds, the real server bound (Property 11)', () => {
-    for (const key of Object.keys(SERVER_MEDICAL_BOUNDS) as (keyof typeof SERVER_MEDICAL_BOUNDS)[]) {
+    for (const key of Object.keys(
+      SERVER_MEDICAL_BOUNDS,
+    ) as (keyof typeof SERVER_MEDICAL_BOUNDS)[]) {
       expect(MEDICAL_BOUNDS[key]).toBe(SERVER_MEDICAL_BOUNDS[key]);
       expect(MEDICAL_BOUNDS[key]).toBeLessThanOrEqual(SERVER_MEDICAL_BOUNDS[key]);
     }

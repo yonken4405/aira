@@ -6,7 +6,7 @@
 // mapping" table). For ANY citizen route and ANY transport outcome -- including HTTP
 // statuses and server codes the mapping does not recognise -- `errorToCopyKey` must return
 // a `MessageKey` that `t()` renders to real, human copy. It must never leak a bare status
-// number or echo a raw server token back to the citizen.
+// number or echo a raw server token back to the citizen. This proves totality.
 
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
@@ -27,7 +27,7 @@ const ROUTES: readonly CitizenRoute[] = [
   'account',
 ];
 
-/** The documented server codes the mapping recognises (register/login + session loss). */
+/** The documented server codes the mapping recognises (register/login/device + session loss). */
 const DOCUMENTED_CODES: readonly string[] = [
   'invalid_email',
   'weak_password',
@@ -35,7 +35,9 @@ const DOCUMENTED_CODES: readonly string[] = [
   'rate_limited',
   'invalid_credentials',
   'account_locked',
+  'invalid_device_key',
   'unauthenticated',
+  'service_unavailable',
 ];
 
 /** A realistic spread of HTTP statuses the citizen surfaces actually see. */
@@ -46,21 +48,20 @@ const routeArb: fc.Arbitrary<CitizenRoute> = fc.constantFrom(...ROUTES);
 /**
  * Transport outcomes across the whole input space: HTTP (with varied status + code),
  * timeout, and offline. Status mixes the realistic set with random ints; code mixes the
- * documented codes with random strings, `undefined`, and `null`. This deliberately feeds
- * combinations the mapping has no explicit row for.
+ * documented codes with random strings and `null`. `afterRetry` and `clientValidation`
+ * vary freely. This deliberately feeds combinations the mapping has no explicit row for.
  */
 const apiErrorArb: fc.Arbitrary<ApiError> = fc.record(
   {
     kind: fc.constantFrom<ApiError['kind']>('http', 'timeout', 'offline'),
-    status: fc.oneof(fc.constantFrom(...REALISTIC_STATUSES), fc.integer()),
-    code: fc.oneof(
-      fc.constantFrom(...DOCUMENTED_CODES),
-      fc.string(),
-      fc.constant(null),
-      fc.constant(undefined),
-    ),
+    status: fc.option(fc.oneof(fc.constantFrom(...REALISTIC_STATUSES), fc.integer()), {
+      nil: undefined,
+    }),
+    code: fc.option(fc.oneof(fc.constantFrom(...DOCUMENTED_CODES), fc.string()), { nil: null }),
     afterRetry: fc.boolean(),
-    clientValidation: fc.constantFrom<ApiError['clientValidation']>('medical', 'contact', undefined),
+    clientValidation: fc.option(fc.constantFrom<'medical' | 'contact'>('medical', 'contact'), {
+      nil: undefined,
+    }),
   },
   { requiredKeys: ['kind'] },
 );
