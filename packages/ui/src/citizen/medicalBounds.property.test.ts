@@ -23,7 +23,9 @@ import {
 // key-space idea extends to the closed BLOOD_TYPES / AGE_BANDS enums: any sampled index must
 // agree between client and server, and the two sets must be the same length.
 describe('Property 11: client medical bounds never exceed server bounds (R7.7, R8.5)', () => {
-  const serverBoundKeys = Object.keys(SERVER_MEDICAL_BOUNDS) as (keyof typeof SERVER_MEDICAL_BOUNDS)[];
+  const serverBoundKeys = Object.keys(
+    SERVER_MEDICAL_BOUNDS,
+  ) as (keyof typeof SERVER_MEDICAL_BOUNDS)[];
 
   it('every bound sampled from the server key space equals, and never exceeds, the client bound', () => {
     fc.assert(

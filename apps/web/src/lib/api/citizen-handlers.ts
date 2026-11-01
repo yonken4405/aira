@@ -8,6 +8,7 @@
 import { readCookie } from '../auth/session';
 import {
   authenticateWithDeviceKey,
+  deleteCitizenAccount,
   loginWithEmail,
   logoutCitizen,
   registerWithEmail,
@@ -200,6 +201,39 @@ export async function handleCitizenLogout(request: Request, deps: AppDeps): Prom
   if (principal) {
     await logoutCitizen(deps.citizen, principal);
   }
+
+  return new Response(null, {
+    status: 204,
+    headers: {
+      ...NO_STORE_HEADERS,
+      'set-cookie': serializeClearedCitizenSessionCookie({ secure: deps.secureCookies }),
+    },
+  });
+}
+
+/**
+ * `DELETE /api/citizen/account` - hard-deletes the authenticated citizen's account
+ * (SECURITY.md §7.5, Requirement 10).
+ *
+ * Order mirrors `deleteCitizenAccount`: revoke this session, drop the encrypted medical
+ * row (contacts live inside it), then delete the identity row. Anonymous incidents carry
+ * no citizen link and are never touched (R10.5). No identity, profile, or contact value
+ * is ever logged (R10.7).
+ */
+export async function handleCitizenAccountDelete(
+  request: Request,
+  deps: AppDeps,
+): Promise<Response> {
+  if (!isSameOrigin(request)) {
+    return errorResponse(403, 'forbidden_origin');
+  }
+
+  const principal = await authenticateCitizen(request, deps);
+  if (!principal) {
+    return errorResponse(401, 'unauthenticated');
+  }
+
+  await deleteCitizenAccount(deps.citizen, deps.medical, principal);
 
   return new Response(null, {
     status: 204,

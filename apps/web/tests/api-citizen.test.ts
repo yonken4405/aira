@@ -5,9 +5,10 @@
  * isolation rule - a citizen session is rejected by a responder route and vice versa.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  handleCitizenAccountDelete,
   handleCitizenDeviceAuth,
   handleCitizenLogin,
   handleCitizenLogout,
@@ -17,6 +18,7 @@ import {
 import { handleListIncidents } from '../src/lib/api/incidents-handlers';
 import { CITIZEN_SESSION_COOKIE } from '../src/lib/citizen/session';
 import { SESSION_COOKIE } from '../src/lib/auth/session';
+import { saveOwnProfile } from '../src/lib/medical/service';
 import { createTestHarness, jsonBody } from './support/harness';
 
 const PASSWORD = 'correct horse battery staple';
@@ -194,5 +196,129 @@ describe('cross-tier isolation (SECURITY.md §7.2)', () => {
       world.deps,
     );
     expect(asCitizenCookie.status).toBe(401);
+  });
+});
+
+describe('DELETE /api/citizen/account (SECURITY.md §7.5, R10)', () => {
+  const consoleSpies: Array<ReturnType<typeof vi.spyOn>> = [];
+
+  beforeEach(() => {
+    consoleSpies.length = 0;
+    for (const method of ['log', 'info', 'warn', 'error', 'debug'] as const) {
+      consoleSpies.push(vi.spyOn(console, method).mockImplementation(() => undefined));
+    }
+  });
+
+  afterEach(() => {
+    for (const spy of consoleSpies) {
+      spy.mockRestore();
+    }
+  });
+
+  async function registerCitizen(): Promise<{ token: string; citizenId: string }> {
+    const registered = await post(handleCitizenRegister, '/api/citizen/register', {
+      email: 'juan@example.com',
+      password: PASSWORD,
+    });
+    const token = tokenFrom(registered);
+    const principal = await handleCitizenSession(
+      new Request('http://localhost/api/citizen/session', {
+        headers: { cookie: `${CITIZEN_SESSION_COOKIE}=${token}` },
+      }),
+      world.deps,
+    );
+    const body = (await principal.json()) as { citizen: { id: string } };
+    return { token, citizenId: body.citizen.id };
+  }
+
+  function deleteRequest(token: string | null, headers: Record<string, string> = {}): Request {
+    return new Request('http://localhost/api/citizen/account', {
+      method: 'DELETE',
+      headers: {
+        ...(token ? { cookie: `${CITIZEN_SESSION_COOKIE}=${token}` } : {}),
+        ...headers,
+      },
+    });
+  }
+
+  it('returns 401 unauthenticated without a valid session', async () => {
+    const response = await handleCitizenAccountDelete(deleteRequest(null), world.deps);
+    expect(response.status).toBe(401);
+    const body = (await response.json()) as { error: string };
+    expect(body.error).toBe('unauthenticated');
+  });
+
+  it('returns 403 forbidden_origin for a cross-site origin', async () => {
+    const { token } = await registerCitizen();
+    const response = await handleCitizenAccountDelete(
+      deleteRequest(token, { origin: 'https://evil.example' }),
+      world.deps,
+    );
+    expect(response.status).toBe(403);
+    const body = (await response.json()) as { error: string };
+    expect(body.error).toBe('forbidden_origin');
+  });
+
+  it('deletes identity + medical row, revokes the session, and clears the cookie', async () => {
+    const { token, citizenId } = await registerCitizen();
+    await saveOwnProfile(world.deps.medical, citizenId, {
+      bloodType: 'O-',
+      allergies: ['penicillin'],
+      contacts: [{ name: 'Ben', phone: '0917-000-0000' }],
+    });
+
+    const response = await handleCitizenAccountDelete(deleteRequest(token), world.deps);
+
+    expect(response.status).toBe(204);
+    // Cleared cookie: empty value + Max-Age=0.
+    const cookie = response.headers.get('set-cookie') ?? '';
+    expect(cookie).toContain(`${CITIZEN_SESSION_COOKIE}=;`);
+    expect(cookie).toContain('Max-Age=0');
+
+    // The old token no longer authenticates (R10.4).
+    const after = await handleCitizenSession(deleteRequest(token), world.deps);
+    expect(after.status).toBe(401);
+
+    // Identity + medical row are gone (R10.1).
+    expect(await world.citizenStore.findById(citizenId)).toBeNull();
+    expect(await world.medicalStore.find(citizenId)).toBeNull();
+  });
+
+  it('leaves a previously submitted anonymous incident untouched (R10.5)', async () => {
+    const officeId = await world.incidents.getDefaultOfficeId();
+    expect(officeId).not.toBeNull();
+    const anonymous = await world.incidents.create({
+      category: 'SUNOG',
+      lat: 10.3157,
+      lon: 123.8854,
+      officeId: officeId ?? 'office-1',
+      at: world.clock.now(),
+    });
+
+    const { token } = await registerCitizen();
+    const response = await handleCitizenAccountDelete(deleteRequest(token), world.deps);
+    expect(response.status).toBe(204);
+
+    const survivor = await world.incidents.findById(anonymous.id);
+    expect(survivor).not.toBeNull();
+    expect(survivor?.reporterCitizenId).toBeNull();
+    expect(survivor?.lat).toBe(10.3157);
+    expect(survivor?.lon).toBe(123.8854);
+  });
+
+  it('never logs identity, profile, or contact values (R10.7)', async () => {
+    const { token, citizenId } = await registerCitizen();
+    await saveOwnProfile(world.deps.medical, citizenId, {
+      bloodType: 'O-',
+      allergies: ['penicillin'],
+      contacts: [{ name: 'Ben', phone: '0917-000-0000' }],
+    });
+
+    await handleCitizenAccountDelete(deleteRequest(token), world.deps);
+
+    const logged = consoleSpies.flatMap((spy) => spy.mock.calls.flat());
+    for (const secret of ['juan@example.com', 'penicillin', 'Ben', '0917-000-0000']) {
+      expect(logged.some((value) => String(value).includes(secret))).toBe(false);
+    }
   });
 });

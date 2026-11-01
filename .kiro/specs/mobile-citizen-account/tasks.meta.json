@@ -7,6 +7,22 @@
     "4.3 Write property test — session-restore maps each launch outcome correctly": {
       "status": "passed",
       "lastRunTimestamp": 1792743314391
+    },
+    "3.3 Write property test — every known API error maps to a defined copy key": {
+      "status": "passed",
+      "lastRunTimestamp": 1793507585807
+    },
+    "5.3 Write property test — device-key auth is a bounded, reuse-first retry": {
+      "status": "passed",
+      "lastRunTimestamp": 1793507731329
+    },
+    "19.3 Write property test — logout always clears the local session regardless of backend reachability": {
+      "status": "passed",
+      "lastRunTimestamp": 1793508253010
+    },
+    "19.2 Write property test — credentials and session tokens never leak to logs or URLs": {
+      "status": "passed",
+      "lastRunTimestamp": 1793508275741
     }
   },
   "executionHistory": {
@@ -355,6 +371,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826305
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507610686
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507773080
       }
     ],
     "7.4 Implement `handleCitizenAccountDelete` and the route": [
@@ -362,6 +388,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826403
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507772173
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507779351
       }
     ],
     "8. Checkpoint — shared helpers + backend endpoint": [
@@ -369,6 +405,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826506
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507820184
       }
     ],
     "9. Add the mobile dependencies (justified per AGENTS.md rule 10)": [
@@ -376,6 +417,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826614
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507833539
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508104885
       }
     ],
     "10.1 Write failing tests for `SessionStore`": [
@@ -383,6 +434,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826724
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508105849
       }
     ],
     "10.2 Implement `SessionStore`": [
@@ -390,6 +446,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826832
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508106709
       }
     ],
     "11.1 Write failing tests for the client (mocked `fetch` recorder)": [
@@ -397,6 +458,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826939
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508107670
       }
     ],
     "11.2 Implement `CitizenApiClient`": [
@@ -404,6 +470,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827036
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508109136
       }
     ],
     "12.1 Write failing tests for the auth provider": [
@@ -411,6 +482,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827129
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508110016
       }
     ],
     "12.2 Implement `CitizenAuthProvider` and `useCitizenAuth`": [
@@ -418,6 +494,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827222
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508110716
       }
     ],
     "13.1 Write the grid-invariance test FIRST": [
@@ -425,6 +506,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827323
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508116569
       }
     ],
     "13.2 Implement `AppNavigator`": [
@@ -432,6 +518,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827441
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508117468
       }
     ],
     "14.1 Write failing tests for the account hub": [
@@ -439,6 +530,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827637
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508119381
       }
     ],
     "14.2 Implement `AccountHubScreen`": [
@@ -446,6 +542,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827756
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508120772
       }
     ],
     "15.1 Write failing tests for registration": [
@@ -453,6 +554,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827876
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508121716
       }
     ],
     "15.2 Implement `RegisterScreen`": [
@@ -460,6 +566,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827992
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508122667
       }
     ],
     "16.1 Write failing tests for login": [
@@ -467,6 +578,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828195
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508123614
       }
     ],
     "16.2 Implement `LoginScreen`": [
@@ -474,6 +590,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828279
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508124571
       }
     ],
     "17.1 Write failing tests for the medical screen": [
@@ -481,6 +602,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828388
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508125468
       }
     ],
     "17.2 Implement `MedicalProfileScreen` + contacts sub-editor": [
@@ -488,6 +614,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828499
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508126916
       }
     ],
     "18.1 Write a failing test asserting grid behaviour is retained": [
@@ -495,6 +626,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828609
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508127865
       }
     ],
     "18.2 Render `AppNavigator` from `App.tsx`": [
@@ -502,6 +638,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828726
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508128774
       }
     ],
     "20.1 Grid regression and no-permission / no-AI / privacy structural assertions": [
@@ -509,6 +650,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828820
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508129784
       }
     ],
     "21. Final checkpoint — run the quality gate": [
@@ -516,6 +662,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828928
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508699597
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508926391
       }
     ],
     "1. Add the citizen copy keys and device-key generator to `@aira/ui`": [
@@ -565,6 +721,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743222769
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507516457
       }
     ],
     "2.3 Write property test — client bounds never exceed server bounds": [
@@ -572,6 +733,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743224176
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507517333
       }
     ],
     "2.6 Write property test — validation accepts iff within bounds, and gates the PUT": [
@@ -579,6 +745,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743225103
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507603896
       }
     ],
     "3.3 Write property test — every known API error maps to a defined copy key": [
@@ -586,6 +757,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743226487
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507602521
       }
     ],
     "4.3 Write property test — session-restore maps each launch outcome correctly": [
@@ -593,6 +769,181 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743227337
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507518831
+      }
+    ],
+    "5.3 Write property test — device-key auth is a bounded, reuse-first retry": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507604675
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507774144
+      }
+    ],
+    "7. Implement the account-delete service and handler": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793507779446
+      }
+    ],
+    "10. Implement the `SessionStore` over `expo-secure-store`": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508106788
+      }
+    ],
+    "11. Implement the `CitizenApiClient`": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508109232
+      }
+    ],
+    "12. Implement `CitizenAuthProvider` + `useCitizenAuth`": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508110781
+      }
+    ],
+    "13. Implement `AppNavigator` (grid is the never-gated root)": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508117569
+      }
+    ],
+    "13.3 Finalize the Property 1 grid-invariance property test": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508118416
+      }
+    ],
+    "14. Implement `AccountHubScreen`": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508120845
+      }
+    ],
+    "15. Implement `RegisterScreen`": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508122727
+      }
+    ],
+    "16. Implement `LoginScreen`": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508124654
+      }
+    ],
+    "17. Implement `MedicalProfileScreen` + contacts sub-editor": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508126980
+      }
+    ],
+    "18. Wire `App.tsx` to render `AppNavigator`": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508128865
+      }
+    ],
+    "20. Structural guards — grid regression + no-permission / no-AI / tier-isolation": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508129852
+      }
+    ],
+    "19.1 Write property test — client requests target only the citizen tier; device key leaves only via `/device`": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508152729
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508548484
+      }
+    ],
+    "19.2 Write property test — credentials and session tokens never leak to logs or URLs": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508153615
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508547074
+      }
+    ],
+    "19.4 Write property test — medical profile fields never leak to logs": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508155145
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508546150
+      }
+    ],
+    "19.3 Write property test — logout always clears the local session regardless of backend reachability": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508155666
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508549440
+      }
+    ],
+    "19. Property tests for client data-flow and secret non-leak": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508546221
+      }
+    ],
+    "19.5 Write property test — in-progress edits survive every non-success save outcome": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508550850
+      }
+    ],
+    "19.6 Write property test — contact edits are reflected exactly in the next PUT body": [
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508551607
+      },
+      {
+        "executionId": "29ce6c35-b673-454b-a5b1-5ec9fa1cd9b8",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793508699092
       }
     ]
   }

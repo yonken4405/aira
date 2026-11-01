@@ -65,8 +65,15 @@ import { MEDICAL_BOUNDS, BLOOD_TYPES, AGE_BANDS } from './medicalBounds';
  * ─────────────────────────────────────────────────────────────────────────────────────────
  */
 
-const { MAX_ITEMS, MAX_ITEM_LEN, MAX_NOTES_LEN, MAX_CONTACTS, MAX_NAME_LEN, MAX_PHONE_LEN, MAX_RELATION_LEN } =
-  MEDICAL_BOUNDS;
+const {
+  MAX_ITEMS,
+  MAX_ITEM_LEN,
+  MAX_NOTES_LEN,
+  MAX_CONTACTS,
+  MAX_NAME_LEN,
+  MAX_PHONE_LEN,
+  MAX_RELATION_LEN,
+} = MEDICAL_BOUNDS;
 
 /** The empty/default draft — everything null / empty. Must be VALID (R7.2). */
 const EMPTY_DRAFT: MedicalDraft = {
@@ -90,7 +97,10 @@ const VALID_DRAFT: MedicalDraft = {
   contacts: [{ name: 'Ana', phone: '09170000000', relation: 'mother' }],
 };
 
-const draftWith = (overrides: Partial<MedicalDraft>): MedicalDraft => ({ ...VALID_DRAFT, ...overrides });
+const draftWith = (overrides: Partial<MedicalDraft>): MedicalDraft => ({
+  ...VALID_DRAFT,
+  ...overrides,
+});
 
 const contact = (overrides: Partial<EmergencyContactDraft> = {}): EmergencyContactDraft => ({
   name: 'Ana',
@@ -142,13 +152,17 @@ describe('validateMedicalDraft — valid drafts (R7.2, R7.7, R8.4)', () => {
 describe('validateMedicalDraft — blood type / age band enums (R7.4, R7.5)', () => {
   it('rejects a blood type outside the closed set and flags fields.bloodType', () => {
     // Cast through unknown: the whole point is a value the closed type would forbid.
-    const result = validateMedicalDraft(draftWith({ bloodType: 'C+' as unknown as MedicalDraft['bloodType'] }));
+    const result = validateMedicalDraft(
+      draftWith({ bloodType: 'C+' as unknown as MedicalDraft['bloodType'] }),
+    );
     expectInvalid(result);
     expect(result.errors.fields.bloodType).toBe('citizenMedicalInvalid');
   });
 
   it('rejects an age band outside the closed set and flags fields.ageBand', () => {
-    const result = validateMedicalDraft(draftWith({ ageBand: '100+' as unknown as MedicalDraft['ageBand'] }));
+    const result = validateMedicalDraft(
+      draftWith({ ageBand: '100+' as unknown as MedicalDraft['ageBand'] }),
+    );
     expectInvalid(result);
     expect(result.errors.fields.ageBand).toBe('citizenMedicalInvalid');
   });
@@ -157,11 +171,15 @@ describe('validateMedicalDraft — blood type / age band enums (R7.4, R7.5)', ()
 describe('validateMedicalDraft — list bounds: count (R7.6, R7.7)', () => {
   for (const field of ['allergies', 'conditions', 'medications'] as const) {
     it(`accepts exactly MAX_ITEMS (${MAX_ITEMS}) ${field}`, () => {
-      expectValid(validateMedicalDraft(draftWith({ [field]: list(MAX_ITEMS) } as Partial<MedicalDraft>)));
+      expectValid(
+        validateMedicalDraft(draftWith({ [field]: list(MAX_ITEMS) } as Partial<MedicalDraft>)),
+      );
     });
 
     it(`rejects MAX_ITEMS + 1 (${MAX_ITEMS + 1}) ${field} and flags fields.${field}`, () => {
-      const result = validateMedicalDraft(draftWith({ [field]: list(MAX_ITEMS + 1) } as Partial<MedicalDraft>));
+      const result = validateMedicalDraft(
+        draftWith({ [field]: list(MAX_ITEMS + 1) } as Partial<MedicalDraft>),
+      );
       expectInvalid(result);
       expect(result.errors.fields[field]).toBe('citizenMedicalInvalid');
     });
@@ -171,7 +189,9 @@ describe('validateMedicalDraft — list bounds: count (R7.6, R7.7)', () => {
 describe('validateMedicalDraft — list bounds: entry length (R7.6, R7.7)', () => {
   for (const field of ['allergies', 'conditions', 'medications'] as const) {
     it(`accepts a ${field} entry at exactly MAX_ITEM_LEN (${MAX_ITEM_LEN})`, () => {
-      expectValid(validateMedicalDraft(draftWith({ [field]: [str(MAX_ITEM_LEN)] } as Partial<MedicalDraft>)));
+      expectValid(
+        validateMedicalDraft(draftWith({ [field]: [str(MAX_ITEM_LEN)] } as Partial<MedicalDraft>)),
+      );
     });
 
     it(`rejects a ${field} entry one over MAX_ITEM_LEN (${MAX_ITEM_LEN + 1}) and flags fields.${field}`, () => {
@@ -238,22 +258,32 @@ describe('validateMedicalDraft — per-contact validity (R8.4)', () => {
   });
 
   it('accepts a contact name at exactly MAX_NAME_LEN but rejects one over', () => {
-    expectValid(validateMedicalDraft(draftWith({ contacts: [contact({ name: str(MAX_NAME_LEN) })] })));
-    const result = validateMedicalDraft(draftWith({ contacts: [contact({ name: str(MAX_NAME_LEN + 1) })] }));
+    expectValid(
+      validateMedicalDraft(draftWith({ contacts: [contact({ name: str(MAX_NAME_LEN) })] })),
+    );
+    const result = validateMedicalDraft(
+      draftWith({ contacts: [contact({ name: str(MAX_NAME_LEN + 1) })] }),
+    );
     expectInvalid(result);
     expect(result.errors.contacts).toEqual(['citizenContactInvalid']);
   });
 
   it('accepts a contact phone at exactly MAX_PHONE_LEN but rejects one over', () => {
-    expectValid(validateMedicalDraft(draftWith({ contacts: [contact({ phone: str(MAX_PHONE_LEN) })] })));
-    const result = validateMedicalDraft(draftWith({ contacts: [contact({ phone: str(MAX_PHONE_LEN + 1) })] }));
+    expectValid(
+      validateMedicalDraft(draftWith({ contacts: [contact({ phone: str(MAX_PHONE_LEN) })] })),
+    );
+    const result = validateMedicalDraft(
+      draftWith({ contacts: [contact({ phone: str(MAX_PHONE_LEN + 1) })] }),
+    );
     expectInvalid(result);
     expect(result.errors.contacts).toEqual(['citizenContactInvalid']);
   });
 
   it('accepts a null relation and a relation at exactly MAX_RELATION_LEN but rejects one over', () => {
     expectValid(validateMedicalDraft(draftWith({ contacts: [contact({ relation: null })] })));
-    expectValid(validateMedicalDraft(draftWith({ contacts: [contact({ relation: str(MAX_RELATION_LEN) })] })));
+    expectValid(
+      validateMedicalDraft(draftWith({ contacts: [contact({ relation: str(MAX_RELATION_LEN) })] })),
+    );
     const result = validateMedicalDraft(
       draftWith({ contacts: [contact({ relation: str(MAX_RELATION_LEN + 1) })] }),
     );

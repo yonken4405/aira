@@ -65,8 +65,7 @@ const MAX_REQUESTS = 2;
  */
 export function runDeviceAuthSequence(input: DeviceAuthInput): DeviceAuthResult {
   // Reuse-first (R3.2): mint a key only when none is stored.
-  let currentKey: string | null =
-    input.storedKey === null ? input.generateKey() : input.storedKey;
+  let currentKey: string | null = input.storedKey === null ? input.generateKey() : input.storedKey;
 
   let requestsIssued = 0;
   let retriedOnInvalidKey = false;
