@@ -2,11 +2,12 @@
 
 import { t } from '@aira/ui';
 import { Button, ConfirmDialog, Field, Input, cn, useToast } from '@aira/ui/web';
-import { KeyRound, Plus } from 'lucide-react';
+import { ChevronDown, ChevronRight, KeyRound, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { Fragment, useState, type FormEvent } from 'react';
 
 import type { TenantRecord } from '../lib/platform/types';
+import { AgencyNetworkPanel } from './AgencyNetworkPanel';
 
 export interface PlatformTenantsProps {
   readonly tenants: readonly TenantRecord[];
@@ -46,6 +47,10 @@ export function PlatformTenants({ tenants }: PlatformTenantsProps) {
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
   const [creating, setCreating] = useState(false);
+
+  // The responder-network editor hangs off each tenant row as an expandable panel
+  // (self-loading agencies + capability). Operators toggle one tenant at a time.
+  const [expandedTenantId, setExpandedTenantId] = useState<string | null>(null);
 
   const [adminFor, setAdminFor] = useState<TenantRecord | null>(null);
   const [adminEmail, setAdminEmail] = useState('');
@@ -239,54 +244,83 @@ export function PlatformTenants({ tenants }: PlatformTenantsProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {tenants.map((tenant) => (
-                  <tr key={tenant.id} className={cn(tenant.status === 'suspended' && 'opacity-60')}>
-                    <td className="px-3 py-2 text-fg">{tenant.name}</td>
-                    <td className="px-3 py-2 text-muted">{tenant.region}</td>
-                    <td className="px-3 py-2 text-muted">{tenant.province}</td>
-                    <td className="px-3 py-2">
-                      <span
-                        className={cn(
-                          'text-[10px] font-bold uppercase tracking-label',
-                          tenant.status === 'active' ? 'text-status-resolved' : 'text-status-error',
-                        )}
-                      >
-                        {tenant.status === 'active' ? t('tenantActive') : t('tenantSuspended')}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex flex-wrap justify-end gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setAdminEmail('');
-                            setAdminFor(tenant);
-                          }}
-                        >
-                          {t('bootstrapAdmin')}
-                        </Button>
-                        {tenant.status === 'active' ? (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => setStatusAction({ tenant, status: 'suspended' })}
+                {tenants.map((tenant) => {
+                  const expanded = expandedTenantId === tenant.id;
+                  return (
+                    <Fragment key={tenant.id}>
+                      <tr className={cn(tenant.status === 'suspended' && 'opacity-60')}>
+                        <td className="px-3 py-2 text-fg">
+                          <button
+                            type="button"
+                            aria-expanded={expanded}
+                            aria-label={t('agencyNetworkTitle')}
+                            className="mr-1.5 inline-flex items-center align-middle text-muted transition-colors duration-fast hover:text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-fg"
+                            onClick={() => setExpandedTenantId(expanded ? null : tenant.id)}
                           >
-                            {t('suspendTenant')}
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => setStatusAction({ tenant, status: 'active' })}
+                            {expanded ? (
+                              <ChevronDown aria-hidden="true" size={14} />
+                            ) : (
+                              <ChevronRight aria-hidden="true" size={14} />
+                            )}
+                          </button>
+                          {tenant.name}
+                        </td>
+                        <td className="px-3 py-2 text-muted">{tenant.region}</td>
+                        <td className="px-3 py-2 text-muted">{tenant.province}</td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={cn(
+                              'text-[10px] font-bold uppercase tracking-label',
+                              tenant.status === 'active'
+                                ? 'text-status-resolved'
+                                : 'text-status-error',
+                            )}
                           >
-                            {t('activateTenant')}
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                            {tenant.status === 'active' ? t('tenantActive') : t('tenantSuspended')}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex flex-wrap justify-end gap-1.5">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setAdminEmail('');
+                                setAdminFor(tenant);
+                              }}
+                            >
+                              {t('bootstrapAdmin')}
+                            </Button>
+                            {tenant.status === 'active' ? (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setStatusAction({ tenant, status: 'suspended' })}
+                              >
+                                {t('suspendTenant')}
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setStatusAction({ tenant, status: 'active' })}
+                              >
+                                {t('activateTenant')}
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                      {expanded ? (
+                        <tr>
+                          <td colSpan={5} className="border-t border-line bg-raised/40 p-0">
+                            <AgencyNetworkPanel tenantId={tenant.id} offices={[]} />
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>

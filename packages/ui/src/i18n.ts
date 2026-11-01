@@ -413,6 +413,41 @@ const EN_MESSAGES = {
   citizenDeleteProfile: 'Delete profile',
   citizenDeleteProfileConfirmTitle: 'Delete medical profile?',
   citizenDeleteProfileConfirmBody: 'This removes all of your medical details.',
+
+  // Tenant responder network: agencies, capability config, responder provisioning
+  // (tenant-responder-network spec). Agency_Type tokens are identifiers; their human
+  // labels resolve only through these keys, never a raw token (R2.6).
+  agencyTypeFire: 'Fire',
+  agencyTypePolice: 'Police',
+  agencyTypeMedical: 'Medical',
+  agencyTypeDrrm: 'DRRM',
+  agencyTypeOther: 'Other',
+  // Agency_Type picker option: a descriptor phrase so the option text is never a
+  // bare Agency_Type label (keeps the agency list / capability rows the single
+  // source of each exact label on the admin surface). Still t()-resolved (R2.6).
+  agencyTypeOption: '{type} agency',
+  agencyNetworkTitle: 'Responder network',
+  agenciesTitle: 'Agencies',
+  addAgency: 'Add agency',
+  agencyNameLabel: 'Name',
+  agencyCodeLabel: 'Code',
+  agencyTypeLabel: 'Type',
+  agencyActiveLabel: 'Status',
+  renameAgency: 'Rename',
+  deactivateAgency: 'Deactivate',
+  deactivateAgencyTitle: 'Deactivate agency?',
+  deactivateAgencyBody: '{agency} stops receiving routing suggestions until it is reactivated.',
+  activateAgency: 'Activate',
+  agencyCreated: 'Agency added',
+  agencyCreateFailed: 'Could not add the agency. Check the name, code and type.',
+  agencyRenamed: 'Agency updated',
+  agencyUpdateFailed: 'Could not update the agency. Try again.',
+  capabilityTitle: 'Capability map',
+  capabilityCategory: 'Category',
+  capabilitySaved: 'Capability updated',
+  capabilitySaveFailed: 'Could not update the capability map. Try again.',
+  capabilityUnavailable: 'Capability settings are unavailable',
+  staffResponderTitle: 'Add responder',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;

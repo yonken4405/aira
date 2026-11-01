@@ -7,6 +7,8 @@
  */
 
 export * from './categories';
+export type { AgencyType } from './agency-types';
+export { AGENCY_TYPES, isAgencyType } from './agency-types';
 export * from './payload';
 export * from './mesh';
 export * from './outbox';

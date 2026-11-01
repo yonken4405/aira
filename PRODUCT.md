@@ -85,6 +85,24 @@ with a mock implementation today; the real LoRa (paired radio module) + Bluetoot
 a separate, flagged **hardware track** that never blocks app/console work. The frontend never blocks
 on the mesh.
 
+### 1c. Tenant-owned responder network + per-tenant capability (2026-10-22)
+
+Each tenant now owns **its own agencies** (the responding stations: BFP/fire, PNP/police, EMS/medical,
+DRRM rescue) instead of one flat global list. An agency belongs to exactly one tenant, carries a
+human name + code (per-tenant case-insensitive unique), an active flag, and an **Agency_Type** drawn
+from a stable **closed five-value taxonomy** `{FIRE, POLICE, MEDICAL, DRRM, OTHER}`. The type is the
+routing capability key; the human-named rows are per-tenant. Responders are staffed into a specific
+office and optionally affiliated with one of that tenant's agencies; a responder with no agency is a
+**DRRM generalist** capable of every category (the always-present fallback).
+
+The category→agency mapping that drives routing is now a **per-tenant Capability_Config**: each
+Emergency_Category maps to a set of capable Agency_Types, editable per tenant (an empty set is allowed,
+and means only DRRM generalists respond). The shipped **default equals the legacy hardcoded mapping**
+(`SUNOG→{FIRE}`, `MEDIKAL→{MEDICAL}`, `KRIMEN→{POLICE}`, `BAHA→∅`), so routing behavior is **unchanged
+out of the box**. This is a Tier 2 operator/admin surface (§1b) — it degrades to "unavailable" offline
+and never blocks the frozen Tier-0 mesh SOS. It changes neither the frozen mesh payload (§4) nor the
+one-LGU-per-tenant office shape (§1-multitenant).
+
 ---
 
 ## 2. Architectural pivot: REMOVED FEATURES (authoritative)
@@ -197,7 +215,9 @@ English label (§3 language policy). Never localize the IDs themselves.
 - `MeshTransport` abstraction + mock implementation; offline-aware citizen app (outbox queue, "no
   signal" states, local receive/relay store).
 - Dispatcher **nearest-responder routing suggestions** (ranked by distance + category→agency
-  capability + barangay jurisdiction, using office/responder base positions).
+  capability + barangay jurisdiction, using office/responder base positions). The category→agency
+  capability is now **per-tenant configurable** (§1c), not hardcoded; routing is **unchanged** under
+  the shipped default.
 - Optional **citizen accounts** (email/device-key identity, mock email verification, no telco) with an
   opt-in **medical profile** + emergency contacts, encrypted at rest.
 - **On-incident, need-to-know medical access:** revealed to the assigned responder only while they

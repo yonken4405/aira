@@ -289,5 +289,43 @@ following rules are binding.
    the email send fails). Exactly one delivery outcome is recorded per channel per
    notification.
 
+## 14. Tenant responder network (agencies, staffing, capability) (2026-10-22)
+
+The responder-network management surface (tenant-owned agencies, tenant-safe responder staffing, and
+the per-tenant category→Agency_Type Capability_Config that drives routing) is a Tier 2 operator/admin
+feature. It never touches the frozen Tier-0 mesh path and is **coordinate-free** end to end. These
+rules are binding and extend the isolation model of §12.
+
+1. **Two-tier authority, one SQL-bounded scope.** Two tiers manage the same tenant-scoped surface and
+   stay fully isolated server-side (§12.2): a **Platform_Operator** acts across **any** Tenant via
+   `/api/platform/*` routes (the acting tenant is the explicit `tenantId` in the URL); a **DRRM_Admin**
+   acts on its **own** Tenant only, through `responder:manage` on `/api/admin/*` routes, with the
+   acting tenant read from the session principal (derived via its office) and **never** from a URL — a
+   DRRM_Admin can never even name another tenant. Both entry points call one shared service that treats
+   the acting tenant scope as the hard boundary for every read and write.
+2. **Deny-by-default RBAC.** A missing/foreign-tier session is `401`; a session lacking the required
+   permission is `403` (hidden UI is never access control, §4.1). A Platform_Operator session holds
+   management authority across tenants and is **not** rejected merely because the target resource
+   belongs to another tenant (that is its remit); a DRRM_Admin without `responder:manage` is denied.
+3. **Cross-tenant discriminant (DRRM_Admin).** For a DRRM_Admin referencing a resource outside its own
+   Tenant: a resource that **exists but is known to belong to another tenant** — reached by a
+   guessable resource id the route exposes (agency edit/activate by id, responder office id) — is
+   `403`; a resource keyed solely by the admin's own tenant (capability, agency list) that is simply
+   **not visible in-tenant** is `404`. A Platform_Operator targeting a missing resource gets a plain
+   `404`. The bound is enforced in SQL (scope carries `tenant_id`), never by UI filtering.
+4. **No coordinates anywhere on this surface.** No request, response, error message, URL, log line, or
+   audit entry on any responder-network endpoint carries a coordinate — the feature handles none (§5).
+   A successful agency or responder action appends an account-action audit entry (acting principal
+   reference, action type, target resource id) and writes no coordinate (§4.5, §8.3).
+5. **Boundary validation + generic errors.** Agency_Type is validated against the closed taxonomy
+   `{FIRE, POLICE, MEDICAL, DRRM, OTHER}` and the category against the frozen set
+   `{SUNOG, MEDIKAL, KRIMEN, BAHA}`; rejections return a generic error identifier that never echoes the
+   submitted value (§6.4), and per-tenant case-insensitive name/code collisions map to `409`.
+6. **Same-origin + schema discipline.** Every mutation runs the Same_Origin_Guard before auth
+   (`403 forbidden_origin`). The schema change is a single new SQL migration
+   (`20261022250000_tenant_responder_network.sql`) under `supabase/migrations`; the `aira_app` role
+   gets the same deny-by-default least-privilege grant as other business tables (§5.7), with no
+   Supabase Auth and no new keyed provider.
+
 **Definition of done:** a feature that touches data, auth, or third-party boundaries also updates this
 file and is covered by tests per [TESTING.md](./TESTING.md).

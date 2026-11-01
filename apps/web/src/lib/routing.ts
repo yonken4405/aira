@@ -11,25 +11,23 @@
  * assign handler (SECURITY.md §4.1): a suggestion never grants access.
  */
 
-import type { EmergencyCategoryId } from '@aira/ui';
+import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
 
 import { haversineKm, type GeoPoint } from './geo';
+import type { CapabilityConfig } from './platform/types';
 
 /**
- * Which agency codes are capable of responding to each category. Codes match the
- * seeded `agencies.code` (BFP / PNP / EMS); DRRM is the LGU office's own rescue teams,
- * represented by responders with no agency (agency-less = DRRM generalist).
- *
- * A responder with no agency (DRRM generalist) is capable of any category - they are
- * the fallback the office always has.
+ * The default per-tenant capability configuration that reproduces the legacy
+ * hardcoded `CATEGORY_AGENCY_CAPABILITY` behaviour (R5.8, R6.3, R9.7).
+ * Under this config `isCapable` produces the identical result to the previous
+ * agency-code map for every (category, agencyType) pair.
  */
-export const CATEGORY_AGENCY_CAPABILITY: Readonly<Record<EmergencyCategoryId, readonly string[]>> =
-  {
-    SUNOG: ['BFP'],
-    MEDIKAL: ['EMS'],
-    KRIMEN: ['PNP'],
-    BAHA: [], // flood/rescue: DRRM generalists (agency-less) lead
-  };
+export const DEFAULT_CAPABILITY_CONFIG: CapabilityConfig = {
+  SUNOG: ['FIRE'],
+  MEDIKAL: ['MEDICAL'],
+  KRIMEN: ['POLICE'],
+  BAHA: [], // flood/rescue: DRRM generalists (agency-less) lead
+};
 
 /** A responder considered for assignment, with the data routing needs. */
 export interface RoutingCandidate {
@@ -38,8 +36,8 @@ export interface RoutingCandidate {
   readonly role: 'RESPONDER' | 'DISPATCHER' | 'ADMIN';
   readonly officeId: string;
   readonly officeName: string;
-  /** Agency code (BFP/PNP/EMS) or null for a DRRM generalist. */
-  readonly agencyCode: string | null;
+  /** Agency type or null for a DRRM generalist (no affiliated agency). */
+  readonly agencyType: AgencyType | null;
   readonly agencyName: string | null;
   /** Base position (office/barangay centroid). Null when the office has no centroid. */
   readonly base: GeoPoint | null;
@@ -53,12 +51,22 @@ export interface RoutingSuggestion {
   readonly capable: boolean;
 }
 
-/** True when a responder's agency can handle the category (agency-less = generalist). */
-export function isCapable(category: EmergencyCategoryId, agencyCode: string | null): boolean {
-  if (agencyCode === null) {
-    return true; // DRRM generalist responds to anything.
+/**
+ * True when a responder's agency type can handle the category under the given config.
+ * - null agencyType = DRRM generalist: capable of any category (R6.2).
+ * - non-null agencyType: capable iff present in config[category] (R6.1/R6.6).
+ * - never throws, even on an unknown or empty capability set (R6.6).
+ */
+export function isCapable(
+  category: EmergencyCategoryId,
+  agencyType: AgencyType | null,
+  config: CapabilityConfig,
+): boolean {
+  if (agencyType === null) {
+    return true; // DRRM generalist responds to anything (R6.2).
   }
-  return CATEGORY_AGENCY_CAPABILITY[category].includes(agencyCode);
+  const capable = config[category] ?? [];
+  return (capable as readonly string[]).includes(agencyType);
 }
 
 /**
@@ -73,13 +81,14 @@ export function rankResponders(
   category: EmergencyCategoryId,
   incident: GeoPoint,
   candidates: readonly RoutingCandidate[],
+  config: CapabilityConfig,
 ): readonly RoutingSuggestion[] {
   const suggestions: RoutingSuggestion[] = candidates
     .filter((candidate) => candidate.role === 'RESPONDER')
     .map((candidate) => ({
       candidate,
       distanceKm: candidate.base ? haversineKm(candidate.base, incident) : null,
-      capable: isCapable(category, candidate.agencyCode),
+      capable: isCapable(category, candidate.agencyType, config),
     }));
 
   return suggestions.sort((a, b) => {
@@ -104,6 +113,7 @@ export function bestSuggestion(
   category: EmergencyCategoryId,
   incident: GeoPoint,
   candidates: readonly RoutingCandidate[],
+  config: CapabilityConfig,
 ): RoutingSuggestion | null {
-  return rankResponders(category, incident, candidates)[0] ?? null;
+  return rankResponders(category, incident, candidates, config)[0] ?? null;
 }

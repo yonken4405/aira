@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useId, useMemo, useState, type ReactElement } from 'react';
 
 import { can, type Permission, type Role } from '../lib/auth/rbac';
+import { AdminAgencyNetwork } from './AdminAgencyNetwork';
 import { AdminAudit, type AdminAuditProps } from './AdminAudit';
 import { AdminDashboards, type AdminDashboardsProps } from './AdminDashboards';
 import { AdminResponders, type AdminRespondersProps } from './AdminResponders';
@@ -182,7 +183,12 @@ export function AdminSurface({
       </div>
 
       <div role="tabpanel" id={panelId(selected)} aria-labelledby={tabId(selected)} tabIndex={0}>
-        {selected === 'accounts' ? <AdminResponders {...accounts} /> : null}
+        {selected === 'accounts' ? (
+          <div className="flex flex-col gap-4">
+            <AdminResponders {...accounts} />
+            <AdminAgencyNetwork />
+          </div>
+        ) : null}
         {selected === 'metrics' ? <AdminDashboards {...metrics} /> : null}
         {selected === 'audit' ? <AdminAudit {...audit} /> : null}
       </div>

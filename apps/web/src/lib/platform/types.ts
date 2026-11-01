@@ -6,6 +6,8 @@
  * tenant's first DRRM admin. Never place `incident:*` or responder fields here.
  */
 
+import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
+
 export interface PlatformAdminRecord {
   readonly id: string;
   readonly email: string;
@@ -59,6 +61,26 @@ export interface OfficePin {
   readonly status: TenantStatus;
 }
 
+/** A responder agency within a tenant. Its `agencyType` drives category→capability routing. */
+export interface AgencyRecord {
+  readonly id: string;
+  readonly tenantId: string;
+  readonly name: string;
+  readonly code: string;
+  readonly agencyType: AgencyType;
+  readonly active: boolean;
+}
+
+/** Per-tenant mapping: each frozen Emergency_Category → the set of capable Agency_Types. */
+export type CapabilityConfig = Readonly<Record<EmergencyCategoryId, readonly AgencyType[]>>;
+
+export interface CreateAgencyStoreInput {
+  readonly tenantId: string;
+  readonly name: string;
+  readonly code: string;
+  readonly agencyType: AgencyType;
+}
+
 export interface CreateTenantInput {
   readonly name: string;
   readonly region: string;
@@ -101,4 +123,26 @@ export interface PlatformStore {
   listOfficePins(): Promise<readonly OfficePin[]>;
   /** The LGU office id for a tenant (used to bootstrap its first admin). */
   lguOfficeIdForTenant(tenantId: string): Promise<string | null>;
+
+  // Responder network: agencies + capability config
+  createAgency(
+    input: CreateAgencyStoreInput,
+  ): Promise<
+    | { readonly status: 'ok'; readonly agency: AgencyRecord }
+    | { readonly status: 'tenant_not_found' }
+  >; // throws { code: '23505' } on a per-tenant name/code collision
+  listAgenciesForTenant(tenantId: string): Promise<readonly AgencyRecord[]>;
+  findAgencyById(agencyId: string): Promise<AgencyRecord | null>;
+  renameAgency(
+    agencyId: string,
+    patch: { readonly name?: string; readonly code?: string },
+  ): Promise<AgencyRecord | null>; // throws { code: '23505' } on collision
+  setAgencyActive(agencyId: string, active: boolean): Promise<AgencyRecord | null>;
+  findOfficeTenantId(officeId: string): Promise<string | null>;
+  readCapabilityConfig(tenantId: string): Promise<CapabilityConfig | null>;
+  setCapabilityForCategory(
+    tenantId: string,
+    category: EmergencyCategoryId,
+    agencyTypes: readonly AgencyType[],
+  ): Promise<CapabilityConfig>;
 }

@@ -14,6 +14,15 @@ import type { UpdateResponderPatch } from '../auth/types';
 import { toResponderView } from '../auth/view';
 import { notifyOne, notifySafe } from '../notifications/service';
 import type { NotificationPayload } from '../notifications/types';
+import {
+  createAgency,
+  listAgenciesForTenant,
+  readCapabilityConfig,
+  renameAgency,
+  setAgencyActive,
+  setCapabilityForCategory,
+  type ResponderNetworkDeps,
+} from '../responder-network/service';
 import type { AppDeps } from './deps';
 import {
   errorResponse,
@@ -299,4 +308,237 @@ export async function handleListAudit(request: Request, deps: AppDeps): Promise<
 
   const events = await deps.authStore.listAuthEvents({ limit });
   return jsonResponse({ ok: true, events }, 200, { ...NO_STORE_HEADERS });
+}
+
+// ── Responder-network (agency + capability) for the DRRM_Admin tier ───────────
+//
+// A DRRM_Admin is a RESPONDER-tier ADMIN holding `responder:manage`. Unlike the
+// operator tier, the acting tenant ALWAYS comes from the session principal
+// (`context.principal.tenantId`), never a URL — so an admin can only ever touch
+// its own tenant. The id-bearing agency PATCH is the one place a cross-tenant id
+// can be presented: there we distinguish a known-other-tenant row (403 forbidden)
+// from a truly unknown id (404 agency_not_found) per R7.4/R7.5.
+//
+// No coordinate is ever part of these payloads, so nothing here logs the body
+// (SECURITY.md §1/§5).
+
+/** Build the responder-network service deps from the platform store + responder auth. */
+function adminResponderNetworkDeps(deps: AppDeps): ResponderNetworkDeps {
+  return { store: deps.platform.store, auth: deps.auth };
+}
+
+/** POST /api/admin/agencies — create an agency within the admin's own tenant (R3.*). */
+export async function handleAdminCreateAgency(request: Request, deps: AppDeps): Promise<Response> {
+  if (!isSameOrigin(request)) {
+    return errorResponse(403, 'forbidden_origin');
+  }
+
+  const context = await authenticate(request, deps);
+  if (!context.ok) {
+    return context.response;
+  }
+
+  const forbidden = requirePermission(context.principal, 'responder:manage');
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const body = await readJsonObject(request);
+  if (!body) {
+    return errorResponse(400, 'invalid_json');
+  }
+
+  const rn = adminResponderNetworkDeps(deps);
+  const result = await createAgency(
+    rn,
+    { tenantId: context.principal.tenantId },
+    {
+      name: typeof body.name === 'string' ? body.name : '',
+      code: typeof body.code === 'string' ? body.code : '',
+      agencyType: typeof body.agencyType === 'string' ? body.agencyType : '',
+    },
+  );
+
+  switch (result.status) {
+    case 'ok':
+      return jsonResponse({ ok: true, agency: result.agency }, 201, { ...NO_STORE_HEADERS });
+    case 'invalid':
+      return errorResponse(400, 'invalid_agency');
+    case 'invalid_type':
+      // Never echo the submitted agencyType value (R2.4/R2.5).
+      return errorResponse(400, 'invalid_agency_type');
+    case 'tenant_not_found':
+      // Unlikely — the admin's own tenant exists — but map honestly.
+      return errorResponse(404, 'tenant_not_found');
+    case 'conflict':
+      return errorResponse(409, 'agency_exists');
+  }
+}
+
+/** GET /api/admin/agencies — list the admin's own-tenant agencies (R3.*). */
+export async function handleAdminListAgencies(request: Request, deps: AppDeps): Promise<Response> {
+  const context = await authenticate(request, deps);
+  if (!context.ok) {
+    return context.response;
+  }
+
+  const forbidden = requirePermission(context.principal, 'responder:manage');
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const rn = adminResponderNetworkDeps(deps);
+  const agencies = await listAgenciesForTenant(rn, { tenantId: context.principal.tenantId });
+  return jsonResponse({ ok: true, agencies }, 200, { ...NO_STORE_HEADERS });
+}
+
+/**
+ * PATCH /api/admin/agencies/[id] — rename and/or (de)activate an own-tenant agency.
+ *
+ * The acting scope is the session tenant. A rename (name/code) and an activate
+ * (active) are handled independently. R7.4/R7.5: because the admin is tenant-bounded,
+ * a `cross_tenant` result means the id belongs to a KNOWN other tenant → 403 forbidden,
+ * while `not_found` means the id does not exist at all → 404 agency_not_found.
+ */
+export async function handleAdminUpdateAgency(
+  request: Request,
+  deps: AppDeps,
+  agencyId: string,
+): Promise<Response> {
+  if (!isSameOrigin(request)) {
+    return errorResponse(403, 'forbidden_origin');
+  }
+
+  const context = await authenticate(request, deps);
+  if (!context.ok) {
+    return context.response;
+  }
+
+  const forbidden = requirePermission(context.principal, 'responder:manage');
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const body = await readJsonObject(request);
+  if (!body) {
+    return errorResponse(400, 'invalid_json');
+  }
+
+  const scope = { tenantId: context.principal.tenantId };
+  const rn = adminResponderNetworkDeps(deps);
+
+  // Rename (name and/or code) if either field is present.
+  if (body.name !== undefined || body.code !== undefined) {
+    const patch: { name?: string; code?: string } = {};
+    if (body.name !== undefined) {
+      patch.name = typeof body.name === 'string' ? body.name : '';
+    }
+    if (body.code !== undefined) {
+      patch.code = typeof body.code === 'string' ? body.code : '';
+    }
+
+    const result = await renameAgency(rn, scope, agencyId, patch);
+    switch (result.status) {
+      case 'ok':
+        break;
+      case 'invalid':
+        return errorResponse(400, 'invalid_agency');
+      case 'not_found':
+        return errorResponse(404, 'agency_not_found');
+      case 'cross_tenant':
+        // Known other-tenant row — deny without leaking existence detail (R7.4).
+        return errorResponse(403, 'forbidden');
+      case 'conflict':
+        return errorResponse(409, 'agency_exists');
+    }
+  }
+
+  // Activate / deactivate if an explicit boolean was supplied.
+  if (typeof body.active === 'boolean') {
+    const result = await setAgencyActive(rn, scope, agencyId, body.active);
+    switch (result.status) {
+      case 'ok':
+        return jsonResponse({ ok: true, agency: result.agency }, 200, { ...NO_STORE_HEADERS });
+      case 'not_found':
+        return errorResponse(404, 'agency_not_found');
+      case 'cross_tenant':
+        return errorResponse(403, 'forbidden');
+    }
+  }
+
+  // No active flag: return the latest agency state (after any rename).
+  const latest = await deps.platform.store.findAgencyById(agencyId);
+  if (latest === null) {
+    return errorResponse(404, 'agency_not_found');
+  }
+  return jsonResponse({ ok: true, agency: latest }, 200, { ...NO_STORE_HEADERS });
+}
+
+/** GET /api/admin/capability — read the total capability config for the own tenant (R5.*). */
+export async function handleAdminReadCapability(
+  request: Request,
+  deps: AppDeps,
+): Promise<Response> {
+  const context = await authenticate(request, deps);
+  if (!context.ok) {
+    return context.response;
+  }
+
+  const forbidden = requirePermission(context.principal, 'responder:manage');
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const rn = adminResponderNetworkDeps(deps);
+  const capability = await readCapabilityConfig(rn, { tenantId: context.principal.tenantId });
+  return jsonResponse({ ok: true, capability }, 200, { ...NO_STORE_HEADERS });
+}
+
+/**
+ * PATCH /api/admin/capability — set one category's agency-type set for the own tenant.
+ *
+ * R5.6: `requirePermission` blocks a non-manage role with 403 BEFORE the service is
+ * called, so an unauthorized update never persists.
+ */
+export async function handleAdminSetCapability(request: Request, deps: AppDeps): Promise<Response> {
+  if (!isSameOrigin(request)) {
+    return errorResponse(403, 'forbidden_origin');
+  }
+
+  const context = await authenticate(request, deps);
+  if (!context.ok) {
+    return context.response;
+  }
+
+  const forbidden = requirePermission(context.principal, 'responder:manage');
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const body = await readJsonObject(request);
+  if (!body) {
+    return errorResponse(400, 'invalid_json');
+  }
+
+  const category = typeof body.category === 'string' ? body.category : '';
+  // agencyTypes must be an array of strings; anything else is a malformed set.
+  if (!Array.isArray(body.agencyTypes)) {
+    return errorResponse(400, 'invalid_capability');
+  }
+  const agencyTypes = body.agencyTypes.filter((v): v is string => typeof v === 'string');
+  if (agencyTypes.length !== body.agencyTypes.length) {
+    return errorResponse(400, 'invalid_capability');
+  }
+
+  const rn = adminResponderNetworkDeps(deps);
+  const result = await setCapabilityForCategory(
+    rn,
+    { tenantId: context.principal.tenantId },
+    category,
+    agencyTypes,
+  );
+  if (result.status === 'invalid') {
+    return errorResponse(400, 'invalid_capability');
+  }
+  return jsonResponse({ ok: true, capability: result.capability }, 200, { ...NO_STORE_HEADERS });
 }

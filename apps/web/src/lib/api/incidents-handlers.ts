@@ -15,7 +15,7 @@ import {
   RESPONDER_UPDATABLE_STATUSES,
   type IncidentStatus,
 } from '../incidents';
-import { rankResponders } from '../routing';
+import { rankResponders, DEFAULT_CAPABILITY_CONFIG } from '../routing';
 import { readSnapshotFor } from '../medical/service';
 import { createSessionToken, hashSessionToken } from '../auth/session';
 import { authenticateCitizen } from './citizen-handlers';
@@ -310,6 +310,7 @@ export async function handleRoutingSuggestions(
     incident.category,
     { lat: incident.lat, lon: incident.lon },
     candidates,
+    DEFAULT_CAPABILITY_CONFIG,
   );
 
   // Project to the browser shape: no base coordinates leave the server (the dispatcher

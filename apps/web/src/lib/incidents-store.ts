@@ -6,7 +6,8 @@
  * The web layer never receives a query it can widen.
  */
 
-import type { EmergencyCategoryId } from '@aira/ui';
+import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
+import { isAgencyType } from '@aira/ui';
 import type { PoolClient } from 'pg';
 
 import { query, queryOne, withTransaction } from './db';
@@ -227,7 +228,7 @@ export function createPostgresIncidentsStore(): IncidentsStore {
         role: string;
         officeId: string;
         officeName: string;
-        agencyCode: string | null;
+        agencyType: string | null;
         agencyName: string | null;
         lat: number | null;
         lon: number | null;
@@ -238,7 +239,7 @@ export function createPostgresIncidentsStore(): IncidentsStore {
                 r.role,
                 r.office_id as "officeId",
                 o.name as "officeName",
-                a.code as "agencyCode",
+                a.agency_type as "agencyType",
                 a.name as "agencyName",
                 o.lat,
                 o.lon
@@ -263,7 +264,7 @@ export function createPostgresIncidentsStore(): IncidentsStore {
               : 'ADMIN',
         officeId: row.officeId,
         officeName: row.officeName,
-        agencyCode: row.agencyCode,
+        agencyType: isAgencyType(row.agencyType) ? (row.agencyType as AgencyType) : null,
         agencyName: row.agencyName,
         base: row.lat !== null && row.lon !== null ? { lat: row.lat, lon: row.lon } : null,
       }));

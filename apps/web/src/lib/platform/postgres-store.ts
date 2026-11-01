@@ -5,6 +5,9 @@
 
 import { query, queryOne, withTransaction } from '../db';
 import type {
+  AgencyRecord,
+  CapabilityConfig,
+  CreateAgencyStoreInput,
   CreateTenantInput,
   OfficePin,
   PlatformAdminRecord,
@@ -13,6 +16,7 @@ import type {
   TenantRecord,
   TenantStatus,
 } from './types';
+import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
 
 interface AdminRow {
   id: string;
@@ -42,6 +46,20 @@ interface TenantRow {
   province: string;
   status: string;
   createdAt: Date;
+}
+
+interface AgencyRow {
+  id: string;
+  tenantId: string;
+  name: string;
+  code: string;
+  agencyType: string;
+  active: boolean;
+}
+
+interface CapabilityRow {
+  category: string;
+  agencyType: string;
 }
 
 const toMs = (value: Date | null): number | null => (value ? value.getTime() : null);
@@ -81,6 +99,28 @@ const ADMIN_COLUMNS = `
   failed_attempts as "failedAttempts", locked_until as "lockedUntil", last_login_at as "lastLoginAt"
 `;
 const TENANT_COLUMNS = `id, name, region, province, status, created_at as "createdAt"`;
+const AGENCY_COLUMNS = `id, tenant_id as "tenantId", name, code, agency_type as "agencyType", active`;
+
+const mapAgency = (row: AgencyRow): AgencyRecord => ({
+  id: row.id,
+  tenantId: row.tenantId,
+  name: row.name,
+  code: row.code,
+  agencyType: row.agencyType as AgencyType,
+  active: row.active,
+});
+
+const foldCapabilityRows = (rows: readonly CapabilityRow[]): CapabilityConfig => {
+  const record: Record<string, AgencyType[]> = {};
+  for (const row of rows) {
+    const cat = row.category;
+    if (!record[cat]) {
+      record[cat] = [];
+    }
+    record[cat]!.push(row.agencyType as AgencyType);
+  }
+  return record as unknown as CapabilityConfig;
+};
 
 export function createPostgresPlatformStore(): PlatformStore {
   return {
@@ -229,6 +269,124 @@ export function createPostgresPlatformStore(): PlatformStore {
         [tenantId],
       );
       return row?.id ?? null;
+    },
+
+    async createAgency(input: CreateAgencyStoreInput) {
+      const tenantExists = await queryOne<{ exists: number }>(
+        `select 1 as exists from public.tenants where id = $1`,
+        [input.tenantId],
+      );
+      if (!tenantExists) {
+        return { status: 'tenant_not_found' as const };
+      }
+      const row = await queryOne<AgencyRow>(
+        `insert into public.agencies (tenant_id, name, code, agency_type, active)
+         values ($1, $2, $3, $4, true)
+         returning ${AGENCY_COLUMNS}`,
+        [input.tenantId, input.name, input.code, input.agencyType],
+      );
+      if (!row) {
+        throw new Error('agency_insert_failed');
+      }
+      return { status: 'ok' as const, agency: mapAgency(row) };
+    },
+
+    async listAgenciesForTenant(tenantId: string) {
+      const rows = await query<AgencyRow>(
+        `select ${AGENCY_COLUMNS} from public.agencies where tenant_id = $1 order by name asc`,
+        [tenantId],
+      );
+      return rows.map(mapAgency);
+    },
+
+    async findAgencyById(agencyId: string) {
+      const row = await queryOne<AgencyRow>(
+        `select ${AGENCY_COLUMNS} from public.agencies where id = $1`,
+        [agencyId],
+      );
+      return row ? mapAgency(row) : null;
+    },
+
+    async findOfficeTenantId(officeId: string) {
+      const row = await queryOne<{ tenantId: string }>(
+        `select tenant_id as "tenantId" from public.offices where id = $1`,
+        [officeId],
+      );
+      return row?.tenantId ?? null;
+    },
+
+    async renameAgency(
+      agencyId: string,
+      patch: { readonly name?: string; readonly code?: string },
+    ) {
+      const setParts: string[] = [];
+      const values: unknown[] = [];
+      let paramIndex = 1;
+
+      if (patch.name !== undefined) {
+        setParts.push(`name = $${paramIndex}`);
+        values.push(patch.name);
+        paramIndex += 1;
+      }
+      if (patch.code !== undefined) {
+        setParts.push(`code = $${paramIndex}`);
+        values.push(patch.code);
+        paramIndex += 1;
+      }
+      if (setParts.length === 0) {
+        return null;
+      }
+
+      values.push(agencyId);
+      const row = await queryOne<AgencyRow>(
+        `update public.agencies set ${setParts.join(', ')}, updated_at = now() where id = $${paramIndex} returning ${AGENCY_COLUMNS}`,
+        values as import('../db').SqlParam[],
+      );
+      return row ? mapAgency(row) : null;
+    },
+
+    async setAgencyActive(agencyId: string, active: boolean) {
+      const row = await queryOne<AgencyRow>(
+        `update public.agencies set active = $1, updated_at = now() where id = $2 returning ${AGENCY_COLUMNS}`,
+        [active, agencyId],
+      );
+      return row ? mapAgency(row) : null;
+    },
+
+    async readCapabilityConfig(tenantId: string) {
+      const rows = await query<CapabilityRow>(
+        `select category, agency_type as "agencyType" from public.tenant_capability_config where tenant_id = $1 order by category, agency_type`,
+        [tenantId],
+      );
+      if (rows.length === 0) {
+        return null;
+      }
+      return foldCapabilityRows(rows);
+    },
+
+    async setCapabilityForCategory(
+      tenantId: string,
+      category: EmergencyCategoryId,
+      agencyTypes: readonly AgencyType[],
+    ) {
+      return withTransaction(async (client) => {
+        await client.query(
+          `delete from public.tenant_capability_config where tenant_id = $1 and category = $2`,
+          [tenantId, category],
+        );
+        for (const agencyType of agencyTypes) {
+          await client.query(
+            `insert into public.tenant_capability_config (tenant_id, category, agency_type) values ($1, $2, $3)`,
+            [tenantId, category, agencyType],
+          );
+        }
+        const result = await client.query(
+          `select category, agency_type as "agencyType" from public.tenant_capability_config where tenant_id = $1 order by category, agency_type`,
+          [tenantId],
+        );
+        const capRows = result.rows as CapabilityRow[];
+        return foldCapabilityRows(capRows);
+      });
     },
   };
 }

@@ -224,6 +224,29 @@ RESOLVED`) with the current step emphasised by weight/contrast, plus a map showi
 - A position that has gone stale (past its TTL) is shown muted with a "last seen HH:MM" label, never as
   a live fix.
 
+**Tenant responder network: agencies + capability editors (Tier 2 - PRODUCT.md §1c).**
+
+- **Operator surface:** a per-tenant `AgencyNetworkPanel` hangs off the existing expandable tenant panel
+  in `PlatformTenants` (same toggle pattern as `OfficeTreePanel`). **DRRM_Admin surface:** an
+  `AdminAgencyNetwork` editor in the `/admin` accounts tab, scoped to the session's tenant (no tenant
+  picker). Both render the same three sub-sections and obey Operate Mode (§1): no gradients/glass/glow,
+  Lucide icons via `@aira/ui/web` (e.g. `Building2`, `ShieldCheck`, `Plus`, `ShieldOff`), tokens from
+  `@aira/tailwind-config`, state never by color alone.
+- **Agencies list + form:** name · code · Agency_Type label · active badge, an add-agency form
+  (name/code `Input`, an Agency_Type `Select`), inline rename, and an activate/deactivate toggle.
+- **Capability editor:** one row per Emergency_Category (`SUNOG/MEDIKAL/KRIMEN/BAHA`), each with
+  per-Agency_Type `Checkbox` toggles; toggling submits a full-replace for that category. The **empty set
+  is allowed** (DRRM generalists then lead) and shown as an explicit state, never a blank.
+- **Agency_Type is an identifier, never raw display text.** Every human-facing Agency_Type label
+  resolves only through `t()` (keys `agencyTypeFire` / `agencyTypePolice` / `agencyTypeMedical` /
+  `agencyTypeDrrm` / `agencyTypeOther`); the five tokens are never printed directly (§2 rule 8,
+  PRODUCT.md §3). All copy is via `t()` — no hardcoded strings, no emoji.
+- **UI states (§6) are mandatory:** a layout-shaped `Skeleton` on first load of the agencies/roster/
+  capability data; every outcome through `useToast()` with **coordinate-free** messages (this surface
+  has no coordinates); deactivating an agency or responder is gated behind `ConfirmDialog` (cancel
+  leaves data unchanged); a failed/slow/offline call surfaces an "unavailable" toast and never blocks
+  the Tier-0 SOS path.
+
 **Responder mobile mode (specced now, built later - PRODUCT.md §5).**
 
 - Same Operate-Mode tokens and `@aira/ui` primitives as the console. Screens: assigned-incident list,
