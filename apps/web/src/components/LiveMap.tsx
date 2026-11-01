@@ -1,6 +1,8 @@
 'use client';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
+// Side-effect: point MapLibre v6 at its bundled worker before the map mounts.
+import '../lib/maplibre-worker';
 
 import { getCategory, t } from '@aira/ui';
 import { EmergencyIcon, cn } from '@aira/ui/web';

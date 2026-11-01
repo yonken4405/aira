@@ -1,6 +1,8 @@
 'use client';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
+// Side-effect: point MapLibre v6 at its bundled worker before the map mounts.
+import '../lib/maplibre-worker';
 
 import { t } from '@aira/ui';
 import { Field, Input, Select, cn } from '@aira/ui/web';
