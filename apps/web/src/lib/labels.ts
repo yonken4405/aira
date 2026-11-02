@@ -14,6 +14,8 @@ export function roleLabel(role: PrincipalRole): string {
       return t('roleResponder');
     case 'DISPATCHER':
       return t('roleDispatcher');
+    case 'AGENCY_ADMIN':
+      return t('roleAgencyAdmin');
     case 'ADMIN':
       return t('roleAdmin');
     case 'CITIZEN':
