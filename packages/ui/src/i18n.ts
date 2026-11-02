@@ -138,7 +138,8 @@ const EN_MESSAGES = {
   signedInAs: 'Signed in as',
   roleResponder: 'Responder',
   roleDispatcher: 'Dispatcher',
-  roleAdmin: 'DRRM administrator',
+  roleAgencyAdmin: 'Agency administrator',
+  roleAdmin: 'LDRRMO coordinator',
   roleCitizen: 'Resident (app only)',
   sessionExpiredTitle: 'Session ended',
   sessionExpiredBody: 'Sign in again to continue.',
@@ -189,6 +190,9 @@ const EN_MESSAGES = {
   adminOverview: 'Live map',
   adminDashboards: 'Dashboards',
   adminAudit: 'Audit log',
+  // single-lgu-agency-network admin surfaces (R8, R5)
+  adminOrg: 'Organization',
+  adminCoverage: 'Coverage',
 
   // Admin oversight (DESIGN.md §5a)
   overviewTitle: 'Operations overview',
@@ -210,6 +214,25 @@ const EN_MESSAGES = {
   office: 'Office',
   agency: 'Agency',
   agencyNone: 'No agency',
+  agencyRequiredHint: 'Required. Every responder belongs to one agency.',
+  agencySelectPrompt: 'Select an agency…',
+  // Users / organization view (single-lgu-agency-network R8)
+  orgTitle: 'Organization',
+  orgOfficesTitle: 'Office hierarchy',
+  orgAgenciesTitle: 'Agencies',
+  orgMembersTitle: 'Members',
+  orgNoMembers: 'No members in this agency yet.',
+  orgUnavailable: 'The organization view is unavailable. Try again shortly.',
+  // Agency coverage editor (single-lgu-agency-network R5)
+  coverageTitle: 'Service coverage',
+  coverageHint:
+    'Choose the barangays your agency normally serves. Coverage prioritizes routing; your units can still respond anywhere in the LGU.',
+  coverageSave: 'Save coverage',
+  coverageSaved: 'Coverage updated',
+  coverageSaveFailed: 'Could not save coverage. Try again.',
+  coverageUnavailable: 'Coverage is unavailable right now. Try again shortly.',
+  coverageConfirmTitle: 'Replace coverage?',
+  coverageConfirmBody: 'This replaces the full set of barangays {agency} covers.',
   activeLabel: 'Status',
   activeValue: 'Active',
   inactiveValue: 'Inactive',
@@ -356,6 +379,10 @@ const EN_MESSAGES = {
   notifyTenantOnboardedBody: 'A new partner office has been onboarded to the platform.',
   notifyTenantSuspendedTitle: 'Partner office suspended',
   notifyTenantSuspendedBody: 'A partner office has been suspended on the platform.',
+  // LDRRMO coordination nudge (single-lgu-agency-network R4.4). Coordinate-free copy.
+  notifyCoordinationNudgeTitle: 'Coordination request from the LDRRMO',
+  notifyCoordinationNudgeBody:
+    'The LDRRMO operations center has requested your agency’s coordination on an active response.',
 
   // Mobile citizen account + medical profile (mobile-citizen-account spec).
   // Tier-2 enrichment surfaces reached from the SOS grid; English-primary Operate-Mode copy.
@@ -378,9 +405,13 @@ const EN_MESSAGES = {
   citizenGenericError: 'Something went wrong. Try again.',
 
   // Account hub + register/login screen copy.
+  citizenOpenAccount: 'Account',
+  citizenBack: 'Back',
   citizenAccountTitle: 'Account',
   citizenRegister: 'Create account',
+  citizenRegisterTitle: 'Create your account',
   citizenLogin: 'Sign in',
+  citizenLoginTitle: 'Sign in to your account',
   citizenUseDeviceKey: 'Continue without an email',
   citizenEmailLabel: 'Email',
   citizenPasswordLabel: 'Password',
@@ -413,6 +444,11 @@ const EN_MESSAGES = {
   citizenDeleteProfile: 'Delete profile',
   citizenDeleteProfileConfirmTitle: 'Delete medical profile?',
   citizenDeleteProfileConfirmBody: 'This removes all of your medical details.',
+  citizenSave: 'Save',
+  citizenRetry: 'Try again',
+  citizenUnset: 'Not set',
+  citizenAddItem: 'Add',
+  citizenRemoveItem: 'Remove',
 
   // Tenant responder network: agencies, capability config, responder provisioning
   // (tenant-responder-network spec). Agency_Type tokens are identifiers; their human
