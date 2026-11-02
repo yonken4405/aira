@@ -15,7 +15,7 @@ import {
   RESPONDER_UPDATABLE_STATUSES,
   type IncidentStatus,
 } from '../incidents';
-import { rankResponders, DEFAULT_CAPABILITY_CONFIG } from '../routing';
+import { rankResponders } from '../routing';
 import { readSnapshotFor } from '../medical/service';
 import { createSessionToken, hashSessionToken } from '../auth/session';
 import { authenticateCitizen } from './citizen-handlers';
@@ -52,14 +52,39 @@ export async function handleListIncidents(request: Request, deps: AppDeps): Prom
   }
 
   const { principal } = context;
-  const forbidden = requireAnyPermission(principal, ['incident:read:office', 'incident:read:own']);
+  const forbidden = requireAnyPermission(principal, [
+    'incident:read:office',
+    'incident:read:agency',
+    'incident:read:own',
+  ]);
   if (forbidden) {
     return forbidden;
   }
 
-  const incidents = can(principal.role, 'incident:read:office')
-    ? await deps.incidents.listForOffice(principal.officeId)
-    : await deps.incidents.listAssignedTo(principal.responderId);
+  // Three scopes (single-lgu-agency-network R6.5/R7.2):
+  //  - LDRRMO coordinator (incident:read:office): the WHOLE LGU office subtree, read-only.
+  //  - dispatcher / agency-admin (incident:read:agency): only incidents ROUTED to the
+  //    caller's agency — those whose capable agency type matches the agency's type
+  //    (coverage prioritises ordering; it is never a membership filter).
+  //  - field responder: only their own assignments.
+  let incidents;
+  if (can(principal.role, 'incident:read:office')) {
+    incidents = await deps.incidents.listForOffice(principal.officeId);
+  } else if (can(principal.role, 'incident:read:agency')) {
+    // Resolve the caller's agency type for the category→type routing match. An
+    // agency-less principal (break-glass) falls back to the whole office queue.
+    const agency = principal.agencyId
+      ? await deps.platform.store.findAgencyById(principal.agencyId)
+      : null;
+    const coverageOfficeIds = principal.agencyId
+      ? await deps.platform.store.listCoverage(principal.agencyId)
+      : [];
+    incidents = await deps.incidents.listForAgency(principal.officeId, agency?.agencyType ?? null, {
+      coverageOfficeIds,
+    });
+  } else {
+    incidents = await deps.incidents.listAssignedTo(principal.responderId);
+  }
 
   return jsonResponse({ ok: true, incidents: incidents.map(toWireIncident) }, 200, {
     ...PRIVATE_CACHE_HEADERS,
@@ -151,7 +176,7 @@ export async function handleAssignIncident(
     return context.response;
   }
 
-  const forbidden = requirePermission(context.principal, 'incident:assign');
+  const forbidden = requirePermission(context.principal, 'incident:assign:agency');
   if (forbidden) {
     return forbidden;
   }
@@ -170,6 +195,16 @@ export async function handleAssignIncident(
   if (!(await deps.incidents.isInOfficeScope(incidentId, context.principal.officeId))) {
     // Out-of-scope rows are indistinguishable from missing ones.
     return errorResponse(404, 'incident_not_found');
+  }
+
+  // Agency-scoped dispatch (R6.4): a dispatcher may only assign a unit from its OWN
+  // agency. Assigning a non-own-agency unit is forbidden (403). An agency-less
+  // dispatcher (break-glass) is unbounded here.
+  if (context.principal.agencyId !== null) {
+    const assignee = await deps.authStore.findResponderById(responderId);
+    if (assignee && assignee.agencyId !== context.principal.agencyId) {
+      return errorResponse(403, 'forbidden');
+    }
   }
 
   const outcome = await deps.incidents.assign({
@@ -292,7 +327,7 @@ export async function handleRoutingSuggestions(
     return context.response;
   }
 
-  const forbidden = requirePermission(context.principal, 'incident:assign');
+  const forbidden = requirePermission(context.principal, 'incident:assign:agency');
   if (forbidden) {
     return forbidden;
   }
@@ -305,12 +340,17 @@ export async function handleRoutingSuggestions(
     return errorResponse(404, 'incident_not_found');
   }
 
-  const candidates = await deps.incidents.listRoutingCandidates(context.principal.officeId);
+  // Agency-scoped (R6.3): a dispatcher only ever sees its OWN agency's units. The
+  // principal's agency bounds the candidate set at the store layer; coverage then
+  // prioritises ordering. (An agency-less principal — e.g. the break-glass path —
+  // sees the whole office scope.)
+  const candidates = await deps.incidents.listRoutingCandidates(context.principal.officeId, {
+    agencyId: context.principal.agencyId,
+  });
   const suggestions = rankResponders(
     incident.category,
     { lat: incident.lat, lon: incident.lon },
     candidates,
-    DEFAULT_CAPABILITY_CONFIG,
   );
 
   // Project to the browser shape: no base coordinates leave the server (the dispatcher

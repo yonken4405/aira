@@ -7,9 +7,8 @@
 
 import { t } from '@aira/ui';
 
-import { generatePassword } from '../auth/password';
 import { isRole } from '../auth/rbac';
-import { createResponder, revokeResponderSessions, updateResponder } from '../auth/service';
+import { revokeResponderSessions, updateResponder } from '../auth/service';
 import type { UpdateResponderPatch } from '../auth/types';
 import { toResponderView } from '../auth/view';
 import { notifyOne, notifySafe } from '../notifications/service';
@@ -17,12 +16,16 @@ import type { NotificationPayload } from '../notifications/types';
 import {
   createAgency,
   listAgenciesForTenant,
-  readCapabilityConfig,
+  listAgencyCoverage,
+  provisionResponder,
   renameAgency,
   setAgencyActive,
-  setCapabilityForCategory,
+  setAgencyCoverage,
+  type ActingScope,
   type ResponderNetworkDeps,
 } from '../responder-network/service';
+import { can } from '../auth/rbac';
+import { notifyMany } from '../notifications/service';
 import type { AppDeps } from './deps';
 import {
   errorResponse,
@@ -32,7 +35,7 @@ import {
   NO_STORE_HEADERS,
   readJsonObject,
 } from './http';
-import { authenticate, requirePermission } from './session-guard';
+import { authenticate, requireAnyPermission, requirePermission } from './session-guard';
 
 const DEFAULT_AUDIT_LIMIT = 100;
 const MAX_AUDIT_LIMIT = 200;
@@ -53,7 +56,7 @@ export async function handleListResponders(request: Request, deps: AppDeps): Pro
   const [responders, offices, agencies] = await Promise.all([
     deps.authStore.listResponders(context.principal.tenantId),
     deps.authStore.listOffices(context.principal.tenantId),
-    deps.authStore.listAgencies(),
+    deps.authStore.listAgencies(context.principal.tenantId),
   ]);
 
   return jsonResponse(
@@ -78,7 +81,9 @@ export async function handleCreateResponder(request: Request, deps: AppDeps): Pr
     return context.response;
   }
 
-  const forbidden = requirePermission(context.principal, 'responder:manage');
+  // Both the LDRRMO coordinator (responder:manage) and an agency admin (agency:manage)
+  // may provision accounts; the agency admin is bounded to its own agency below.
+  const forbidden = requireAnyPermission(context.principal, ['responder:manage', 'agency:manage']);
   if (forbidden) {
     return forbidden;
   }
@@ -88,7 +93,7 @@ export async function handleCreateResponder(request: Request, deps: AppDeps): Pr
     return errorResponse(400, 'invalid_json');
   }
 
-  const { email, callsign, role, officeId, agencyId, password, mustChangePassword } = body;
+  const { email, callsign, role, officeId, agencyId, mustChangePassword } = body;
 
   if (!isNonEmptyString(email, 254) || !isRole(role) || !isNonEmptyString(officeId, 64)) {
     return errorResponse(400, 'invalid_responder');
@@ -97,44 +102,51 @@ export async function handleCreateResponder(request: Request, deps: AppDeps): Pr
   if (callsign !== undefined && callsign !== null && !isNonEmptyString(callsign, 32)) {
     return errorResponse(400, 'invalid_responder');
   }
-  if (agencyId !== undefined && agencyId !== null && !isNonEmptyString(agencyId, 64)) {
+  // Agency is REQUIRED now (R3.2); a blank/non-string agency is rejected up front.
+  if (!isNonEmptyString(agencyId, 64)) {
     return errorResponse(400, 'invalid_responder');
   }
-  if (password !== undefined && !isNonEmptyString(password, 128)) {
-    return errorResponse(400, 'invalid_password');
-  }
 
-  // Generated passwords are shown exactly once, to the admin creating the account.
-  const initialPassword = typeof password === 'string' ? password : generatePassword();
-
-  const result = await createResponder(deps.auth, {
-    email,
-    callsign: typeof callsign === 'string' ? callsign : null,
-    role,
-    officeId,
-    agencyId: typeof agencyId === 'string' ? agencyId : null,
-    password: initialPassword,
-    mustChangePassword: mustChangePassword !== false,
-  });
-
-  if (result.status === 'invalid_email') {
-    return errorResponse(400, 'invalid_email');
-  }
-  if (result.status === 'invalid_callsign') {
-    return errorResponse(400, 'invalid_responder');
-  }
-  if (result.status === 'conflict') {
-    return errorResponse(409, 'email_taken');
-  }
-  if (result.status === 'weak') {
-    return errorResponse(400, 'weak_password', { problem: result.problem });
-  }
-
-  return jsonResponse(
-    { ok: true, responder: toResponderView(result.responder), password: initialPassword },
-    201,
-    { ...NO_STORE_HEADERS },
+  // Route through provisionResponder so agency-required + agency-scope + office/agency
+  // tenant checks all run in one place. The acting scope carries the caller's agency
+  // when it is an agency admin, so it can only ever create accounts in its OWN agency.
+  const result = await provisionResponder(
+    { store: deps.platform.store, auth: deps.auth },
+    actingScopeFor(context.principal),
+    {
+      email,
+      callsign: typeof callsign === 'string' ? callsign : null,
+      role,
+      officeId,
+      agencyId,
+      mustChangePassword: mustChangePassword !== false,
+    },
   );
+
+  switch (result.status) {
+    case 'ok':
+      return jsonResponse(
+        { ok: true, responder: toResponderView(result.responder), password: result.password },
+        201,
+        { ...NO_STORE_HEADERS },
+      );
+    case 'invalid':
+      return errorResponse(400, 'invalid_responder');
+    case 'office_not_found':
+      return errorResponse(404, 'office_not_found');
+    case 'office_cross_tenant':
+      return errorResponse(403, 'forbidden');
+    case 'agency_not_found':
+      return errorResponse(404, 'agency_not_found');
+    case 'agency_cross_tenant':
+      return errorResponse(400, 'invalid_agency');
+    case 'agency_inactive':
+      return errorResponse(400, 'invalid_agency');
+    case 'cross_agency':
+      return errorResponse(403, 'forbidden');
+    case 'conflict':
+      return errorResponse(409, 'email_taken');
+  }
 }
 
 export async function handleUpdateResponder(
@@ -327,6 +339,24 @@ function adminResponderNetworkDeps(deps: AppDeps): ResponderNetworkDeps {
   return { store: deps.platform.store, auth: deps.auth };
 }
 
+/**
+ * The acting scope for a management call. The tenant always comes from the session.
+ * An AGENCY_ADMIN is additionally bounded to its OWN agency (`agency:manage` but not
+ * `responder:manage`); the LDRRMO coordinator (`responder:manage`) is tenant-wide.
+ */
+function actingScopeFor(principal: {
+  readonly tenantId: string;
+  readonly agencyId: string | null;
+  readonly role: Parameters<typeof can>[0];
+}): ActingScope {
+  const agencyBounded =
+    can(principal.role, 'agency:manage') && !can(principal.role, 'responder:manage');
+  return {
+    tenantId: principal.tenantId,
+    agencyId: agencyBounded ? principal.agencyId : undefined,
+  };
+}
+
 /** POST /api/admin/agencies — create an agency within the admin's own tenant (R3.*). */
 export async function handleAdminCreateAgency(request: Request, deps: AppDeps): Promise<Response> {
   if (!isSameOrigin(request)) {
@@ -474,33 +504,43 @@ export async function handleAdminUpdateAgency(
   return jsonResponse({ ok: true, agency: latest }, 200, { ...NO_STORE_HEADERS });
 }
 
-/** GET /api/admin/capability — read the total capability config for the own tenant (R5.*). */
-export async function handleAdminReadCapability(
+// ── Agency coverage (single-lgu-agency-network R5) ────────────────────────────
+
+/** GET /api/admin/agencies/[id]/coverage — the office ids an agency covers. */
+export async function handleAdminGetCoverage(
   request: Request,
   deps: AppDeps,
+  agencyId: string,
 ): Promise<Response> {
   const context = await authenticate(request, deps);
   if (!context.ok) {
     return context.response;
   }
 
-  const forbidden = requirePermission(context.principal, 'responder:manage');
+  // AGENCY_ADMIN manages its own coverage; the LDRRMO coordinator reads all agencies.
+  const forbidden = requireAnyPermission(context.principal, ['coverage:manage', 'agency:read:all']);
   if (forbidden) {
     return forbidden;
   }
 
   const rn = adminResponderNetworkDeps(deps);
-  const capability = await readCapabilityConfig(rn, { tenantId: context.principal.tenantId });
-  return jsonResponse({ ok: true, capability }, 200, { ...NO_STORE_HEADERS });
+  const result = await listAgencyCoverage(rn, actingScopeFor(context.principal), agencyId);
+  switch (result.status) {
+    case 'ok':
+      return jsonResponse({ ok: true, officeIds: result.officeIds }, 200, { ...NO_STORE_HEADERS });
+    case 'cross_agency':
+      return errorResponse(403, 'forbidden');
+    case 'not_found':
+      return errorResponse(404, 'agency_not_found');
+  }
 }
 
-/**
- * PATCH /api/admin/capability — set one category's agency-type set for the own tenant.
- *
- * R5.6: `requirePermission` blocks a non-manage role with 403 BEFORE the service is
- * called, so an unauthorized update never persists.
- */
-export async function handleAdminSetCapability(request: Request, deps: AppDeps): Promise<Response> {
+/** PUT /api/admin/agencies/[id]/coverage — full-replace an agency's coverage. */
+export async function handleAdminSetCoverage(
+  request: Request,
+  deps: AppDeps,
+  agencyId: string,
+): Promise<Response> {
   if (!isSameOrigin(request)) {
     return errorResponse(403, 'forbidden_origin');
   }
@@ -510,35 +550,139 @@ export async function handleAdminSetCapability(request: Request, deps: AppDeps):
     return context.response;
   }
 
-  const forbidden = requirePermission(context.principal, 'responder:manage');
+  // Only an agency admin writes coverage; the LDRRMO coordinator is read-only on agencies.
+  const forbidden = requirePermission(context.principal, 'coverage:manage');
   if (forbidden) {
     return forbidden;
   }
 
   const body = await readJsonObject(request);
-  if (!body) {
-    return errorResponse(400, 'invalid_json');
+  if (!body || !Array.isArray(body.officeIds)) {
+    return errorResponse(400, 'invalid_coverage');
   }
-
-  const category = typeof body.category === 'string' ? body.category : '';
-  // agencyTypes must be an array of strings; anything else is a malformed set.
-  if (!Array.isArray(body.agencyTypes)) {
-    return errorResponse(400, 'invalid_capability');
-  }
-  const agencyTypes = body.agencyTypes.filter((v): v is string => typeof v === 'string');
-  if (agencyTypes.length !== body.agencyTypes.length) {
-    return errorResponse(400, 'invalid_capability');
+  const officeIds = body.officeIds.filter((v): v is string => typeof v === 'string');
+  if (officeIds.length !== body.officeIds.length) {
+    return errorResponse(400, 'invalid_coverage');
   }
 
   const rn = adminResponderNetworkDeps(deps);
-  const result = await setCapabilityForCategory(
+  const result = await setAgencyCoverage(
     rn,
-    { tenantId: context.principal.tenantId },
-    category,
-    agencyTypes,
+    actingScopeFor(context.principal),
+    agencyId,
+    officeIds,
   );
-  if (result.status === 'invalid') {
-    return errorResponse(400, 'invalid_capability');
+  switch (result.status) {
+    case 'ok':
+      return jsonResponse({ ok: true, officeIds: result.officeIds }, 200, { ...NO_STORE_HEADERS });
+    case 'cross_agency':
+      return errorResponse(403, 'forbidden');
+    case 'not_found':
+      return errorResponse(404, 'agency_not_found');
+    case 'invalid_office':
+      return errorResponse(400, 'invalid_coverage');
   }
-  return jsonResponse({ ok: true, capability: result.capability }, 200, { ...NO_STORE_HEADERS });
+}
+
+// ── Users / organisation view (single-lgu-agency-network R8) ──────────────────
+
+/**
+ * GET /api/admin/org — the roster + hierarchy, scoped to the viewer's authority.
+ *
+ * An AGENCY_ADMIN sees only its own agency's members; the LDRRMO coordinator sees all
+ * agencies and the full office tree (R8.3). Coordinate-free: offices are name/kind only.
+ */
+export async function handleAdminOrg(request: Request, deps: AppDeps): Promise<Response> {
+  const context = await authenticate(request, deps);
+  if (!context.ok) {
+    return context.response;
+  }
+
+  // Either tier that reaches the admin surface may read the org view.
+  const forbidden = requireAnyPermission(context.principal, ['agency:read:all', 'agency:manage']);
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const { principal } = context;
+  const agencyBounded =
+    can(principal.role, 'agency:manage') && !can(principal.role, 'agency:read:all');
+  const agencyFilter = agencyBounded ? principal.agencyId : null;
+
+  const [responders, offices, agencies] = await Promise.all([
+    deps.authStore.listResponders(principal.tenantId, { agencyId: agencyFilter }),
+    deps.authStore.listOffices(principal.tenantId),
+    deps.authStore.listAgencies(principal.tenantId),
+  ]);
+
+  // An agency-bounded viewer sees only its own agency in the hierarchy.
+  const visibleAgencies = agencyBounded
+    ? agencies.filter((a) => a.id === principal.agencyId)
+    : agencies;
+
+  return jsonResponse(
+    {
+      ok: true,
+      members: responders.map((row) => toResponderView(row, row.sessionCount)),
+      offices,
+      agencies: visibleAgencies,
+    },
+    200,
+    { ...NO_STORE_HEADERS },
+  );
+}
+
+// ── LDRRMO coordination nudge (single-lgu-agency-network R4.4) ─────────────────
+
+/**
+ * POST /api/admin/coordination/nudge — the LDRRMO coordinator sends a coordinate-free
+ * help request / nudge to a target agency's members. Coordination only: it never
+ * assigns or advances an incident (separation of duties). Fail-soft notifications.
+ */
+export async function handleAdminNudge(request: Request, deps: AppDeps): Promise<Response> {
+  if (!isSameOrigin(request)) {
+    return errorResponse(403, 'forbidden_origin');
+  }
+
+  const context = await authenticate(request, deps);
+  if (!context.ok) {
+    return context.response;
+  }
+
+  const forbidden = requirePermission(context.principal, 'coordination:nudge');
+  if (forbidden) {
+    return forbidden;
+  }
+
+  const body = await readJsonObject(request);
+  if (!body || !isNonEmptyString(body.agencyId, 64)) {
+    return errorResponse(400, 'invalid_nudge');
+  }
+  const targetAgencyId = body.agencyId;
+
+  // The target agency must belong to the coordinator's own LGU (tenant).
+  const agency = await deps.platform.store.findAgencyById(targetAgencyId);
+  if (agency === null || agency.tenantId !== context.principal.tenantId) {
+    return errorResponse(404, 'agency_not_found');
+  }
+
+  // Resolve the agency's members as notification recipients (ids only — no coordinates).
+  const members = await deps.authStore.listResponders(context.principal.tenantId, {
+    agencyId: targetAgencyId,
+  });
+  const recipients = members.map((m) => ({ tier: 'responders' as const, principalId: m.id }));
+
+  await notifyMany(
+    deps.notifications,
+    recipients,
+    {
+      type: 'coordination.nudge',
+      data: { agencyId: targetAgencyId },
+      title: t('notifyCoordinationNudgeTitle'),
+      body: t('notifyCoordinationNudgeBody'),
+    },
+    { critical: false },
+  );
+
+  return jsonResponse({ ok: true, notified: recipients.length }, 200, { ...NO_STORE_HEADERS });
 }

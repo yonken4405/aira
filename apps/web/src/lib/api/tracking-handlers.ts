@@ -110,9 +110,12 @@ export async function handleGetTracking(
   const responder = await authenticate(request, deps);
   if (responder.ok) {
     const { principal } = responder;
+    // LGU-wide (LDRRMO coordinator) and agency-scoped (dispatcher) roles may both track
+    // an incident inside the office subtree; the spatial LGU bound is enforced below.
+    const canScopeRead =
+      can(principal.role, 'incident:read:office') || can(principal.role, 'incident:read:agency');
     const canOffice =
-      can(principal.role, 'incident:read:office') &&
-      (await deps.incidents.isInOfficeScope(incidentId, principal.officeId));
+      canScopeRead && (await deps.incidents.isInOfficeScope(incidentId, principal.officeId));
     const canOwn =
       can(principal.role, 'incident:read:own') && incident.assignedToId === principal.responderId;
 
