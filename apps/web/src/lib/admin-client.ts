@@ -8,14 +8,9 @@
  * copy of the parsing logic). Agency_Type tokens are identifiers, never display text.
  */
 
-import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
+import type { AgencyType } from '@aira/ui';
 
-import {
-  parseAgencies,
-  parseCapabilityConfig,
-  type AgencyView,
-  type CapabilityConfigView,
-} from './platform-client';
+import { parseAgencies, type AgencyView } from './platform-client';
 
 const JSON_HEADERS = {
   accept: 'application/json',
@@ -94,33 +89,4 @@ export async function setAgencyActive(agencyId: string, active: boolean): Promis
     throw new Error(`agency_update_request_failed_${response.status}`);
   }
   return parseOneAgency(response);
-}
-
-export async function loadCapability(): Promise<CapabilityConfigView> {
-  const response = await fetch('/api/admin/capability', {
-    headers: GET_HEADERS,
-    credentials: 'same-origin',
-    cache: 'no-store',
-  });
-  if (!response.ok) {
-    throw new Error(`capability_request_failed_${response.status}`);
-  }
-  return parseCapabilityConfig(await response.json());
-}
-
-export async function setCapability(
-  category: EmergencyCategoryId,
-  agencyTypes: readonly AgencyType[],
-): Promise<CapabilityConfigView> {
-  const response = await fetch('/api/admin/capability', {
-    method: 'PATCH',
-    headers: JSON_HEADERS,
-    credentials: 'same-origin',
-    cache: 'no-store',
-    body: JSON.stringify({ category, agencyTypes }),
-  });
-  if (!response.ok) {
-    throw new Error(`capability_update_request_failed_${response.status}`);
-  }
-  return parseCapabilityConfig(await response.json());
 }
