@@ -6,24 +6,26 @@ import { usePathname } from 'next/navigation';
 import { useId, useMemo, useState, type ReactElement } from 'react';
 
 import { can, type Permission, type Role } from '../lib/auth/rbac';
-import { AdminAgencyNetwork } from './AdminAgencyNetwork';
+import type { OfficeSummary } from '../lib/auth/types';
 import { AdminAudit, type AdminAuditProps } from './AdminAudit';
 import { AdminDashboards, type AdminDashboardsProps } from './AdminDashboards';
 import { AdminResponders, type AdminRespondersProps } from './AdminResponders';
+import { AgencyCoverage } from './AgencyCoverage';
+import { OrgView } from './OrgView';
 import { Forbidden } from './Forbidden';
 
-/** The three consolidated admin tabs (R4.1). */
-export type AdminTabId = 'accounts' | 'metrics' | 'audit';
+/** The consolidated admin tabs (R4.1, single-lgu-agency-network R8/R5). */
+export type AdminTabId = 'accounts' | 'org' | 'coverage' | 'metrics' | 'audit';
 
 export interface AdminSurfaceProps {
   /**
-   * The signed-in principal's role. Tabs are gated via `can(viewerRole, perm)`
-   * (R4.6): accounts→`responder:manage`, metrics→`metrics:read`, audit→`audit:read`.
+   * The signed-in principal's role. Tabs are gated via `can(viewerRole, perm)`:
+   * accounts→`responder:manage`|`agency:manage`, org→`agency:read:all`|`agency:manage`,
+   * coverage→`coverage:manage`, metrics→`metrics:read`, audit→`audit:read` (R4.6).
    */
   readonly viewerRole: Role;
   /**
-   * The deep-linked tab when the server page knows it (`/admin`→accounts,
-   * `/admin/dashboards`→metrics, `/admin/audit`→audit). When absent the surface
+   * The deep-linked tab when the server page knows it. When absent the surface
    * derives the tab from `usePathname()`, then falls back to the first permitted
    * tab (R4.8).
    */
@@ -32,36 +34,66 @@ export interface AdminSurfaceProps {
   readonly accounts: AdminRespondersProps;
   readonly metrics: AdminDashboardsProps;
   readonly audit: AdminAuditProps;
+  /**
+   * The acting agency admin's own agency + the office list, for the coverage editor.
+   * Present only for an AGENCY_ADMIN (the LDRRMO coordinator has no own agency).
+   */
+  readonly agency?: { readonly id: string; readonly name: string } | null;
+  readonly offices?: readonly OfficeSummary[];
 }
 
-/** Static tab metadata: id → gating permission, label copy, and pathname. */
+/** Static tab metadata: id → gating permissions, label copy, and pathname. */
 interface TabMeta {
   readonly id: AdminTabId;
-  readonly permission: Permission;
+  /** The tab is shown when the viewer holds ANY of these permissions (R4.6/R4.7). */
+  readonly permissions: readonly Permission[];
   readonly label: string;
   readonly path: string;
 }
 
-/** Tab order is fixed (R4.1): accounts, metrics, audit. */
+/** Tab order is fixed: accounts, org, coverage, metrics, audit. */
 const TAB_META: readonly TabMeta[] = [
-  { id: 'accounts', permission: 'responder:manage', label: t('adminAccounts'), path: '/admin' },
+  {
+    id: 'accounts',
+    permissions: ['responder:manage', 'agency:manage'],
+    label: t('adminAccounts'),
+    path: '/admin',
+  },
+  {
+    id: 'org',
+    permissions: ['agency:read:all', 'agency:manage'],
+    label: t('adminOrg'),
+    path: '/admin/org',
+  },
+  {
+    id: 'coverage',
+    permissions: ['coverage:manage'],
+    label: t('adminCoverage'),
+    path: '/admin/coverage',
+  },
   {
     id: 'metrics',
-    permission: 'metrics:read',
+    permissions: ['metrics:read'],
     label: t('adminDashboards'),
     path: '/admin/dashboards',
   },
-  { id: 'audit', permission: 'audit:read', label: t('adminAudit'), path: '/admin/audit' },
+  { id: 'audit', permissions: ['audit:read'], label: t('adminAudit'), path: '/admin/audit' },
 ];
 
 /** Map a pathname to the tab it deep-links to, when any (R4.2, R4.8). */
 function tabForPathname(pathname: string): AdminTabId | undefined {
-  // Longest-prefix first so `/admin/dashboards` and `/admin/audit` win over `/admin`.
+  // Longest-prefix first so the deeper routes win over `/admin`.
   if (pathname === '/admin/dashboards' || pathname.startsWith('/admin/dashboards/')) {
     return 'metrics';
   }
   if (pathname === '/admin/audit' || pathname.startsWith('/admin/audit/')) {
     return 'audit';
+  }
+  if (pathname === '/admin/org' || pathname.startsWith('/admin/org/')) {
+    return 'org';
+  }
+  if (pathname === '/admin/coverage' || pathname.startsWith('/admin/coverage/')) {
+    return 'coverage';
   }
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
     return 'accounts';
@@ -85,14 +117,26 @@ export function AdminSurface({
   accounts,
   metrics,
   audit,
+  agency,
+  offices,
 }: AdminSurfaceProps): ReactElement {
   const pathname = usePathname();
   const baseId = useId();
 
-  // The permitted tabs, preserving the fixed order (R4.6, R4.7).
+  // The permitted tabs, preserving the fixed order (R4.6, R4.7). The coverage tab also
+  // requires a resolved own-agency (an AGENCY_ADMIN); it is omitted without one.
   const permittedTabs = useMemo(
-    () => TAB_META.filter((meta) => can(viewerRole, meta.permission)),
-    [viewerRole],
+    () =>
+      TAB_META.filter((meta) => {
+        if (!meta.permissions.some((permission) => can(viewerRole, permission))) {
+          return false;
+        }
+        if (meta.id === 'coverage' && !agency) {
+          return false;
+        }
+        return true;
+      }),
+    [viewerRole, agency],
   );
 
   // Resolve the initial selection once: deep-linked tab if permitted, else the
@@ -186,8 +230,11 @@ export function AdminSurface({
         {selected === 'accounts' ? (
           <div className="flex flex-col gap-4">
             <AdminResponders {...accounts} />
-            <AdminAgencyNetwork />
           </div>
+        ) : null}
+        {selected === 'org' ? <OrgView /> : null}
+        {selected === 'coverage' && agency ? (
+          <AgencyCoverage agencyId={agency.id} agencyName={agency.name} offices={offices ?? []} />
         ) : null}
         {selected === 'metrics' ? <AdminDashboards {...metrics} /> : null}
         {selected === 'audit' ? <AdminAudit {...audit} /> : null}

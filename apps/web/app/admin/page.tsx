@@ -25,13 +25,20 @@ export default async function AdminAccountsPage() {
   const [responders, offices, agencies, incidents, events] = await Promise.all([
     store.listResponders(principal.tenantId),
     store.listOffices(principal.tenantId),
-    store.listAgencies(),
+    store.listAgencies(principal.tenantId),
     createPostgresIncidentsStore().listForOffice(principal.officeId),
     store.listAuthEvents({ limit: 100 }),
   ]);
 
   const metrics = computeMetrics(incidents);
   const officeNames = Object.fromEntries(offices.map((office) => [office.id, office.name]));
+
+  // The coverage editor targets the acting agency admin's OWN agency; the LDRRMO
+  // coordinator has no own agency, so the tab is omitted for them (single-lgu R5).
+  const agency =
+    principal.agencyId && principal.agencyName
+      ? { id: principal.agencyId, name: principal.agencyName }
+      : null;
 
   return (
     <AdminSurface
@@ -45,6 +52,8 @@ export default async function AdminAccountsPage() {
       }}
       metrics={{ metrics, officeNames }}
       audit={{ events }}
+      agency={agency}
+      offices={offices}
     />
   );
 }

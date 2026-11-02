@@ -85,7 +85,9 @@ export function AdminResponders({ responders, offices, agencies, viewerId }: Adm
       callsign: callsign === '' ? null : callsign,
       role,
       officeId,
-      agencyId: agencyId === '' ? null : agencyId,
+      // Agency is required now (single-lgu-agency-network R3.2); the submit button is
+      // disabled until one is chosen, so this is never blank here.
+      agencyId,
       mustChangePassword: true,
     });
 
@@ -272,13 +274,14 @@ export function AdminResponders({ responders, offices, agencies, viewerId }: Adm
             </Select>
           </Field>
 
-          <Field id="new-agency" label={t('agency')}>
+          <Field id="new-agency" label={t('agency')} hint={t('agencyRequiredHint')}>
             <Select
               id="new-agency"
               value={agencyId}
               onChange={(event) => setAgencyId(event.target.value)}
+              required
             >
-              <option value="">{t('agencyNone')}</option>
+              <option value="">{t('agencySelectPrompt')}</option>
               {agencies.map((agency) => (
                 <option key={agency.id} value={agency.id}>
                   {agency.name}
@@ -291,7 +294,7 @@ export function AdminResponders({ responders, offices, agencies, viewerId }: Adm
             <Button
               type="submit"
               className="w-full"
-              disabled={creating || email === '' || officeId === ''}
+              disabled={creating || email === '' || officeId === '' || agencyId === ''}
             >
               {creating ? t('saving') : t('createResponder')}
             </Button>
