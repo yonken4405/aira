@@ -74,7 +74,7 @@ verbatim.
       export from `packages/ui/src/index.ts`. The randomness source stays injected (no `expo-crypto`
       import in `@aira/ui`).
     - _Requirements: 3.1_
-  - [-]* 1.4 Write property test for `generateDeviceKey`
+  - [x]* 1.4 Write property test for `generateDeviceKey`
     - **Property 6 (key-format piece): Generated device keys always match the server pattern**
     - **Validates: Requirements 3.1**
     - For any 32 injected random bytes, `generateDeviceKey` returns a 43-char base64url string matching
@@ -92,7 +92,7 @@ MAX_PHONE_LEN:32, MAX_RELATION_LEN:40}` and that `BLOOD_TYPES`/`AGE_BANDS` re-ex
     - Create `packages/ui/src/citizen/medicalBounds.ts` exporting the `MEDICAL_BOUNDS` constant and the
       `BloodType`/`AgeBand` closed sets; export from `packages/ui/src/index.ts`.
     - _Requirements: 7.7, 8.5_
-  - [-]* 2.3 Write property test — client bounds never exceed server bounds
+  - [x]* 2.3 Write property test — client bounds never exceed server bounds
     - **Property 11: Client bounds never exceed server bounds**
     - **Validates: Requirements 7.7, 8.5**
     - For each bound in `MEDICAL_BOUNDS`, its value equals the corresponding constant in
@@ -109,7 +109,7 @@ MAX_PHONE_LEN:32, MAX_RELATION_LEN:40}` and that `BLOOD_TYPES`/`AGE_BANDS` re-ex
       `EmergencyContactDraft` types, `ValidationResult`, and the pure `validateMedicalDraft(draft)`
       function; export from `packages/ui/src/index.ts`.
     - _Requirements: 7.7, 8.4_
-  - [-]* 2.6 Write property test — validation accepts iff within bounds, and gates the PUT
+  - [x]* 2.6 Write property test — validation accepts iff within bounds, and gates the PUT
     - **Property 10: Client validation accepts a draft iff within mirrored bounds; rejection blocks PUT**
     - **Validates: Requirements 7.4, 7.5, 7.7, 8.4**
 
@@ -124,7 +124,7 @@ MAX_PHONE_LEN:32, MAX_RELATION_LEN:40}` and that `BLOOD_TYPES`/`AGE_BANDS` re-ex
     - Create `packages/ui/src/citizen/errorToCopyKey.ts` exporting the pure
       `errorToCopyKey(route, status, code): MessageKey`; export from `packages/ui/src/index.ts`.
     - _Requirements: 2.4, 2.5, 2.6, 2.7, 4.3, 4.4, 7.3, 11.1_
-  - [-]* 3.3 Write property test — every known API error maps to a defined copy key
+  - [x]* 3.3 Write property test — every known API error maps to a defined copy key
     - **Property 7: Every known API error maps to a defined Copy_Catalog key**
     - **Validates: Requirements 2.4, 2.5, 2.6, 2.7, 4.3, 4.4, 7.3, 11.1**
 
@@ -140,7 +140,7 @@ MAX_PHONE_LEN:32, MAX_RELATION_LEN:40}` and that `BLOOD_TYPES`/`AGE_BANDS` re-ex
       (`anonymous` | `registered` | `unknown`), `Connectivity`, and the pure reducer; export from
       `packages/ui/src/index.ts`.
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
-  - [ ]* 4.3 Write property test — session-restore maps each launch outcome correctly
+  - [x]* 4.3 Write property test — session-restore maps each launch outcome correctly
     - **Property 2: Session-restore maps each launch outcome to the correct state**
     - **Validates: Requirements 6.1, 6.2, 6.3, 6.4**
 
@@ -156,7 +156,7 @@ MAX_PHONE_LEN:32, MAX_RELATION_LEN:40}` and that `BLOOD_TYPES`/`AGE_BANDS` re-ex
     - Create `packages/ui/src/citizen/deviceAuthSequence.ts` exporting the pure model used by the client;
       export from `packages/ui/src/index.ts`.
     - _Requirements: 3.2, 3.5, 3.6_
-  - [ ]* 5.3 Write property test — device-key auth is a bounded, reuse-first retry
+  - [x]* 5.3 Write property test — device-key auth is a bounded, reuse-first retry
     - **Property 6: Device-key authentication is a bounded, reuse-first retry**
     - **Validates: Requirements 3.2, 3.5**
   - [x] 5.4 Write failing tests for the pure cookie extractor
@@ -193,7 +193,7 @@ MAX_PHONE_LEN:32, MAX_RELATION_LEN:40}` and that `BLOOD_TYPES`/`AGE_BANDS` re-ex
       no `citizen_id` and are therefore untouched.
     - _Requirements: 10.1, 10.4, 10.5_
 
-- [ ] 7. Implement the account-delete service and handler
+- [x] 7. Implement the account-delete service and handler
   - [x] 7.1 Write failing tests for the service `deleteCitizenAccount`
     - Add tests (in `apps/web/tests/citizen-account-delete.test.ts`) over the in-memory citizen + medical
       stores: `deleteCitizenAccount` revokes the current session (reason recorded), removes the medical
@@ -206,13 +206,13 @@ MAX_PHONE_LEN:32, MAX_RELATION_LEN:40}` and that `BLOOD_TYPES`/`AGE_BANDS` re-ex
       `deleteOwnProfile(medicalDeps, principal.citizenId)` (reusing `MedicalStore.remove`), (3)
       `store.deleteCitizen(principal.citizenId)`. No identity/profile/contact values logged.
     - _Requirements: 10.1, 10.4, 10.5, 10.7_
-  - [~] 7.3 Write failing handler/route tests mirroring existing citizen-handler tests
+  - [x] 7.3 Write failing handler/route tests mirroring existing citizen-handler tests
     - Add tests to `apps/web/tests/api-citizen.test.ts` (in-memory store, no Postgres): no session → `401
 unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204` + cleared
       `aira_citizen_session` cookie + revoked session; a pre-existing anonymous incident is untouched; a
       console/log spy confirms no identity/profile/contact value is logged.
     - _Requirements: 10.2, 10.3, 10.4, 10.5, 10.7_
-  - [~] 7.4 Implement `handleCitizenAccountDelete` and the route
+  - [x] 7.4 Implement `handleCitizenAccountDelete` and the route
     - Add `handleCitizenAccountDelete(request, deps)` to `apps/web/src/lib/api/citizen-handlers.ts`
       (same-origin guard → 403; `authenticateCitizen` → 401; call `deleteCitizenAccount`; return `204`
       with `NO_STORE_HEADERS` + `serializeClearedCitizenSessionCookie`). Create
@@ -220,12 +220,12 @@ unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204
       `getAppDeps()` → `503 service_unavailable` guard used by the other citizen routes.
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.7_
 
-- [~] 8. Checkpoint — shared helpers + backend endpoint
+- [x] 8. Checkpoint — shared helpers + backend endpoint
   - Ensure all tests pass (`pnpm check`), ask the user if questions arise.
 
 ### Phase 3 — Mobile infrastructure (deps, SessionStore, API client, auth provider)
 
-- [~] 9. Add the mobile dependencies (justified per AGENTS.md rule 10)
+- [x] 9. Add the mobile dependencies (justified per AGENTS.md rule 10)
   - Add to `apps/mobile/package.json`: `expo-secure-store` (R6.6 requires the device's secure storage
     facility for the session token + device key), `lucide-react-native` (R12.6 requires the Lucide icon
     set; `lucide-react` from `@aira/ui/web` is DOM-only), and `expo-crypto` (CSPRNG bytes for
@@ -236,21 +236,21 @@ unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204
     (connectivity is outcome-derived, per the design).
   - _Requirements: 6.6, 12.6; enables all mobile tasks + PBTs_
 
-- [ ] 10. Implement the `SessionStore` over `expo-secure-store`
-  - [~] 10.1 Write failing tests for `SessionStore`
+- [x] 10. Implement the `SessionStore` over `expo-secure-store`
+  - [x] 10.1 Write failing tests for `SessionStore`
     - Add `apps/mobile/src/storage/__tests__/sessionStore.test.ts` with `expo-secure-store` mocked:
       get/set/clear round-trips for both the session token (`aira.citizen.session`) and device key
       (`aira.citizen.deviceKey`); absent values return `null`; a console spy confirms neither value is
       ever logged.
     - _Requirements: 6.5, 6.6_
-  - [~] 10.2 Implement `SessionStore`
+  - [x] 10.2 Implement `SessionStore`
     - Create `apps/mobile/src/storage/sessionStore.ts` implementing the `SessionStore` interface over
       `SecureStore.setItemAsync`/`getItemAsync`/`deleteItemAsync`; it is the ONLY module that reads/writes
       the two secrets. Never passes a value to `console`, analytics, or a URL.
     - _Requirements: 6.5, 6.6_
 
-- [ ] 11. Implement the `CitizenApiClient`
-  - [~] 11.1 Write failing tests for the client (mocked `fetch` recorder)
+- [x] 11. Implement the `CitizenApiClient`
+  - [x] 11.1 Write failing tests for the client (mocked `fetch` recorder)
     - Add `apps/mobile/src/api/__tests__/citizenClient.test.ts`: HTTPS-base enforcement (a non-HTTPS base
       is refused outside development, R12.4); every request uses a 10 s `AbortController` deadline and a
       timeout yields `{ok:false,kind:'timeout'}` (fake timers, R3.3/R7.1/R7.8); a network error yields
@@ -260,7 +260,7 @@ unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204
       jar + store are cleared; non-2xx responses parse into `{status, code, retryAfterSeconds}`; a console
       spy confirms no body, cookie, device key, or medical field is logged.
     - _Requirements: 3.3, 6.5, 7.1, 7.8, 7.11, 12.2, 12.4_
-  - [~] 11.2 Implement `CitizenApiClient`
+  - [x] 11.2 Implement `CitizenApiClient`
     - Create `apps/mobile/src/api/citizenClient.ts` implementing the `CitizenApiClient` /`ApiResult`
       contract: base-URL config from `app.json` `extra`/env (HTTPS-required in release), 10 s
       `AbortController` timeouts, the manual cookie jar (reuse the `@aira/ui` `extractSessionToken` /
@@ -269,8 +269,8 @@ unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204
       `deleteAccount` calls `DELETE /api/citizen/account`.
     - _Requirements: 3.3, 3.7, 6.5, 7.1, 7.8, 7.11, 12.2, 12.4_
 
-- [ ] 12. Implement `CitizenAuthProvider` + `useCitizenAuth`
-  - [~] 12.1 Write failing tests for the auth provider
+- [x] 12. Implement `CitizenAuthProvider` + `useCitizenAuth`
+  - [x] 12.1 Write failing tests for the auth provider
     - Add `apps/mobile/src/auth/__tests__/CitizenAuthContext.test.tsx` (injected mock client + store):
       `register`/`login`/`deviceAuth` success → `registered` + token persisted; `restore` drives the
       session-restore reducer (`200→registered`, `401→anonymous`+clear, offline→`unknown`+retain);
@@ -278,7 +278,7 @@ unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204
       password is dropped as soon as the request resolves (never in state/store — console spy);
       `deleteAccount` on success clears token + device key.
     - _Requirements: 2.3, 2.8, 3.2, 3.4, 3.5, 4.2, 4.6, 6.1, 6.2, 6.3, 6.4, 10.6_
-  - [~] 12.2 Implement `CitizenAuthProvider` and `useCitizenAuth`
+  - [x] 12.2 Implement `CitizenAuthProvider` and `useCitizenAuth`
     - Create `apps/mobile/src/auth/CitizenAuthContext.tsx` holding `CitizenAuthState` + `Connectivity`
       and exposing `register`/`login`/`deviceAuth`/`restore`/`logout`/`deleteAccount` returning
       `AuthOutcome`; it wraps `CitizenApiClient` and keeps `SessionStore` + state in sync, generating the
@@ -288,41 +288,41 @@ unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204
 
 ### Phase 4 — Mobile navigation + screens
 
-- [ ] 13. Implement `AppNavigator` (grid is the never-gated root)
-  - [~] 13.1 Write the grid-invariance test FIRST
+- [x] 13. Implement `AppNavigator` (grid is the never-gated root)
+  - [x] 13.1 Write the grid-invariance test FIRST
     - Add `apps/mobile/src/navigation/__tests__/AppNavigator.test.tsx`: the SOS grid is the first
       interactive screen on mount and every Tier-0 action (all four categories) submits without being
       blocked/disabled/delayed; switching to a secondary screen and back requires no auth. Drive this with
       `fast-check`-generated `(CitizenAuthState × Connectivity)` combinations (Property 1), tagged
       `// Feature: mobile-citizen-account, Property 1: ...`, min 100 iterations.
     - _Requirements: 1.1, 1.2, 1.4, 1.5, 1.6, 11.3_
-  - [~] 13.2 Implement `AppNavigator`
+  - [x] 13.2 Implement `AppNavigator`
     - Create `apps/mobile/src/navigation/AppNavigator.tsx` with the union-typed `Screen` state machine
       (default `{name:'grid'}`), rendering the grid as the always-mounted root with a single secondary
       affordance (a `lucide-react-native` account icon) switching to `accountHub`; runs the launch
       session-restore effect (grid renders before/during it); injectable `client`/`store` for tests.
     - _Requirements: 1.1, 1.3, 1.4, 1.5, 6.1, 6.4_
-  - [ ]* 13.3 Finalize the Property 1 grid-invariance property test
+  - [x]* 13.3 Finalize the Property 1 grid-invariance property test
     - **Property 1: The SOS grid is interactive under every auth and connectivity state**
     - **Validates: Requirements 1.1, 1.2, 1.4, 1.6, 11.3**
 
-- [ ] 14. Implement `AccountHubScreen`
-  - [~] 14.1 Write failing tests for the account hub
+- [x] 14. Implement `AccountHubScreen`
+  - [x] 14.1 Write failing tests for the account hub
     - Add `apps/mobile/src/screens/__tests__/AccountHubScreen.test.tsx`: anonymous state offers
       Register / Login / device-key entries (R1.3/R2.1); registered state shows the citizen email (if
       any), Medical-profile entry, Sign out (confirm-first, R5.5) and Delete account (confirm-first, R10.6);
       every Tier-2 row renders the offline treatment when `connectivity === 'offline'` within the 1 s
       budget (R11.1/R11.2); all copy via `t()`.
     - _Requirements: 1.3, 5.1, 5.2, 5.4, 5.5, 10.6, 11.1, 11.2_
-  - [~] 14.2 Implement `AccountHubScreen`
+  - [x] 14.2 Implement `AccountHubScreen`
     - Create `apps/mobile/src/screens/AccountHubScreen.tsx`: the Secondary_Surface entry point wired to
       `useCitizenAuth`; sign-out confirms then clears local state and returns to the grid even if the
       backend is unreachable; delete-account confirms then calls `deleteAccount` and returns to the grid
       anonymous. Icons via `lucide-react-native`, tokens via NativeWind; no voice/chat/AI affordance.
     - _Requirements: 1.3, 5.1, 5.2, 5.3, 5.4, 5.5, 10.6, 11.1, 11.2, 12.6, 12.7_
 
-- [ ] 15. Implement `RegisterScreen`
-  - [~] 15.1 Write failing tests for registration
+- [x] 15. Implement `RegisterScreen`
+  - [x] 15.1 Write failing tests for registration
     - Add `apps/mobile/src/screens/__tests__/RegisterScreen.test.tsx`: email + password fields render with
       `t()` labels (R2.1); submit posts to register; `201` persists session + shows registered state
       (R2.3); `400 invalid_email` shows the message and retains the entered email (R2.4);
@@ -330,28 +330,28 @@ unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204
       `429 rate_limited` disables submit then re-enables after `retry-after` (fake timers, R2.7); the
       password never appears in state/store/logs after the request resolves (console spy, R2.8).
     - _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8_
-  - [~] 15.2 Implement `RegisterScreen`
+  - [x] 15.2 Implement `RegisterScreen`
     - Create `apps/mobile/src/screens/RegisterScreen.tsx` wired to `useCitizenAuth.register`, mapping each
       error via `errorToCopyKey`, retaining the email on `invalid_email`, and running the retry-after
       countdown on `rate_limited`.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8_
 
-- [ ] 16. Implement `LoginScreen`
-  - [~] 16.1 Write failing tests for login
+- [x] 16. Implement `LoginScreen`
+  - [x] 16.1 Write failing tests for login
     - Add `apps/mobile/src/screens/__tests__/LoginScreen.test.tsx`: email + password fields; `200` persists
       session + shows registered state (R4.2); `401 invalid_credentials` shows a single non-distinguishing
       message (R4.3); `423 account_locked` shows the retry window derived from `retryAfterSeconds` as
       `{minutes}` (R4.4); `429 rate_limited` disables then re-enables submit after `retry-after` (R4.5);
       the password never leaks after the request resolves (R4.6).
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
-  - [~] 16.2 Implement `LoginScreen`
+  - [x] 16.2 Implement `LoginScreen`
     - Create `apps/mobile/src/screens/LoginScreen.tsx` wired to `useCitizenAuth.login`, mapping
       `invalid_credentials` / `account_locked` / `rate_limited` via `errorToCopyKey` with the lock/retry
       countdowns.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-- [ ] 17. Implement `MedicalProfileScreen` + contacts sub-editor
-  - [~] 17.1 Write failing tests for the medical screen
+- [x] 17. Implement `MedicalProfileScreen` + contacts sub-editor
+  - [x] 17.1 Write failing tests for the medical screen
     - Add `apps/mobile/src/screens/__tests__/MedicalProfileScreen.test.tsx`: loads via `GET` on open with a
       10 s timeout (fake timers, R7.1); empty-profile state treats an absent profile as normal (R7.2);
       a non-200/non-401 load failure keeps the surface open and shows a retry control (R7.3); `bloodType`
@@ -368,54 +368,54 @@ unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204
       logged (R7.11); assert no device-contacts/mic/camera/media/SMS permission API import on this screen
       (R7.12).
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11, 7.12, 8.1, 8.2, 8.3, 8.4, 8.5, 9.1, 9.2, 9.3, 9.4, 11.5_
-  - [~] 17.2 Implement `MedicalProfileScreen` + contacts sub-editor
+  - [x] 17.2 Implement `MedicalProfileScreen` + contacts sub-editor
     - Create `apps/mobile/src/screens/MedicalProfileScreen.tsx`: loads on open (10 s timeout), bounded
       editors for every field using `MEDICAL_BOUNDS` + `validateMedicalDraft`, PUT/DELETE flows, the
       preserved-draft buffer for the app session, and the contacts sub-editor. Never requests
       device-contacts/mic/camera/media/SMS permissions; no voice/chat/AI affordance; all copy via `t()`.
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11, 7.12, 8.1, 8.2, 8.3, 8.4, 8.5, 9.1, 9.2, 9.3, 9.4, 11.4, 11.5, 12.7_
 
-- [ ] 18. Wire `App.tsx` to render `AppNavigator`
-  - [~] 18.1 Write a failing test asserting grid behaviour is retained
+- [x] 18. Wire `App.tsx` to render `AppNavigator`
+  - [x] 18.1 Write a failing test asserting grid behaviour is retained
     - Extend `apps/mobile/src/screens/__tests__/EmergencyGridScreen.test.tsx` (or add an `App` test) to
       assert `App` renders the grid as the first screen and `GRID_CATEGORIES` still equals the closed enum
       (SUNOG/MEDIKAL/KRIMEN/BAHA) with the mesh wire format unchanged (R1.7).
     - _Requirements: 1.1, 1.7_
-  - [~] 18.2 Render `AppNavigator` from `App.tsx`
+  - [x] 18.2 Render `AppNavigator` from `App.tsx`
     - Update `apps/mobile/App.tsx` to render `AppNavigator` (wrapped in `CitizenAuthProvider`) instead of
       `EmergencyGridScreen` directly, keeping the `StatusBar` and the grid's props/behaviour verbatim.
     - _Requirements: 1.1, 1.7_
 
 ### Phase 5 — Cross-cutting PBTs + leak/structural assertions (jest-expo)
 
-- [ ] 19. Property tests for client data-flow and secret non-leak
-  - [ ]* 19.1 Write property test — client requests target only the citizen tier; device key leaves only via `/device`
+- [x] 19. Property tests for client data-flow and secret non-leak
+  - [x]* 19.1 Write property test — client requests target only the citizen tier; device key leaves only via `/device`
     - **Property 3: Client requests target only the citizen tier and the device key leaves only via `/device`**
     - **Validates: Requirements 3.7, 12.2**
     - `apps/mobile` (client, mocked fetch recorder) + `fast-check`.
-  - [ ]* 19.2 Write property test — credentials and session tokens never leak to logs or URLs
+  - [x]* 19.2 Write property test — credentials and session tokens never leak to logs or URLs
     - **Property 4: Credentials and session tokens never leak to logs or URLs**
     - **Validates: Requirements 2.8, 4.6, 6.5**
     - `apps/mobile` (client/provider, console spy) + `fast-check`.
-  - [ ]* 19.3 Write property test — logout always clears the local session regardless of backend reachability
+  - [x]* 19.3 Write property test — logout always clears the local session regardless of backend reachability
     - **Property 5: Logout always clears the local session regardless of backend reachability**
     - **Validates: Requirements 5.2, 5.3**
     - `apps/mobile` (provider, mocked outcomes) + `fast-check`.
-  - [ ]* 19.4 Write property test — medical profile fields never leak to logs
+  - [x]* 19.4 Write property test — medical profile fields never leak to logs
     - **Property 8: Medical profile fields never leak to logs**
     - **Validates: Requirements 7.11**
     - `apps/mobile` (client, console spy) + `fast-check`.
-  - [ ]* 19.5 Write property test — in-progress edits survive every non-success save outcome
+  - [x]* 19.5 Write property test — in-progress edits survive every non-success save outcome
     - **Property 9: In-progress edits survive every non-success save outcome**
     - **Validates: Requirements 7.10, 11.5**
     - `apps/mobile` (medical screen) + `fast-check`.
-  - [ ]* 19.6 Write property test — contact edits are reflected exactly in the next PUT body
+  - [x]* 19.6 Write property test — contact edits are reflected exactly in the next PUT body
     - **Property 12: Contact edits are reflected exactly in the next PUT body**
     - **Validates: Requirements 8.2, 8.3**
     - `apps/mobile` / `@aira/ui` + `fast-check`.
 
-- [ ] 20. Structural guards — grid regression + no-permission / no-AI / tier-isolation
-  - [~] 20.1 Grid regression and no-permission / no-AI / privacy structural assertions
+- [x] 20. Structural guards — grid regression + no-permission / no-AI / tier-isolation
+  - [x] 20.1 Grid regression and no-permission / no-AI / privacy structural assertions
     - Confirm the existing `EmergencyGridScreen.test.tsx` passes verbatim (R1.7). Add a structural test
       (extending the existing grep-style assertion) that no new account/medical screen imports a
       device-contacts / microphone / camera / photo-media / SMS permission API (R7.12) and that no new
@@ -427,7 +427,7 @@ unauthenticated`; cross-site origin → `403 forbidden_origin`; success → `204
 
 ### Final gate
 
-- [~] 21. Final checkpoint — run the quality gate
+- [x] 21. Final checkpoint — run the quality gate
   - Run `pnpm check` (turbo typecheck + test across all packages); ensure it is green, then run
     `pnpm format`. Ask the user if questions arise.
   - _Requirements: all_

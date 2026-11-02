@@ -9,6 +9,9 @@
     "android": {
       "package": "ph.aira.citizen"
     },
+    "extra": {
+      "citizenApiBase": "http://localhost:3000"
+    },
     "platforms": ["android", "ios"]
   }
 }

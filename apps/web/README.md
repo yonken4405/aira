@@ -152,17 +152,28 @@ pnpm --filter @aira/web seed:accounts
 
 ---
 
-## Smoke test (optional)
+## Smoke tests (optional)
 
-A script exercises the full platform flow end-to-end over HTTP (platform login → create tenant →
-bootstrap a tenant admin → responder email login → cross-tier isolation). With the dev server
-running (`pnpm dev`) and accounts seeded:
+Two scripts exercise the real HTTP surface end-to-end against a running dev server. Both need the
+local DB up (steps 2-3), `MEDICAL_ENCRYPTION_KEY` set (step 4), and `pnpm dev` running; both target
+http://localhost:3000 by default (pass another base URL as the first arg) and clean up after
+themselves.
+
+**Platform + email login** (platform login → create tenant → bootstrap a tenant admin → responder
+email login → cross-tier isolation). Needs the seeded accounts (step 5):
 
 ```bash
-node apps/web/scripts/smoke-platform.mjs
+pnpm --filter @aira/web smoke:platform
 ```
 
-It targets http://localhost:3000 by default and cleans up the throwaway tenant it creates.
+**Registered-citizen tier: account + medical profile** (register by email → session restore →
+medical profile GET/PUT round-trip at rest → cross-tier isolation → device-key identity → account
+delete → session revoked + profile gone). It provisions its own throwaway citizen each run, so no
+seeded citizen is required:
+
+```bash
+pnpm --filter @aira/web smoke:citizen
+```
 
 ---
 

@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "auth:create-responder": "node scripts/create-responder.mjs",
     "platform:create-admin": "node scripts/create-platform-admin.mjs",
-    "seed:accounts": "node scripts/seed-accounts.mjs"
+    "seed:accounts": "node scripts/seed-accounts.mjs",
+    "smoke:platform": "node scripts/smoke-platform.mjs",
+    "smoke:citizen": "node scripts/smoke-citizen.mjs"
   },
   "dependencies": {
     "@aira/tailwind-config": "workspace:*",

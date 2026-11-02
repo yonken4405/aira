@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import {
   EMERGENCY_CATEGORIES,
@@ -12,8 +12,10 @@ import {
   type EmergencyCategoryId,
   type OutboxSnapshot,
 } from '@aira/ui';
+import { UserRound } from 'lucide-react-native';
 
 import { SosButton } from '../components/SosButton';
+import { ICON_COLOR } from '../theme';
 
 /** Fixed 2×2 grid layout - order matches the design spec (DESIGN.md §4). */
 const GRID_ROWS: readonly (readonly [EmergencyCategoryId, EmergencyCategoryId])[] = [
@@ -58,6 +60,8 @@ function linkLabel(snapshot: OutboxSnapshot): string {
 export interface EmergencyGridScreenProps {
   /** Injectable for tests; defaults to a fresh mock-mesh-backed outbox. */
   readonly transport?: MockMeshTransport;
+  /** Secondary-surface affordance; absent keeps the screen exactly as before. */
+  readonly onOpenAccount?: () => void;
 }
 
 /**
@@ -66,7 +70,7 @@ export interface EmergencyGridScreenProps {
  * Offline-first (PRODUCT.md §1b): the grid always works; the outbox queues alerts when
  * there is no mesh link and drains them automatically when a link returns.
  */
-export function EmergencyGridScreen({ transport }: EmergencyGridScreenProps = {}) {
+export function EmergencyGridScreen({ transport, onOpenAccount }: EmergencyGridScreenProps = {}) {
   // The transport is stable for the component's lifetime; the outbox (which owns the
   // transport subscriptions) is created and disposed together inside the effect so the
   // create/dispose pair is always balanced, even under React StrictMode's
@@ -104,11 +108,24 @@ export function EmergencyGridScreen({ transport }: EmergencyGridScreenProps = {}
       <View className="border-b border-line bg-surface px-5 pb-4 pt-14">
         <View className="flex-row items-center justify-between">
           <Text className="text-lg font-extrabold text-fg">{t('appName')}</Text>
-          <View className="flex-row items-center gap-2 border border-line bg-raised px-2 py-1">
-            <View className={`h-2 w-2 ${linkToneClass(snapshot.link)}`} />
-            <Text className="text-[10px] font-bold uppercase text-muted" testID="mesh-status">
-              {linkLabel(snapshot)}
-            </Text>
+          <View className="flex-row items-center gap-2">
+            <View className="flex-row items-center gap-2 border border-line bg-raised px-2 py-1">
+              <View className={`h-2 w-2 ${linkToneClass(snapshot.link)}`} />
+              <Text className="text-[10px] font-bold uppercase text-muted" testID="mesh-status">
+                {linkLabel(snapshot)}
+              </Text>
+            </View>
+            {onOpenAccount ? (
+              <Pressable
+                testID="open-account"
+                accessibilityRole="button"
+                accessibilityLabel={t('citizenAccountTitle')}
+                onPress={onOpenAccount}
+                className="min-h-[48px] min-w-[48px] items-center justify-center border border-line bg-raised active:opacity-75"
+              >
+                <UserRound size={20} color={ICON_COLOR} />
+              </Pressable>
+            ) : null}
           </View>
         </View>
 
