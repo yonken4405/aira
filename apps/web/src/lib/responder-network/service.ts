@@ -10,15 +10,14 @@
  * Requirements: R2.4, R2.5, R3.2â€“R3.8, R4.1â€“R4.9, R5.1, R5.3â€“R5.5, R5.7â€“R5.9.
  */
 
-import { isAgencyType, isEmergencyCategoryId, type AgencyType } from '@aira/ui';
+import { isAgencyType } from '@aira/ui';
 
 import type { AuthServiceDeps } from '../auth/service';
 import { createResponder } from '../auth/service';
 import { generatePassword } from '../auth/password';
 import type { ResponderRecord } from '../auth/types';
 import type { Role } from '../auth/rbac';
-import type { AgencyRecord, CapabilityConfig, PlatformStore } from '../platform/types';
-import { DEFAULT_CAPABILITY_CONFIG } from '../routing';
+import type { AgencyRecord, PlatformStore } from '../platform/types';
 
 // â”€â”€ Exported dependency / scope types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -27,7 +26,13 @@ export interface ResponderNetworkDeps {
   readonly auth?: AuthServiceDeps;
 }
 
-export type ActingScope = { readonly tenantId: string };
+/**
+ * The acting scope for a management call. Always tenant-bounded. For an agency-scoped
+ * caller (AGENCY_ADMIN), `agencyId` is set and the service refuses to read or write any
+ * other agency (single-lgu-agency-network R5.2/R7.1/R7.3). For an unbounded caller
+ * (the break-glass path), `agencyId` is omitted.
+ */
+export type ActingScope = { readonly tenantId: string; readonly agencyId?: string | null };
 
 // â”€â”€ Result types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -50,17 +55,15 @@ export type SetAgencyActiveResult =
   | { readonly status: 'not_found' } // agency missing (R3.8)
   | { readonly status: 'cross_tenant' }; // agency belongs to a different tenant (R7.4)
 
-export type SetCapabilityResult =
-  { readonly status: 'ok'; readonly capability: CapabilityConfig } | { readonly status: 'invalid' }; // category or type outside taxonomy (R5.7)
-
 export type ProvisionResponderResult =
   | { readonly status: 'ok'; readonly responder: ResponderRecord; readonly password: string }
-  | { readonly status: 'invalid' } // missing/blank officeId (R4.2)
+  | { readonly status: 'invalid' } // missing/blank officeId OR missing agency (R3.2/R4.2)
   | { readonly status: 'office_not_found' } // officeId unknown (R4.3)
   | { readonly status: 'office_cross_tenant' } // office belongs to another tenant (R4.4)
   | { readonly status: 'agency_not_found' } // agencyId unknown (R4.5)
   | { readonly status: 'agency_cross_tenant' } // agency belongs to another tenant (R4.6)
   | { readonly status: 'agency_inactive' } // agency.active === false (R4.7)
+  | { readonly status: 'cross_agency' } // agency-bounded caller provisioning into another agency (R7.3)
   | { readonly status: 'conflict' }; // 23505 email duplicate
 
 // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -69,39 +72,6 @@ function is23505(error: unknown): boolean {
   return (
     typeof error === 'object' && error !== null && (error as { code?: unknown }).code === '23505'
   );
-}
-
-/**
- * Build a total CapabilityConfig from a partial (or null) stored config by filling
- * any absent/empty category with its DEFAULT_CAPABILITY_CONFIG value so the result
- * always covers all four frozen categories (R5.3).
- *
- * The in-memory store's `readCapabilityConfig` returns `[]` for categories that were
- * never explicitly stored (rather than `null`/`undefined`), so we treat both `null`
- * and an empty array as "not yet set" and substitute the default. This is safe because
- * the default value for any category that can be explicitly zeroed (e.g. BAHA=[]) is
- * already `[]`, so the substitution is a no-op for those cases.
- */
-function toTotalConfig(stored: CapabilityConfig | null): CapabilityConfig {
-  if (stored === null) {
-    // No stored config at all -- return a copy of the full default.
-    return { ...DEFAULT_CAPABILITY_CONFIG };
-  }
-  // Read each category defensively. The in-memory adapter returns `[]` for an
-  // unconfigured category, but the Postgres adapter folds only the categories that
-  // have stored rows, so an unconfigured category is `undefined` here. Treat both
-  // `undefined` and `[]` as "not set" and fall back to the default, so the result is
-  // always a total four-key map and never dereferences an absent category.
-  const pick = (
-    value: readonly AgencyType[] | undefined,
-    fallback: readonly AgencyType[],
-  ): readonly AgencyType[] => (value && value.length > 0 ? value : fallback);
-  return {
-    SUNOG: pick(stored.SUNOG, DEFAULT_CAPABILITY_CONFIG.SUNOG),
-    MEDIKAL: pick(stored.MEDIKAL, DEFAULT_CAPABILITY_CONFIG.MEDIKAL),
-    KRIMEN: pick(stored.KRIMEN, DEFAULT_CAPABILITY_CONFIG.KRIMEN),
-    BAHA: pick(stored.BAHA, DEFAULT_CAPABILITY_CONFIG.BAHA),
-  };
 }
 
 // â”€â”€ Service functions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -251,72 +221,108 @@ export async function listAgenciesForTenant(
   return deps.store.listAgenciesForTenant(scope.tenantId);
 }
 
+// â”€â”€ Agency coverage (single-lgu-agency-network R5) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+export type ListAgencyCoverageResult =
+  | { readonly status: 'ok'; readonly officeIds: readonly string[] }
+  | { readonly status: 'not_found' } // agency unknown / not visible in scope (404)
+  | { readonly status: 'cross_agency' }; // known other agency in this LGU (403)
+
+export type SetAgencyCoverageResult =
+  | { readonly status: 'ok'; readonly officeIds: readonly string[] }
+  | { readonly status: 'not_found' } // agency unknown / not visible in scope (404)
+  | { readonly status: 'cross_agency' } // known other agency in this LGU (403)
+  | { readonly status: 'invalid_office' }; // an office outside the LGU (same-LGU rule)
+
 /**
- * Read the full Capability_Config for the acting tenant.
- *
- * Always returns a total four-key map: missing categories are filled from
- * DEFAULT_CAPABILITY_CONFIG so the routing engine never receives a partial config (R5.3).
+ * Resolve an agency within the acting scope. Mirrors the cross-tenant discriminant used
+ * elsewhere, one level down: an agency in another tenant, or absent entirely, is
+ * `not_found` (404 — not visible); an agency in THIS LGU that is not the caller's own
+ * agency (when the caller is agency-bounded) is `cross_agency` (403 — known other).
  */
-export async function readCapabilityConfig(
+async function resolveOwnAgency(
   deps: ResponderNetworkDeps,
   scope: ActingScope,
-): Promise<CapabilityConfig> {
-  const stored = await deps.store.readCapabilityConfig(scope.tenantId);
-  return toTotalConfig(stored);
+  agencyId: string,
+): Promise<
+  | { readonly status: 'ok'; readonly agency: AgencyRecord }
+  | { readonly status: 'not_found' }
+  | { readonly status: 'cross_agency' }
+> {
+  const agency = await deps.store.findAgencyById(agencyId);
+  if (agency === null || agency.tenantId !== scope.tenantId) {
+    return { status: 'not_found' };
+  }
+  // An agency-bounded caller may only touch its own agency (R5.2/R7.3).
+  if (scope.agencyId !== undefined && scope.agencyId !== null && agency.id !== scope.agencyId) {
+    return { status: 'cross_agency' };
+  }
+  return { status: 'ok', agency };
+}
+
+/** Read the office ids an agency covers, enforcing agency scope (R5.2/R7.3). */
+export async function listAgencyCoverage(
+  deps: ResponderNetworkDeps,
+  scope: ActingScope,
+  agencyId: string,
+): Promise<ListAgencyCoverageResult> {
+  const resolved = await resolveOwnAgency(deps, scope, agencyId);
+  if (resolved.status !== 'ok') {
+    return resolved;
+  }
+  const officeIds = await deps.store.listCoverage(agencyId);
+  return { status: 'ok', officeIds };
 }
 
 /**
- * Full-replace the agency-type set for exactly one category within the acting tenant.
+ * Full-replace an agency's office coverage (R5.1/R5.2). Coverage is prioritisation only.
  *
- * - Validates the category against the frozen set (R5.7).
- * - Validates every submitted type against the taxonomy (R5.7).
- * - De-duplicates the submitted set before persisting (R5.4).
- * - Returns the whole updated total config.
- * - An empty set is valid â€” DRRM generalists then lead for that category (R5.9).
+ * - Enforces agency scope: a bounded caller editing another agency → cross_agency (403);
+ *   an unknown/not-visible agency → not_found (404).
+ * - De-duplicates the submitted office ids.
+ * - Same-LGU rule: every office must belong to the acting tenant, else invalid_office.
  */
-export async function setCapabilityForCategory(
+export async function setAgencyCoverage(
   deps: ResponderNetworkDeps,
   scope: ActingScope,
-  category: string,
-  agencyTypes: readonly string[],
-): Promise<SetCapabilityResult> {
-  // Validate the category against the frozen four-value set (R5.7).
-  if (!isEmergencyCategoryId(category)) {
-    return { status: 'invalid' };
+  agencyId: string,
+  officeIds: readonly string[],
+): Promise<SetAgencyCoverageResult> {
+  const resolved = await resolveOwnAgency(deps, scope, agencyId);
+  if (resolved.status !== 'ok') {
+    return resolved;
   }
 
-  // Validate every supplied agency type (R5.7). Fail before any write.
-  if (!agencyTypes.every(isAgencyType)) {
-    return { status: 'invalid' };
+  // De-duplicate before any validation or write (R5.1).
+  const deduped = [...new Set(officeIds)];
+
+  // Same-LGU rule: every office must resolve to the acting tenant (R5.1).
+  for (const officeId of deduped) {
+    const officeTenantId = await deps.store.findOfficeTenantId(officeId);
+    if (officeTenantId === null || officeTenantId !== scope.tenantId) {
+      return { status: 'invalid_office' };
+    }
   }
 
-  // De-duplicate while preserving first-occurrence order (R5.4).
-  const deduped = [...new Set(agencyTypes)];
-
-  const updatedStored = await deps.store.setCapabilityForCategory(
-    scope.tenantId,
-    category,
-    deduped,
-  );
-
-  // The store returns the stored (possibly partial) config; make it total.
-  return { status: 'ok', capability: toTotalConfig(updatedStored) };
+  await deps.store.setCoverage(agencyId, deduped);
+  const officeIdsAfter = await deps.store.listCoverage(agencyId);
+  return { status: 'ok', officeIds: officeIdsAfter };
 }
 
 /**
- * Provision a responder into a specific office and optionally affiliate with an agency,
- * with tenant-safety checks on both (R4.1â€“R4.9).
+ * Provision a responder into a specific office, affiliated with a REQUIRED agency, with
+ * tenant- and agency-safety checks (single-lgu-agency-network R3.1/R3.2, R4, R7.3).
  *
  * Guards (in order):
- *  1. officeId blank/missing â†’ invalid (R4.2)
- *  2. findOfficeTenantId â†’ null â†’ office_not_found (R4.3)
- *  3. officeTenantId !== scope.tenantId â†’ office_cross_tenant (R4.4)
- *  4. agencyId supplied and non-null:
- *     a. findAgencyById â†’ null â†’ agency_not_found (R4.5)
- *     b. agency.tenantId !== scope.tenantId â†’ agency_cross_tenant (R4.6)
- *     c. !agency.active â†’ agency_inactive (R4.7)
- *  5. No agencyId â†’ DRRM_Generalist (agency_id null) (R4.8)
- *  6. Generate one-time password, call createResponder (R4.1/R4.9)
+ *  1. officeId blank/missing → invalid (R4.2)
+ *  2. agencyId blank/missing → invalid — agency is now REQUIRED (R3.2)
+ *  3. findOfficeTenantId → null → office_not_found (R4.3)
+ *  4. officeTenantId !== scope.tenantId → office_cross_tenant (R4.4)
+ *  5. agency: findAgencyById → null → agency_not_found (R4.5); wrong tenant →
+ *     agency_cross_tenant (R4.6); inactive → agency_inactive (R4.7)
+ *  6. an agency-bounded caller (AGENCY_ADMIN) provisioning into a DIFFERENT agency →
+ *     cross_agency (R7.3)
+ *  7. Generate one-time password, call createResponder (R4.1/R4.9)
  *
  * SECURITY: no coordinate is written into any result field or audit entry (R4.9).
  */
@@ -337,6 +343,20 @@ export async function provisionResponder(
     return { status: 'invalid' };
   }
 
+  // R3.2: agency is now REQUIRED for every provisioned account.
+  if (!input.agencyId || input.agencyId.trim() === '') {
+    return { status: 'invalid' };
+  }
+
+  // R7.3: an agency-bounded caller may only provision into its own agency.
+  if (
+    scope.agencyId !== undefined &&
+    scope.agencyId !== null &&
+    input.agencyId !== scope.agencyId
+  ) {
+    return { status: 'cross_agency' };
+  }
+
   // R4.3: the office must exist.
   const officeTenantId = await deps.store.findOfficeTenantId(input.officeId);
   if (officeTenantId === null) {
@@ -348,26 +368,23 @@ export async function provisionResponder(
     return { status: 'office_cross_tenant' };
   }
 
-  // R4.5â€“R4.7: validate supplied agency.
-  if (input.agencyId !== undefined && input.agencyId !== null) {
-    const agency = await deps.store.findAgencyById(input.agencyId);
-    if (agency === null) {
-      return { status: 'agency_not_found' };
-    }
-    if (agency.tenantId !== scope.tenantId) {
-      return { status: 'agency_cross_tenant' };
-    }
-    if (!agency.active) {
-      return { status: 'agency_inactive' };
-    }
+  // R4.5–R4.7: validate the required agency.
+  const agency = await deps.store.findAgencyById(input.agencyId);
+  if (agency === null) {
+    return { status: 'agency_not_found' };
+  }
+  if (agency.tenantId !== scope.tenantId) {
+    return { status: 'agency_cross_tenant' };
+  }
+  if (!agency.active) {
+    return { status: 'agency_inactive' };
   }
 
   // Generate a one-time password (shown exactly once to the admin, never stored in
-  // plain text â€” createResponder hashes it before persisting).
+  // plain text — createResponder hashes it before persisting).
   const password = generatePassword();
 
-  // R4.8: no agencyId â†’ agency_id null (DRRM_Generalist).
-  const agencyId = input.agencyId ?? null;
+  const agencyId = input.agencyId;
 
   const result = await createResponder(deps.auth, {
     email: input.email,

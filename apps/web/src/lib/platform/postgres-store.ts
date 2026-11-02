@@ -6,7 +6,6 @@
 import { query, queryOne, withTransaction } from '../db';
 import type {
   AgencyRecord,
-  CapabilityConfig,
   CreateAgencyStoreInput,
   CreateTenantInput,
   OfficePin,
@@ -16,7 +15,7 @@ import type {
   TenantRecord,
   TenantStatus,
 } from './types';
-import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
+import type { AgencyType } from '@aira/ui';
 
 interface AdminRow {
   id: string;
@@ -55,11 +54,6 @@ interface AgencyRow {
   code: string;
   agencyType: string;
   active: boolean;
-}
-
-interface CapabilityRow {
-  category: string;
-  agencyType: string;
 }
 
 const toMs = (value: Date | null): number | null => (value ? value.getTime() : null);
@@ -109,18 +103,6 @@ const mapAgency = (row: AgencyRow): AgencyRecord => ({
   agencyType: row.agencyType as AgencyType,
   active: row.active,
 });
-
-const foldCapabilityRows = (rows: readonly CapabilityRow[]): CapabilityConfig => {
-  const record: Record<string, AgencyType[]> = {};
-  for (const row of rows) {
-    const cat = row.category;
-    if (!record[cat]) {
-      record[cat] = [];
-    }
-    record[cat]!.push(row.agencyType as AgencyType);
-  }
-  return record as unknown as CapabilityConfig;
-};
 
 export function createPostgresPlatformStore(): PlatformStore {
   return {
@@ -353,40 +335,38 @@ export function createPostgresPlatformStore(): PlatformStore {
       return row ? mapAgency(row) : null;
     },
 
-    async readCapabilityConfig(tenantId: string) {
-      const rows = await query<CapabilityRow>(
-        `select category, agency_type as "agencyType" from public.tenant_capability_config where tenant_id = $1 order by category, agency_type`,
-        [tenantId],
+    // ── Agency coverage (single-lgu-agency-network R5) ───────────────────────
+
+    async listCoverage(agencyId: string) {
+      const rows = await query<{ officeId: string }>(
+        `select office_id as "officeId" from public.agency_coverage where agency_id = $1 order by office_id asc`,
+        [agencyId],
       );
-      if (rows.length === 0) {
-        return null;
-      }
-      return foldCapabilityRows(rows);
+      return rows.map((row) => row.officeId);
     },
 
-    async setCapabilityForCategory(
-      tenantId: string,
-      category: EmergencyCategoryId,
-      agencyTypes: readonly AgencyType[],
-    ) {
-      return withTransaction(async (client) => {
-        await client.query(
-          `delete from public.tenant_capability_config where tenant_id = $1 and category = $2`,
-          [tenantId, category],
-        );
-        for (const agencyType of agencyTypes) {
+    async setCoverage(agencyId: string, officeIds: readonly string[]) {
+      // Full-replace within a transaction: delete the agency's links, then insert the
+      // de-duplicated set. Coverage is prioritisation only (never an access control).
+      const deduped = [...new Set(officeIds)];
+      await withTransaction(async (client) => {
+        await client.query(`delete from public.agency_coverage where agency_id = $1`, [agencyId]);
+        for (const officeId of deduped) {
           await client.query(
-            `insert into public.tenant_capability_config (tenant_id, category, agency_type) values ($1, $2, $3)`,
-            [tenantId, category, agencyType],
+            `insert into public.agency_coverage (agency_id, office_id) values ($1, $2)
+             on conflict (agency_id, office_id) do nothing`,
+            [agencyId, officeId],
           );
         }
-        const result = await client.query(
-          `select category, agency_type as "agencyType" from public.tenant_capability_config where tenant_id = $1 order by category, agency_type`,
-          [tenantId],
-        );
-        const capRows = result.rows as CapabilityRow[];
-        return foldCapabilityRows(capRows);
       });
+    },
+
+    async coversOffice(agencyId: string, officeId: string) {
+      const row = await queryOne<{ one: number }>(
+        `select 1 as one from public.agency_coverage where agency_id = $1 and office_id = $2 limit 1`,
+        [agencyId, officeId],
+      );
+      return row !== null;
     },
   };
 }
