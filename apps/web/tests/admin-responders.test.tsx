@@ -123,6 +123,8 @@ describe('AdminResponders', () => {
 
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'new.unit@cebu.gov.ph' } });
     fireEvent.change(screen.getByLabelText('Callsign (optional)'), { target: { value: 'UNIT-7' } });
+    // Agency is required now (R3.2); the submit stays disabled until one is chosen.
+    fireEvent.change(screen.getByLabelText('Agency'), { target: { value: 'agency-bfp' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create responder' }));
 
     await waitFor(() =>
@@ -147,6 +149,7 @@ describe('AdminResponders', () => {
     renderAdmin();
 
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'k9@cebu.gov.ph' } });
+    fireEvent.change(screen.getByLabelText('Agency'), { target: { value: 'agency-bfp' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create responder' }));
 
     expect(await screen.findByTestId('toast-error')).toBeTruthy();

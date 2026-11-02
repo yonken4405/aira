@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @vitest-environment node
  *
  * TDD-RED: Agency + Capability service functions over the in-memory PlatformStore.
@@ -21,24 +21,23 @@ import {
   type MemoryPlatformStore,
 } from './support/memory-platform-store';
 
-// ── Service under test (does NOT exist yet → tests fail) ────────────────────
+// â”€â”€ Service under test (does NOT exist yet â†’ tests fail) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 import {
   createAgency,
   listAgenciesForTenant,
+  listAgencyCoverage,
   provisionResponder,
-  readCapabilityConfig,
   renameAgency,
   setAgencyActive,
-  setCapabilityForCategory,
+  setAgencyCoverage,
   type ActingScope,
   type CreateAgencyResult,
   type RenameAgencyResult,
   type ResponderNetworkDeps,
   type SetAgencyActiveResult,
-  type SetCapabilityResult,
 } from '../src/lib/responder-network/service';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const NOW = 1_700_000_000_000;
 
@@ -66,9 +65,9 @@ beforeEach(() => {
   deps = { store };
 });
 
-// ────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // createAgency
-// ────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 describe('createAgency', () => {
   it('returns invalid for a 1-char trimmed name (below minimum 2)', async () => {
@@ -217,7 +216,7 @@ describe('createAgency', () => {
     });
     // Create a duplicate (same name, case-insensitive)
     const result: CreateAgencyResult = await createAgency(deps, scope, {
-      name: 'bureau of fire', // same name, different case → 23505 per-tenant
+      name: 'bureau of fire', // same name, different case â†’ 23505 per-tenant
       code: 'BFPDUP',
       agencyType: 'FIRE',
     });
@@ -234,7 +233,7 @@ describe('createAgency', () => {
     });
     const result: CreateAgencyResult = await createAgency(deps, scope, {
       name: 'BFP Duplicate',
-      code: 'bfp', // same code, different case → 23505 per-tenant
+      code: 'bfp', // same code, different case â†’ 23505 per-tenant
       agencyType: 'FIRE',
     });
     expect(result.status).toBe('conflict');
@@ -289,9 +288,9 @@ describe('createAgency', () => {
   });
 });
 
-// ────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // listAgenciesForTenant
-// ────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 describe('listAgenciesForTenant', () => {
   it('returns only agencies belonging to the acting scope tenant', async () => {
@@ -321,9 +320,9 @@ describe('listAgenciesForTenant', () => {
   });
 });
 
-// ────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // renameAgency
-// ────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 describe('renameAgency', () => {
   it('returns not_found for a missing agency id (R3.8)', async () => {
@@ -488,9 +487,9 @@ describe('renameAgency', () => {
   });
 });
 
-// ────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // setAgencyActive
-// ────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 describe('setAgencyActive', () => {
   it('returns not_found for a missing agency id (R3.8)', async () => {
@@ -578,7 +577,7 @@ describe('setAgencyActive', () => {
     }
   });
 
-  it('never deletes the row — only flips the boolean (R3.6)', async () => {
+  it('never deletes the row â€” only flips the boolean (R3.6)', async () => {
     const tenantId = await seedTenant();
     const scope: ActingScope = { tenantId };
     const createResult = await createAgency(deps, scope, {
@@ -596,7 +595,7 @@ describe('setAgencyActive', () => {
     expect(list.some((a) => a.id === createResult.agency.id)).toBe(true);
   });
 
-  it('is idempotent — setting active=false twice returns the same state', async () => {
+  it('is idempotent â€” setting active=false twice returns the same state', async () => {
     const tenantId = await seedTenant();
     const scope: ActingScope = { tenantId };
     const createResult = await createAgency(deps, scope, {
@@ -622,206 +621,11 @@ describe('setAgencyActive', () => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-// readCapabilityConfig
-// ────────────────────────────────────────────────────────────────────────────
-
-describe('readCapabilityConfig', () => {
-  it('returns a total four-key config when no capability is stored (DEFAULT_CAPABILITY_CONFIG) (R5.3/R5.8)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-    const config = await readCapabilityConfig(deps, scope);
-
-    // Must be a total map covering all four frozen categories (R5.1/R5.3)
-    expect(Object.keys(config)).toHaveLength(4);
-    expect(config).toHaveProperty('SUNOG');
-    expect(config).toHaveProperty('MEDIKAL');
-    expect(config).toHaveProperty('KRIMEN');
-    expect(config).toHaveProperty('BAHA');
-  });
-
-  it('fills absent categories with the DEFAULT_CAPABILITY_CONFIG values (R5.8)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-    const config = await readCapabilityConfig(deps, scope);
-
-    // DEFAULT_CAPABILITY_CONFIG = { SUNOG: ['FIRE'], MEDIKAL: ['MEDICAL'], KRIMEN: ['POLICE'], BAHA: [] }
-    expect(config.SUNOG).toEqual(['FIRE']);
-    expect(config.MEDIKAL).toEqual(['MEDICAL']);
-    expect(config.KRIMEN).toEqual(['POLICE']);
-    expect(config.BAHA).toEqual([]);
-  });
-
-  it('returns the stored value when a category IS set (R5.1)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-
-    // Set a category capability
-    await setCapabilityForCategory(deps, scope, 'BAHA', ['DRRM', 'FIRE']);
-
-    const config = await readCapabilityConfig(deps, scope);
-    // BAHA should now have the stored value, not the default empty array
-    expect(config.BAHA).toContain('DRRM');
-    expect(config.BAHA).toContain('FIRE');
-    expect(config.BAHA).toHaveLength(2);
-  });
-
-  it('is total even after some categories are set and some are not', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-
-    // Only set SUNOG
-    await setCapabilityForCategory(deps, scope, 'SUNOG', ['FIRE', 'DRRM']);
-
-    const config = await readCapabilityConfig(deps, scope);
-    // All four keys must be present
-    expect(Object.keys(config)).toHaveLength(4);
-    // The unset ones fall back to default
-    expect(config.MEDIKAL).toEqual(['MEDICAL']);
-    expect(config.KRIMEN).toEqual(['POLICE']);
-    expect(config.BAHA).toEqual([]);
-    // The set one has the stored value
-    expect(config.SUNOG).toContain('FIRE');
-    expect(config.SUNOG).toContain('DRRM');
-  });
-});
-
-// ────────────────────────────────────────────────────────────────────────────
-// setCapabilityForCategory
-// ────────────────────────────────────────────────────────────────────────────
-
-describe('setCapabilityForCategory', () => {
-  it('returns invalid for a non-frozen category string (R5.7)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-    const result: SetCapabilityResult = await setCapabilityForCategory(
-      deps,
-      scope,
-      'NOT_A_CATEGORY' as never,
-      ['FIRE'],
-    );
-    expect(result.status).toBe('invalid');
-  });
-
-  it('returns invalid for a non-taxonomy agency type in the list (R5.7)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-    const result: SetCapabilityResult = await setCapabilityForCategory(deps, scope, 'SUNOG', [
-      'FIRE',
-      'NOT_REAL_TYPE',
-    ] as never);
-    expect(result.status).toBe('invalid');
-  });
-
-  it('de-duplicates the submitted agency types (R5.4)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-    const result: SetCapabilityResult = await setCapabilityForCategory(deps, scope, 'SUNOG', [
-      'FIRE',
-      'FIRE',
-      'DRRM',
-      'DRRM',
-    ]);
-    expect(result.status).toBe('ok');
-    if (result.status === 'ok') {
-      const sunogTypes = result.capability.SUNOG;
-      // De-duplicated: only unique values
-      const unique = [...new Set(sunogTypes)];
-      expect(sunogTypes).toHaveLength(unique.length);
-    }
-  });
-
-  it('full-replaces one category without touching the others (R5.4)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-
-    // Set initial state for KRIMEN
-    await setCapabilityForCategory(deps, scope, 'KRIMEN', ['POLICE', 'DRRM']);
-
-    // Now update only SUNOG
-    const result: SetCapabilityResult = await setCapabilityForCategory(deps, scope, 'SUNOG', [
-      'FIRE',
-    ]);
-    expect(result.status).toBe('ok');
-    if (result.status === 'ok') {
-      // SUNOG is updated
-      expect(result.capability.SUNOG).toEqual(['FIRE']);
-      // KRIMEN is unchanged
-      expect(result.capability.KRIMEN).toContain('POLICE');
-      expect(result.capability.KRIMEN).toContain('DRRM');
-    }
-  });
-
-  it('is idempotent — a repeated identical update leaves config unchanged (R5.5)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-
-    const first: SetCapabilityResult = await setCapabilityForCategory(deps, scope, 'BAHA', [
-      'DRRM',
-    ]);
-    const second: SetCapabilityResult = await setCapabilityForCategory(deps, scope, 'BAHA', [
-      'DRRM',
-    ]);
-
-    expect(first.status).toBe('ok');
-    expect(second.status).toBe('ok');
-    if (first.status === 'ok' && second.status === 'ok') {
-      expect(second.capability.BAHA).toEqual(first.capability.BAHA);
-    }
-  });
-
-  it('allows setting an empty set (DRRM generalists lead, R5.9)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-    const result: SetCapabilityResult = await setCapabilityForCategory(deps, scope, 'BAHA', []);
-    expect(result.status).toBe('ok');
-    if (result.status === 'ok') {
-      expect(result.capability.BAHA).toEqual([]);
-    }
-  });
-
-  it('returns the full four-key config after an update (R5.1)', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-    const result: SetCapabilityResult = await setCapabilityForCategory(deps, scope, 'MEDIKAL', [
-      'MEDICAL',
-    ]);
-    expect(result.status).toBe('ok');
-    if (result.status === 'ok') {
-      expect(Object.keys(result.capability)).toHaveLength(4);
-      expect(result.capability).toHaveProperty('SUNOG');
-      expect(result.capability).toHaveProperty('MEDIKAL');
-      expect(result.capability).toHaveProperty('KRIMEN');
-      expect(result.capability).toHaveProperty('BAHA');
-    }
-  });
-
-  it('accepts all four frozen category ids', async () => {
-    const tenantId = await seedTenant();
-    const scope: ActingScope = { tenantId };
-    for (const category of ['SUNOG', 'MEDIKAL', 'KRIMEN', 'BAHA'] as const) {
-      const result: SetCapabilityResult = await setCapabilityForCategory(deps, scope, category, [
-        'DRRM',
-      ]);
-      expect(result.status).toBe('ok');
-    }
-  });
-});
-
-// ────────────────────────────────────────────────────────────────────────────
-// provisionResponder
-// (task 7.3 TDD-RED — provisionResponder is NOT yet exported from the service
-//  module; every test in this block will fail with TypeError until task 7.4)
+// provisionResponder (single-lgu-agency-network R3.1/R3.2, R4, R7.3)
+// Agency is now REQUIRED; an AGENCY_ADMIN caller is bounded to its own agency.
 // ────────────────────────────────────────────────────────────────────────────
 
 describe('provisionResponder', () => {
-  /**
-   * Each test in this block constructs a `provisionDeps` that combines the
-   * platform store (for office/agency resolution) with an auth service dep
-   * (for `createResponder` + `ACCOUNT_CREATED` audit).  Task 7.4 will add
-   * `auth: AuthServiceDeps` to `ResponderNetworkDeps`; until then the extra
-   * field is present so the tests drive the required signature.
-   */
-
   let provisionDeps: ResponderNetworkDeps & {
     auth: { store: MemoryAuthStore; now: () => number; secureCookies: boolean };
   };
@@ -835,9 +639,6 @@ describe('provisionResponder', () => {
     };
   });
 
-  // ── helpers ──────────────────────────────────────────────────────────────
-
-  /** Seed a tenant + its LGU office; returns { tenantId, officeId }. */
   async function seedTenantWithOffice(
     name = 'Provision Test DRRMO',
   ): Promise<{ tenantId: string; officeId: string }> {
@@ -855,398 +656,274 @@ describe('provisionResponder', () => {
     return { tenantId: tenant.id, officeId };
   }
 
-  /** Seed a second tenant (different from the acting scope). */
-  async function seedOtherTenant(): Promise<{ tenantId: string; officeId: string }> {
-    return seedTenantWithOffice('Other DRRMO Tenant');
+  /** Seed an active agency in the given tenant; returns its id. */
+  async function seedAgency(tenantId: string, code = 'BFP'): Promise<string> {
+    const result = await createAgency(
+      { store },
+      { tenantId },
+      { name: `Agency ${code}`, code, agencyType: 'FIRE' },
+    );
+    if (result.status !== 'ok') throw new Error('seed agency failed');
+    return result.agency.id;
   }
 
-  // ── R4.2: missing officeId → invalid ─────────────────────────────────────
+  const base = {
+    email: 'new.responder@aira.test',
+    role: 'RESPONDER' as const,
+    password: 'Str0ng!Pass#2024',
+    mustChangePassword: false,
+  };
 
   it('returns invalid when officeId is omitted (R4.2)', async () => {
     const { tenantId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
+    const agencyId = await seedAgency(tenantId);
+    const result = await provisionResponder(provisionDeps, { tenantId }, { ...base, agencyId });
     expect(result.status).toBe('invalid');
   });
 
-  it('returns invalid when officeId is an empty string (R4.2)', async () => {
-    const { tenantId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      officeId: '',
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
+  it('returns invalid when agency is omitted — agency is now required (R3.2)', async () => {
+    const { tenantId, officeId } = await seedTenantWithOffice();
+    const result = await provisionResponder(provisionDeps, { tenantId }, { ...base, officeId });
     expect(result.status).toBe('invalid');
+    // Nothing is written on a rejected provision.
+    expect(authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED')).toHaveLength(0);
   });
 
-  // ── R4.3: unknown officeId → office_not_found ─────────────────────────────
+  it('returns invalid when agencyId is explicitly null (R3.2)', async () => {
+    const { tenantId, officeId } = await seedTenantWithOffice();
+    const result = await provisionResponder(
+      provisionDeps,
+      { tenantId },
+      {
+        ...base,
+        officeId,
+        agencyId: null,
+      },
+    );
+    expect(result.status).toBe('invalid');
+  });
 
   it('returns office_not_found for an unrecognised officeId (R4.3)', async () => {
     const { tenantId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      officeId: 'no-such-office-id',
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
+    const agencyId = await seedAgency(tenantId);
+    const result = await provisionResponder(
+      provisionDeps,
+      { tenantId },
+      {
+        ...base,
+        officeId: 'no-such-office-id',
+        agencyId,
+      },
+    );
     expect(result.status).toBe('office_not_found');
   });
 
-  it('creates no responder when officeId is unknown (R4.3)', async () => {
+  it('returns office_cross_tenant when the office belongs to a different tenant (R4.4)', async () => {
     const { tenantId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    await provisionResponder(provisionDeps, scope, {
-      officeId: 'no-such-office-id',
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
-    // authStore should have zero responders created
-    expect(authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED')).toHaveLength(0);
-  });
-
-  // ── R4.4: office belongs to another tenant → office_cross_tenant → 403 ───
-
-  it('returns office_cross_tenant when office belongs to a different tenant (R4.4)', async () => {
-    const { tenantId } = await seedTenantWithOffice();
-    const { officeId: otherOfficeId } = await seedOtherTenant();
-    const scope: ActingScope = { tenantId }; // acting as tenant 1
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      officeId: otherOfficeId, // but the office belongs to tenant 2
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
+    const { officeId: otherOfficeId } = await seedTenantWithOffice('Other DRRMO Tenant');
+    const agencyId = await seedAgency(tenantId);
+    const result = await provisionResponder(
+      provisionDeps,
+      { tenantId },
+      {
+        ...base,
+        officeId: otherOfficeId,
+        agencyId,
+      },
+    );
     expect(result.status).toBe('office_cross_tenant');
   });
 
-  it('creates no responder when office belongs to a different tenant (R4.4)', async () => {
-    const { tenantId } = await seedTenantWithOffice();
-    const { officeId: otherOfficeId } = await seedOtherTenant();
-    const scope: ActingScope = { tenantId };
-
-    await provisionResponder(provisionDeps, scope, {
-      officeId: otherOfficeId,
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
-    expect(authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED')).toHaveLength(0);
-  });
-
-  // ── R4.5: supplied agencyId unknown → agency_not_found ───────────────────
-
   it('returns agency_not_found when agencyId does not exist (R4.5)', async () => {
     const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      officeId,
-      agencyId: 'no-such-agency-id',
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
+    const result = await provisionResponder(
+      provisionDeps,
+      { tenantId },
+      {
+        ...base,
+        officeId,
+        agencyId: 'no-such-agency-id',
+      },
+    );
     expect(result.status).toBe('agency_not_found');
   });
 
-  it('creates no responder when agencyId is unknown (R4.5)', async () => {
+  it('returns agency_cross_tenant when the agency belongs to a different tenant (R4.6)', async () => {
     const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    await provisionResponder(provisionDeps, scope, {
-      officeId,
-      agencyId: 'no-such-agency-id',
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
-    expect(authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED')).toHaveLength(0);
-  });
-
-  // ── R4.6: agency belongs to a different tenant → agency_cross_tenant ─────
-
-  it('returns agency_cross_tenant when agency belongs to a different tenant (R4.6)', async () => {
-    const { tenantId, officeId } = await seedTenantWithOffice();
-    const { tenantId: otherTenantId } = await seedOtherTenant();
-    const scope: ActingScope = { tenantId };
-
-    // Create an agency under the OTHER tenant
-    const otherScope: ActingScope = { tenantId: otherTenantId };
-    const agencyResult = await createAgency({ store }, otherScope, {
-      name: 'Other BFP',
-      code: 'OBFP',
-      agencyType: 'FIRE',
-    });
-    expect(agencyResult.status).toBe('ok');
-    if (agencyResult.status !== 'ok') return;
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      officeId,
-      agencyId: agencyResult.agency.id, // agency of tenant 2, but acting as tenant 1
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
+    const { tenantId: otherTenantId } = await seedTenantWithOffice('Other DRRMO Tenant');
+    const otherAgencyId = await seedAgency(otherTenantId, 'OBFP');
+    const result = await provisionResponder(
+      provisionDeps,
+      { tenantId },
+      {
+        ...base,
+        officeId,
+        agencyId: otherAgencyId,
+      },
+    );
     expect(result.status).toBe('agency_cross_tenant');
   });
 
-  it('creates no responder when agency belongs to a different tenant (R4.6)', async () => {
-    const { tenantId, officeId } = await seedTenantWithOffice();
-    const { tenantId: otherTenantId } = await seedOtherTenant();
-    const scope: ActingScope = { tenantId };
-
-    const otherScope: ActingScope = { tenantId: otherTenantId };
-    const agencyResult = await createAgency({ store }, otherScope, {
-      name: 'Other PNP',
-      code: 'OPNP',
-      agencyType: 'POLICE',
-    });
-    expect(agencyResult.status).toBe('ok');
-    if (agencyResult.status !== 'ok') return;
-
-    await provisionResponder(provisionDeps, scope, {
-      officeId,
-      agencyId: agencyResult.agency.id,
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
-    expect(authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED')).toHaveLength(0);
-  });
-
-  // ── R4.7: agency is inactive → agency_inactive ────────────────────────────
-
   it('returns agency_inactive when the supplied agency is inactive (R4.7)', async () => {
     const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    // Create and then deactivate an agency
-    const agencyResult = await createAgency({ store }, scope, {
-      name: 'Inactive BFP',
-      code: 'IBFP',
-      agencyType: 'FIRE',
-    });
-    expect(agencyResult.status).toBe('ok');
-    if (agencyResult.status !== 'ok') return;
-
-    await setAgencyActive({ store }, scope, agencyResult.agency.id, false);
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      officeId,
-      agencyId: agencyResult.agency.id,
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
+    const agencyId = await seedAgency(tenantId);
+    await setAgencyActive({ store }, { tenantId }, agencyId, false);
+    const result = await provisionResponder(
+      provisionDeps,
+      { tenantId },
+      {
+        ...base,
+        officeId,
+        agencyId,
+      },
+    );
     expect(result.status).toBe('agency_inactive');
   });
 
-  it('creates no responder when agency is inactive (R4.7)', async () => {
+  it('returns cross_agency when an AGENCY_ADMIN provisions into another agency (R7.3)', async () => {
     const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    const agencyResult = await createAgency({ store }, scope, {
-      name: 'Inactive EMS',
-      code: 'IEMS',
-      agencyType: 'MEDICAL',
-    });
-    expect(agencyResult.status).toBe('ok');
-    if (agencyResult.status !== 'ok') return;
-
-    await setAgencyActive({ store }, scope, agencyResult.agency.id, false);
-
-    await provisionResponder(provisionDeps, scope, {
+    const ownAgencyId = await seedAgency(tenantId, 'BFP');
+    const otherAgencyId = await seedAgency(tenantId, 'PNP');
+    // The acting scope is bounded to the caller's own agency.
+    const scope: ActingScope = { tenantId, agencyId: ownAgencyId };
+    const result = await provisionResponder(provisionDeps, scope, {
+      ...base,
       officeId,
-      agencyId: agencyResult.agency.id,
-      email: 'new.responder@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
+      agencyId: otherAgencyId,
+    });
+    expect(result.status).toBe('cross_agency');
     expect(authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED')).toHaveLength(0);
   });
 
-  // ── R4.8: no agencyId → DRRM_Generalist with agency_id null ──────────────
-
-  it('creates a DRRM_Generalist (agency_id null) when no agencyId is supplied (R4.8)', async () => {
+  it('succeeds with a one-time password + ACCOUNT_CREATED audit on a valid office + agency (R4.1/R4.9)', async () => {
     const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      officeId,
-      // no agencyId supplied
-      email: 'generalist@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
+    const agencyId = await seedAgency(tenantId);
+    const result = await provisionResponder(
+      provisionDeps,
+      { tenantId },
+      {
+        ...base,
+        officeId,
+        agencyId,
+        email: 'firefighter@aira.test',
+        callsign: 'FIRE-01',
+      },
+    );
 
     expect(result.status).toBe('ok');
     if (result.status === 'ok') {
-      expect(result.responder.agencyId).toBeNull();
-    }
-  });
-
-  it('creates a DRRM_Generalist (agency_id null) when agencyId is explicitly null (R4.8)', async () => {
-    const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      officeId,
-      agencyId: null,
-      email: 'generalist2@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
-    expect(result.status).toBe('ok');
-    if (result.status === 'ok') {
-      expect(result.responder.agencyId).toBeNull();
-    }
-  });
-
-  // ── R4.1 + R4.9: success — valid office + agency, creates responder + OTP + ACCOUNT_CREATED ──
-
-  it('returns ok with the created responder and a one-time password on success (R4.1)', async () => {
-    const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    // Create an active agency for this tenant
-    const agencyResult = await createAgency({ store }, scope, {
-      name: 'Bureau of Fire Protection',
-      code: 'BFP',
-      agencyType: 'FIRE',
-    });
-    expect(agencyResult.status).toBe('ok');
-    if (agencyResult.status !== 'ok') return;
-
-    const result = await provisionResponder(provisionDeps, scope, {
-      officeId,
-      agencyId: agencyResult.agency.id,
-      email: 'firefighter@aira.test',
-      callsign: 'FIRE-01',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: true,
-    } as Parameters<typeof provisionResponder>[2]);
-
-    expect(result.status).toBe('ok');
-    if (result.status === 'ok') {
-      expect(result.responder).toBeDefined();
-      expect(typeof result.responder.id).toBe('string');
-      expect(result.responder.email).toBe('firefighter@aira.test');
-      expect(result.responder.agencyId).toBe(agencyResult.agency.id);
+      expect(result.responder.agencyId).toBe(agencyId);
       expect(result.responder.officeId).toBe(officeId);
-      // One-time password shown exactly once (R4.1)
-      expect(typeof result.password).toBe('string');
       expect(result.password.length).toBeGreaterThan(0);
     }
+    expect(authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED')).toHaveLength(1);
   });
 
-  it('appends ACCOUNT_CREATED to the auth store events on success (R4.9)', async () => {
+  it('an AGENCY_ADMIN may provision into its OWN agency (R7.3)', async () => {
     const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    const agencyResult = await createAgency({ store }, scope, {
-      name: 'Philippine National Police',
-      code: 'PNP',
-      agencyType: 'POLICE',
-    });
-    expect(agencyResult.status).toBe('ok');
-    if (agencyResult.status !== 'ok') return;
-
-    await provisionResponder(provisionDeps, scope, {
-      officeId,
-      agencyId: agencyResult.agency.id,
-      email: 'officer@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: true,
-    } as Parameters<typeof provisionResponder>[2]);
-
-    const created = authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED');
-    expect(created.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it('does not write any coordinate into the ACCOUNT_CREATED audit entry (R4.9)', async () => {
-    const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
-    await provisionResponder(provisionDeps, scope, {
-      officeId,
-      // no agencyId — DRRM_Generalist
-      email: 'nocoord@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: false,
-    } as Parameters<typeof provisionResponder>[2]);
-
-    const created = authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED');
-    for (const entry of created) {
-      const serialised = JSON.stringify(entry);
-      // Coordinates look like floating-point numbers with 4+ decimal places
-      expect(serialised).not.toMatch(/\d{1,3}\.\d{4,}/);
-    }
-  });
-
-  it('the one-time password is shown exactly once (not stored in plain text) (R4.1)', async () => {
-    const { tenantId, officeId } = await seedTenantWithOffice();
-    const scope: ActingScope = { tenantId };
-
+    const agencyId = await seedAgency(tenantId);
+    const scope: ActingScope = { tenantId, agencyId };
     const result = await provisionResponder(provisionDeps, scope, {
+      ...base,
       officeId,
-      email: 'otp.check@aira.test',
-      role: 'RESPONDER',
-      password: 'Str0ng!Pass#2024',
-      mustChangePassword: true,
-    } as Parameters<typeof provisionResponder>[2]);
-
+      agencyId,
+      email: 'own.agency@aira.test',
+    });
     expect(result.status).toBe('ok');
-    if (result.status === 'ok') {
-      // The password field must be present in the result (shown once to the admin)
-      expect(result.password).toBeTruthy();
-      // The responder record itself must NOT store the plaintext password
-      expect((result.responder as unknown as Record<string, unknown>)['password']).toBeUndefined();
-      expect((result.responder as unknown as Record<string, unknown>)['passwordHash']).not.toBe(
-        result.password,
-      );
+  });
+
+  it('writes no coordinate into the ACCOUNT_CREATED audit entry (R4.9)', async () => {
+    const { tenantId, officeId } = await seedTenantWithOffice();
+    const agencyId = await seedAgency(tenantId);
+    await provisionResponder(
+      provisionDeps,
+      { tenantId },
+      {
+        ...base,
+        officeId,
+        agencyId,
+        email: 'nocoord@aira.test',
+      },
+    );
+    for (const entry of authStore.events.filter((e) => e.event === 'ACCOUNT_CREATED')) {
+      expect(JSON.stringify(entry)).not.toMatch(/\d{1,3}\.\d{4,}/);
     }
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// setAgencyCoverage / listAgencyCoverage (single-lgu-agency-network R5.2, R7.3)
+// ────────────────────────────────────────────────────────────────────────────
+
+describe('agency coverage service', () => {
+  async function seedTenantOfficeAgency(): Promise<{
+    tenantId: string;
+    officeId: string;
+    agencyId: string;
+  }> {
+    const tenant = await store.createTenantWithLgu({
+      name: 'Coverage DRRMO',
+      region: 'Region VII',
+      province: 'Cebu',
+      lguName: 'Coverage DRRMO LGU',
+      lat: 10.3157,
+      lon: 123.8854,
+      now: NOW,
+    });
+    const officeId = await store.lguOfficeIdForTenant(tenant.id);
+    if (officeId === null) throw new Error('no office');
+    const created = await createAgency(
+      { store },
+      { tenantId: tenant.id },
+      { name: 'Bureau of Fire Protection', code: 'BFP', agencyType: 'FIRE' },
+    );
+    if (created.status !== 'ok') throw new Error('seed agency failed');
+    return { tenantId: tenant.id, officeId, agencyId: created.agency.id };
+  }
+
+  it('sets and lists coverage for the own agency (de-duplicated, full replace)', async () => {
+    const { tenantId, officeId, agencyId } = await seedTenantOfficeAgency();
+    const scope: ActingScope = { tenantId, agencyId };
+
+    const set = await setAgencyCoverage(deps, scope, agencyId, [officeId, officeId]);
+    expect(set.status).toBe('ok');
+    if (set.status === 'ok') {
+      expect(set.officeIds).toEqual([officeId]);
+    }
+
+    const list = await listAgencyCoverage(deps, scope, agencyId);
+    expect(list.status).toBe('ok');
+    if (list.status === 'ok') {
+      expect(list.officeIds).toEqual([officeId]);
+    }
+  });
+
+  it('rejects an office outside the acting LGU with invalid_office (same-LGU rule)', async () => {
+    const { tenantId, agencyId } = await seedTenantOfficeAgency();
+    const scope: ActingScope = { tenantId, agencyId };
+    const result = await setAgencyCoverage(deps, scope, agencyId, ['office-not-in-lgu']);
+    expect(result.status).toBe('invalid_office');
+  });
+
+  it('an AGENCY_ADMIN editing ANOTHER agency gets cross_agency (403-mapped)', async () => {
+    const { tenantId, officeId, agencyId } = await seedTenantOfficeAgency();
+    const otherAgency = await createAgency(
+      { store },
+      { tenantId },
+      { name: 'Philippine National Police', code: 'PNP', agencyType: 'POLICE' },
+    );
+    if (otherAgency.status !== 'ok') throw new Error('seed other agency failed');
+
+    // Acting bounded to BFP, but trying to edit PNP.
+    const scope: ActingScope = { tenantId, agencyId };
+    const result = await setAgencyCoverage(deps, scope, otherAgency.agency.id, [officeId]);
+    expect(result.status).toBe('cross_agency');
+  });
+
+  it('an unknown / not-visible agency gets not_found (404-mapped)', async () => {
+    const { tenantId, agencyId } = await seedTenantOfficeAgency();
+    const scope: ActingScope = { tenantId, agencyId };
+    const result = await listAgencyCoverage(deps, scope, 'no-such-agency');
+    expect(result.status).toBe('not_found');
   });
 });

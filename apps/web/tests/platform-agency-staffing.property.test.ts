@@ -141,6 +141,17 @@ describe('Property 4b: office in other tenant → office_cross_tenant', () => {
       const { tenantId: actingTenant } = await seedTenantWithOffice(platformStore, 'Acting-Tenant');
       const { officeId: otherOffice } = await seedTenantWithOffice(platformStore, 'Other-Tenant');
 
+      // Agency is now required (R3.2); seed one in the acting tenant so the office
+      // check (R4.4) is the guard under test rather than the agency-required guard.
+      const agencyResult = await platformStore.createAgency({
+        tenantId: actingTenant,
+        name: 'Acting BFP',
+        code: 'ABFP',
+        agencyType: 'FIRE',
+      });
+      if (agencyResult.status !== 'ok') throw new Error('seed agency failed');
+      const agencyId = agencyResult.agency.id;
+
       const scope: ActingScope = { tenantId: actingTenant };
       const deps: ResponderNetworkDeps & {
         auth: { store: typeof authStore; now: () => number; secureCookies: boolean };
@@ -156,6 +167,7 @@ describe('Property 4b: office in other tenant → office_cross_tenant', () => {
           const result = await provisionResponder(deps, scope, {
             email: uniqueEmail,
             officeId: otherOffice,
+            agencyId,
           });
           expect(result.status).toBe('office_cross_tenant');
           // Must not have created a responder — no ACCOUNT_CREATED event appended
@@ -275,6 +287,17 @@ describe('Property 4e: unknown office id → office_not_found, nothing created',
     async () => {
       const { tenantId } = await seedTenantWithOffice(platformStore, 'NoOffice-Tenant');
 
+      // Agency is required (R3.2); seed one so the unknown-office guard (R4.3) is the
+      // guard under test.
+      const agencyResult = await platformStore.createAgency({
+        tenantId,
+        name: 'NoOffice BFP',
+        code: 'NOBFP',
+        agencyType: 'FIRE',
+      });
+      if (agencyResult.status !== 'ok') throw new Error('seed agency failed');
+      const agencyId = agencyResult.agency.id;
+
       const scope: ActingScope = { tenantId };
       const deps: ResponderNetworkDeps & {
         auth: { store: typeof authStore; now: () => number; secureCookies: boolean };
@@ -297,6 +320,7 @@ describe('Property 4e: unknown office id → office_not_found, nothing created',
             const result = await provisionResponder(deps, scope, {
               email: uniqueEmail,
               officeId: unknownOfficeId,
+              agencyId,
             });
             expect(result.status).toBe('office_not_found');
             expect(authStore.events.length).toBe(before);
@@ -353,11 +377,12 @@ describe('Property 4f: unknown agency id → agency_not_found, nothing created',
 });
 
 // ---------------------------------------------------------------------------
-// Property 4g — no agencyId → DRRM Generalist (agency_id null)
+// Property 4g — agency is now REQUIRED → no agencyId is rejected (R3.2)
+// (supersedes the former DRRM-generalist=null behaviour)
 // ---------------------------------------------------------------------------
-describe('Property 4g: no agencyId → DRRM Generalist with agency_id null (R4.8)', () => {
+describe('Property 4g: no agencyId → invalid, nothing created (R3.2)', () => {
   it(
-    'provisionResponder creates responder with null agencyId when none is supplied',
+    'provisionResponder rejects a provision with no agency and creates nothing',
     async () => {
       const { tenantId, officeId } = await seedTenantWithOffice(platformStore, 'Generalist-Tenant');
 
@@ -372,15 +397,14 @@ describe('Property 4g: no agencyId → DRRM Generalist with agency_id null (R4.8
       await fc.assert(
         fc.asyncProperty(fc.emailAddress({ size: 'small' }), async (email) => {
           const uniqueEmail = `gen-${email.split('@')[0]}-${Math.random()}@aira.test`;
+          const before = authStore.events.length;
           const result = await provisionResponder(deps, scope, {
             email: uniqueEmail,
             officeId,
-            // no agencyId
+            // no agencyId — now a validation error
           });
-          expect(result.status).toBe('ok');
-          if (result.status === 'ok') {
-            expect(result.responder.agencyId).toBeNull();
-          }
+          expect(result.status).toBe('invalid');
+          expect(authStore.events.length).toBe(before);
         }),
         { numRuns: RUNS },
       );

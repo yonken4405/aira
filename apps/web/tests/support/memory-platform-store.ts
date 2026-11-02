@@ -2,12 +2,9 @@
  * In-memory `PlatformStore` for platform-tier tests (TESTING.md §4.3).
  */
 
-import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
-
 import { DUMMY_PASSWORD_HASH } from '../../src/lib/auth/password';
 import type {
   AgencyRecord,
-  CapabilityConfig,
   CreateTenantInput,
   OfficePin,
   PlatformAdminRecord,
@@ -17,20 +14,6 @@ import type {
   TenantStatus,
 } from '../../src/lib/platform/types';
 
-/** The four frozen Emergency_Category ids (mirrors `EmergencyCategoryId`). */
-const FROZEN_CATEGORIES: readonly EmergencyCategoryId[] = ['SUNOG', 'MEDIKAL', 'KRIMEN', 'BAHA'];
-
-/** Build a full `CapabilityConfig` from a per-tenant capability map. */
-function buildCapabilityConfig(
-  tenantMap: Map<EmergencyCategoryId, Set<AgencyType>>,
-): CapabilityConfig {
-  const result: Record<string, readonly AgencyType[]> = {};
-  for (const cat of FROZEN_CATEGORIES) {
-    result[cat] = tenantMap.has(cat) ? [...(tenantMap.get(cat) as Set<AgencyType>)] : [];
-  }
-  return result as CapabilityConfig;
-}
-
 export interface MemoryPlatformStore extends PlatformStore {
   readonly admins: Map<string, PlatformAdminRecord>;
   readonly sessions: Map<string, PlatformSessionRecord>;
@@ -38,8 +21,8 @@ export interface MemoryPlatformStore extends PlatformStore {
   readonly offices: OfficePin[];
   /** Agency rows keyed by agency id. */
   readonly agencies: Map<string, AgencyRecord>;
-  /** Per-tenant capability: tenantId → category → set of AgencyTypes. */
-  readonly capability: Map<string, Map<EmergencyCategoryId, Set<AgencyType>>>;
+  /** Agency coverage: agency id → set of covered office ids. */
+  readonly coverage: Map<string, Set<string>>;
   seedAdmin(
     overrides: Partial<PlatformAdminRecord> & { readonly email: string },
   ): PlatformAdminRecord;
@@ -60,7 +43,8 @@ export function createMemoryPlatformStore(
   const tenants = new Map<string, TenantRecord>();
   const offices: OfficePin[] = [];
   const agencies = new Map<string, AgencyRecord>();
-  const capability = new Map<string, Map<EmergencyCategoryId, Set<AgencyType>>>();
+  /** agency id → set of covered office ids (single-lgu-agency-network R5). */
+  const coverage = new Map<string, Set<string>>();
 
   function seedAdmin(
     overrides: Partial<PlatformAdminRecord> & { readonly email: string },
@@ -84,7 +68,7 @@ export function createMemoryPlatformStore(
     tenants,
     offices,
     agencies,
-    capability,
+    coverage,
     seedAdmin,
 
     async findAdminByEmail(email) {
@@ -307,29 +291,19 @@ export function createMemoryPlatformStore(
       return office?.tenantId ?? null;
     },
 
-    // ── Responder-network: capability config ────────────────────────────────
+    // ── Agency coverage (R5) ─────────────────────────────────────────────────
 
-    async readCapabilityConfig(tenantId) {
-      const tenantMap = capability.get(tenantId);
-      if (!tenantMap || tenantMap.size === 0) {
-        return null;
-      }
-      return buildCapabilityConfig(tenantMap);
+    async listCoverage(agencyId) {
+      return [...(coverage.get(agencyId) ?? new Set<string>())];
     },
 
-    async setCapabilityForCategory(tenantId, category, agencyTypes) {
-      let tenantMap = capability.get(tenantId);
-      if (!tenantMap) {
-        tenantMap = new Map<EmergencyCategoryId, Set<AgencyType>>();
-        capability.set(tenantId, tenantMap);
-      }
+    async setCoverage(agencyId, officeIds) {
+      // Full-replace with a de-duplicated set (mirrors the Postgres delete-then-insert).
+      coverage.set(agencyId, new Set(officeIds));
+    },
 
-      // De-duplicate submitted types and replace the set for this category
-      const deduplicated = new Set(agencyTypes);
-      tenantMap.delete(category);
-      tenantMap.set(category, deduplicated);
-
-      return buildCapabilityConfig(tenantMap);
+    async coversOffice(agencyId, officeId) {
+      return coverage.get(agencyId)?.has(officeId) ?? false;
     },
   };
 }

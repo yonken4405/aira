@@ -33,15 +33,12 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
+import type { AgencyType } from '@aira/ui';
 import { AGENCY_TYPES } from '@aira/ui';
 
 import { createMemoryPlatformStore } from './support/memory-platform-store';
 
 const RUNS = 100;
-
-/** The four frozen Emergency_Category ids. */
-const FROZEN_CATEGORIES: readonly EmergencyCategoryId[] = ['SUNOG', 'MEDIKAL', 'KRIMEN', 'BAHA'];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Arbitraries
@@ -65,23 +62,8 @@ const agencyCodeArb: fc.Arbitrary<string> = fc
 /** One of the five valid agency types. */
 const agencyTypeArb: fc.Arbitrary<AgencyType> = fc.constantFrom<AgencyType>(...AGENCY_TYPES);
 
-/** One of the four frozen category ids. */
-const categoryArb: fc.Arbitrary<EmergencyCategoryId> = fc.constantFrom<EmergencyCategoryId>(
-  ...FROZEN_CATEGORIES,
-);
-
-/**
- * A set of agency types for a capability update (may contain duplicates in the
- * raw input to exercise the de-duplication invariant). Generated as a plain
- * array; the store (and property) must de-duplicate.
- */
-const agencyTypeSetArb: fc.Arbitrary<readonly AgencyType[]> = fc.array(agencyTypeArb, {
-  minLength: 0,
-  maxLength: 8,
-});
-
 // ─────────────────────────────────────────────────────────────────────────────
-// Property 13 — six sub-invariants
+// Property 13 — store adapter equivalence invariants
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Property 13: Store adapter equivalence', () => {
@@ -277,21 +259,17 @@ describe('Property 13: Store adapter equivalence', () => {
   });
 
   /**
-   * Invariant 4: After `setCapabilityForCategory(tenant, cat, types)`,
-   * `readCapabilityConfig(tenant)[cat]` equals the de-duplicated submitted set
-   * (order-independent equality).
-   *
-   * Validates: R9.8
+   * Invariant 4: agency coverage round-trips through the store — after
+   * `setCoverage(agency, offices)`, `listCoverage(agency)` returns the de-duplicated
+   * set and `coversOffice` agrees (single-lgu-agency-network R5).
    */
-  it('Inv 4: setCapabilityForCategory → readCapabilityConfig returns de-duplicated set for that category', async () => {
+  it('Inv 4: setCoverage → listCoverage/coversOffice are self-consistent (de-duplicated)', async () => {
     await fc.assert(
       fc.asyncProperty(
         tenantNameArb,
-        categoryArb,
-        agencyTypeSetArb,
-        async (tenantName, category, rawTypes) => {
+        fc.array(fc.string({ minLength: 1, maxLength: 12 }), { minLength: 0, maxLength: 6 }),
+        async (tenantName, officeIds) => {
           const store = createMemoryPlatformStore();
-
           const tenant = await store.createTenantWithLgu({
             name: tenantName,
             region: 'Region VII',
@@ -301,67 +279,22 @@ describe('Property 13: Store adapter equivalence', () => {
             lon: null,
             now: 1_700_000_000_000,
           });
-
-          await store.setCapabilityForCategory(tenant.id, category, rawTypes);
-
-          const config = await store.readCapabilityConfig(tenant.id);
-          expect(config).not.toBeNull();
-          if (config === null) return;
-
-          // The stored set for this category must equal the de-duplicated submitted set
-          const expectedSet = new Set(rawTypes);
-          const actualSet = new Set(config[category]);
-          expect(actualSet).toEqual(expectedSet);
-        },
-      ),
-      { numRuns: RUNS },
-    );
-  });
-
-  /**
-   * Invariant 5: `readCapabilityConfig` never throws and always returns a total
-   * map keyed by all 4 frozen categories (after at least one
-   * `setCapabilityForCategory` call).
-   *
-   * Validates: R9.8
-   */
-  it('Inv 5: readCapabilityConfig is total — all 4 frozen categories present after setCapabilityForCategory', async () => {
-    await fc.assert(
-      fc.asyncProperty(
-        tenantNameArb,
-        categoryArb,
-        agencyTypeSetArb,
-        async (tenantName, category, rawTypes) => {
-          const store = createMemoryPlatformStore();
-
-          const tenant = await store.createTenantWithLgu({
-            name: tenantName,
-            region: 'Region VII',
-            province: 'Cebu',
-            lguName: `${tenantName} LGU`,
-            lat: null,
-            lon: null,
-            now: 1_700_000_000_000,
+          const created = await store.createAgency({
+            tenantId: tenant.id,
+            name: 'Coverage Agency',
+            code: 'COV',
+            agencyType: 'FIRE',
           });
+          if (created.status !== 'ok') return;
+          const agencyId = created.agency.id;
 
-          // At least one setCapabilityForCategory call
-          await store.setCapabilityForCategory(tenant.id, category, rawTypes);
+          await store.setCoverage(agencyId, officeIds);
 
-          // Must not throw
-          let config: Awaited<ReturnType<typeof store.readCapabilityConfig>>;
-          expect(() => {
-            // We verify it doesn't throw via the async path
-          }).not.toThrow();
-
-          config = await store.readCapabilityConfig(tenant.id);
-          expect(config).not.toBeNull();
-          if (config === null) return;
-
-          // All 4 frozen categories must be present
-          for (const cat of FROZEN_CATEGORIES) {
-            expect(Object.prototype.hasOwnProperty.call(config, cat)).toBe(true);
-            // Each value must be an array
-            expect(Array.isArray(config[cat])).toBe(true);
+          const expected = new Set(officeIds);
+          const actual = new Set(await store.listCoverage(agencyId));
+          expect(actual).toEqual(expected);
+          for (const officeId of expected) {
+            expect(await store.coversOffice(agencyId, officeId)).toBe(true);
           }
         },
       ),
@@ -390,10 +323,9 @@ describe('Property 13: Store adapter equivalence', () => {
           }),
           { minLength: 1, maxLength: 5 },
         ),
-        categoryArb,
-        agencyTypeSetArb,
+        fc.array(fc.string({ minLength: 1, maxLength: 12 }), { minLength: 0, maxLength: 4 }),
         fc.boolean(), // whether to deactivate the first agency
-        async (tenantName, agencies, category, capTypes, deactivateFirst) => {
+        async (tenantName, agencies, coverageOffices, deactivateFirst) => {
           const store = createMemoryPlatformStore();
 
           const tenant = await store.createTenantWithLgu({
@@ -448,21 +380,13 @@ describe('Property 13: Store adapter equivalence', () => {
             expect(readBack?.active).toBe(false);
           }
 
-          // Inv 4+5: capability roundtrip
-          await store.setCapabilityForCategory(tenant.id, category, capTypes);
-          const config = await store.readCapabilityConfig(tenant.id);
-          expect(config).not.toBeNull();
-          if (config === null) return;
-
-          // All 4 frozen categories present
-          for (const cat of FROZEN_CATEGORIES) {
-            expect(Array.isArray(config[cat])).toBe(true);
+          // Inv 4: agency coverage roundtrip on the first created agency
+          if (firstId !== undefined) {
+            await store.setCoverage(firstId, coverageOffices);
+            const expectedCoverage = new Set(coverageOffices);
+            const actualCoverage = new Set(await store.listCoverage(firstId));
+            expect(actualCoverage).toEqual(expectedCoverage);
           }
-
-          // The updated category matches de-duplicated submission
-          const expectedSet = new Set(capTypes);
-          const actualSet = new Set(config[category]);
-          expect(actualSet).toEqual(expectedSet);
         },
       ),
       { numRuns: RUNS },

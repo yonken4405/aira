@@ -30,17 +30,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AdminResponders } from '../src/components/AdminResponders';
 import { AppShellHeader } from '../src/components/AppShellHeader';
-import { PlatformTenants } from '../src/components/PlatformTenants';
 import { RoutingPanel } from '../src/components/RoutingPanel';
 import type { ResponderView } from '../src/lib/auth/types';
-import type { TenantRecord } from '../src/lib/platform/types';
 import { OFFICE_ID, makeIncident } from './support/fixtures';
 
 const nav = vi.hoisted(() => ({ replace: vi.fn(), refresh: vi.fn(), push: vi.fn() }));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace: nav.replace, refresh: nav.refresh, push: nav.push }),
-  usePathname: () => '/platform',
+  usePathname: () => '/admin',
 }));
 
 vi.mock('next/link', () => ({
@@ -72,112 +70,9 @@ function fetchCallsFor(fragment: string): unknown[][] {
   );
 }
 
-// ---------------------------------------------------------------------------
-// PlatformTenants — suspend (R18.1, destructive tone) + activate (R18.3)
-// ---------------------------------------------------------------------------
-
-const ACTIVE_TENANT: TenantRecord = {
-  id: 'tenant-active',
-  name: 'Cebu City LGU',
-  region: 'Region VII',
-  province: 'Cebu',
-  status: 'active',
-  createdAt: Date.UTC(2026, 0, 1),
-};
-
-const SUSPENDED_TENANT: TenantRecord = {
-  ...ACTIVE_TENANT,
-  id: 'tenant-suspended',
-  name: 'Mandaue City LGU',
-  status: 'suspended',
-};
-
-describe('PlatformTenants suspend confirmation (R18.1, R18.5)', () => {
-  it('opens a confirm dialog before the suspend PATCH and does not call the API until confirmed', async () => {
-    render(
-      <ToastProvider>
-        <PlatformTenants tenants={[ACTIVE_TENANT]} />
-      </ToastProvider>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Suspend' }));
-
-    // A confirmation gate must appear and the PATCH must NOT have fired yet.
-    const dialog = await screen.findByRole('alertdialog');
-    expect(dialog).toBeTruthy();
-    expect(fetchCallsFor(`/api/platform/tenants/${ACTIVE_TENANT.id}`)).toHaveLength(0);
-
-    // Confirming runs the suspension.
-    const confirm = screen.getAllByRole('button').find((b) => /suspend/i.test(b.textContent ?? ''));
-    fireEvent.click(confirm as HTMLElement);
-
-    await waitFor(() =>
-      expect(fetchCallsFor(`/api/platform/tenants/${ACTIVE_TENANT.id}`)).toHaveLength(1),
-    );
-    expect(fetchSpy).toHaveBeenCalledWith(
-      `/api/platform/tenants/${ACTIVE_TENANT.id}`,
-      expect.objectContaining({ method: 'PATCH' }),
-    );
-  });
-
-  it('uses a destructive-tone confirm action for suspend', async () => {
-    render(
-      <ToastProvider>
-        <PlatformTenants tenants={[ACTIVE_TENANT]} />
-      </ToastProvider>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Suspend' }));
-    await screen.findByRole('alertdialog');
-
-    // The destructive variant of Button renders the emergency/error surface; the
-    // confirm action inside the dialog must carry it (tone="destructive").
-    const confirm = screen
-      .getAllByRole('button')
-      .find((b) => /suspend/i.test(b.textContent ?? '') && b.className.includes('emergency'));
-    expect(confirm).toBeTruthy();
-  });
-
-  it('aborts the suspend with no fetch when the dialog is cancelled (R18.5)', async () => {
-    render(
-      <ToastProvider>
-        <PlatformTenants tenants={[ACTIVE_TENANT]} />
-      </ToastProvider>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Suspend' }));
-    await screen.findByRole('alertdialog');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-
-    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
-    expect(fetchCallsFor(`/api/platform/tenants/${ACTIVE_TENANT.id}`)).toHaveLength(0);
-  });
-});
-
-describe('PlatformTenants activate confirmation (R18.3, R18.5)', () => {
-  it('opens a confirm dialog before activating a suspended tenant', async () => {
-    render(
-      <ToastProvider>
-        <PlatformTenants tenants={[SUSPENDED_TENANT]} />
-      </ToastProvider>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Activate' }));
-
-    expect(await screen.findByRole('alertdialog')).toBeTruthy();
-    expect(fetchCallsFor(`/api/platform/tenants/${SUSPENDED_TENANT.id}`)).toHaveLength(0);
-
-    const confirm = screen
-      .getAllByRole('button')
-      .find((b) => /activate/i.test(b.textContent ?? ''));
-    fireEvent.click(confirm as HTMLElement);
-
-    await waitFor(() =>
-      expect(fetchCallsFor(`/api/platform/tenants/${SUSPENDED_TENANT.id}`)).toHaveLength(1),
-    );
-  });
-});
+// NOTE: the PlatformTenants suspend/activate confirm-gating cases were removed with the
+// operator console (single-lgu-agency-network R2). The remaining confirm-gating coverage
+// (RoutingPanel / AdminResponders / AppShellHeader) is unaffected.
 
 // ---------------------------------------------------------------------------
 // RoutingPanel — incident status transition incl. RESOLVED (R18.2, R18.5)

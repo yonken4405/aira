@@ -1,8 +1,8 @@
-/**
+﻿/**
  * @vitest-environment node
  *
  * DRRM_Admin-tier integration tests for the responder-network management routes
- * (TDD-RED: the admin handler imports below do NOT exist yet — tests are expected to
+ * (TDD-RED: the admin handler imports below do NOT exist yet â€” tests are expected to
  * fail with "is not a function" / "not exported" errors until task 9.2 implements
  * them). Once green they assert the shared status table scoped to the SESSION tenant.
  *
@@ -20,12 +20,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   // The five DRRM_Admin-tier responder-network handlers under test (added in task 9.2).
   // They resolve the acting tenant from the session (principal.tenantId), NOT a URL,
-  // so they take (request, deps) only — update takes (request, deps, agencyId).
+  // so they take (request, deps) only â€” update takes (request, deps, agencyId).
   handleAdminCreateAgency,
   handleAdminListAgencies,
   handleAdminUpdateAgency,
-  handleAdminReadCapability,
-  handleAdminSetCapability,
 } from '../src/lib/api/admin-handlers';
 import { handleLogin } from '../src/lib/api/auth-handlers';
 import { PLATFORM_SESSION_COOKIE } from '../src/lib/platform/session';
@@ -33,7 +31,7 @@ import { createRateLimiter } from '../src/lib/rate-limit';
 import { createTestClock, createTestHarness, jsonBody, withSession } from './support/harness';
 import { TENANT_ID, TEST_PASSWORD } from './support/fixtures';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const BASE = 'http://localhost';
 
@@ -52,7 +50,7 @@ function createWorld() {
   const harness = createTestHarness({ clock });
 
   // The DRRM admin: a RESPONDER-tier ADMIN whose tenant/office are the harness
-  // defaults (TENANT_ID / OFFICE_ID) — see memory-auth-store seedResponder.
+  // defaults (TENANT_ID / OFFICE_ID) â€” see memory-auth-store seedResponder.
   const admin = harness.authStore.seedResponder({
     id: 'responder-admin',
     callsign: 'ADMIN-1',
@@ -151,12 +149,12 @@ async function seedForeignAgency(name: string, code: string): Promise<string> {
   return created.agency.id;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // POST /api/admin/agencies
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 describe('handleAdminCreateAgency', () => {
-  it('201 — creates an agency in the admin\u2019s own tenant', async () => {
+  it('201 â€” creates an agency in the admin\u2019s own tenant', async () => {
     const token = await world.tokenFor('ADMIN-1');
 
     const response = await handleAdminCreateAgency(
@@ -180,7 +178,7 @@ describe('handleAdminCreateAgency', () => {
     expect(body.agency.tenantId).toBe(TENANT_ID);
   });
 
-  it('400 invalid_agency — name out of range', async () => {
+  it('400 invalid_agency â€” name out of range', async () => {
     const token = await world.tokenFor('ADMIN-1');
 
     const response = await handleAdminCreateAgency(
@@ -196,7 +194,7 @@ describe('handleAdminCreateAgency', () => {
     expect((await response.json()) as { error: string }).toMatchObject({ error: 'invalid_agency' });
   });
 
-  it('400 invalid_agency_type — unknown type, value not echoed', async () => {
+  it('400 invalid_agency_type â€” unknown type, value not echoed', async () => {
     const token = await world.tokenFor('ADMIN-1');
 
     const response = await handleAdminCreateAgency(
@@ -214,7 +212,7 @@ describe('handleAdminCreateAgency', () => {
     expect(JSON.stringify(body)).not.toContain('NINJA');
   });
 
-  it('409 agency_exists — per-tenant case-insensitive name collision', async () => {
+  it('409 agency_exists â€” per-tenant case-insensitive name collision', async () => {
     const token = await world.tokenFor('ADMIN-1');
     await seedOwnAgency('Bureau of Fire', 'BFP');
 
@@ -231,7 +229,7 @@ describe('handleAdminCreateAgency', () => {
     expect((await response.json()) as { error: string }).toMatchObject({ error: 'agency_exists' });
   });
 
-  it('401 — no responder session', async () => {
+  it('401 â€” no responder session', async () => {
     const response = await handleAdminCreateAgency(
       new Request(
         `${BASE}/api/admin/agencies`,
@@ -243,7 +241,7 @@ describe('handleAdminCreateAgency', () => {
     expect(response.status).toBe(401);
   });
 
-  it('401 — platform cookie must NOT authenticate an admin route (cross-tier isolation)', async () => {
+  it('401 â€” platform cookie must NOT authenticate an admin route (cross-tier isolation)', async () => {
     // A value presented under the PLATFORM cookie name must never satisfy the
     // responder-tier `authenticate` guard the admin routes use.
     const headers = new Headers({ 'content-type': 'application/json' });
@@ -261,7 +259,7 @@ describe('handleAdminCreateAgency', () => {
     expect(response.status).toBe(401);
   });
 
-  it('403 — a logged-in RESPONDER/DISPATCHER lacking responder:manage', async () => {
+  it('403 â€” a logged-in RESPONDER/DISPATCHER lacking responder:manage', async () => {
     for (const callsign of ['OPCEN-01', 'K9-01']) {
       const response = await handleAdminCreateAgency(
         withSession(
@@ -275,7 +273,7 @@ describe('handleAdminCreateAgency', () => {
     }
   });
 
-  it('403 forbidden_origin — cross-site POST makes no write', async () => {
+  it('403 forbidden_origin â€” cross-site POST makes no write', async () => {
     const token = await world.tokenFor('ADMIN-1');
 
     const response = await handleAdminCreateAgency(
@@ -295,12 +293,12 @@ describe('handleAdminCreateAgency', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // GET /api/admin/agencies
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 describe('handleAdminListAgencies', () => {
-  it('200 — scoped to the admin\u2019s own tenant; a foreign agency is absent', async () => {
+  it('200 â€” scoped to the admin\u2019s own tenant; a foreign agency is absent', async () => {
     const token = await world.tokenFor('ADMIN-1');
     await seedOwnAgency('Fire Dept', 'FD');
     await seedOwnAgency('Police Dept', 'PD', 'POLICE');
@@ -322,7 +320,7 @@ describe('handleAdminListAgencies', () => {
     expect(body.agencies.some((row) => row.code === 'FF')).toBe(false);
   });
 
-  it('401 — no responder session', async () => {
+  it('401 â€” no responder session', async () => {
     const response = await handleAdminListAgencies(
       new Request(`${BASE}/api/admin/agencies`),
       world.deps,
@@ -331,12 +329,12 @@ describe('handleAdminListAgencies', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // PATCH /api/admin/agencies/[id]
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 describe('handleAdminUpdateAgency', () => {
-  it('200 — renames an in-tenant agency', async () => {
+  it('200 â€” renames an in-tenant agency', async () => {
     const token = await world.tokenFor('ADMIN-1');
     const agencyId = await seedOwnAgency('Old Fire Bureau', 'OFB');
 
@@ -356,7 +354,7 @@ describe('handleAdminUpdateAgency', () => {
     expect(body.agency.name).toBe('New Fire Bureau');
   });
 
-  it('200 — sets an in-tenant agency active/inactive', async () => {
+  it('200 â€” sets an in-tenant agency active/inactive', async () => {
     const token = await world.tokenFor('ADMIN-1');
     const agencyId = await seedOwnAgency('Fire Active', 'FAC');
 
@@ -375,9 +373,9 @@ describe('handleAdminUpdateAgency', () => {
     expect(body.agency.active).toBe(false);
   });
 
-  it('R7.4 — DRRM_Admin cross-tenant: editing a known-other-tenant agency by id \u2192 403 forbidden', async () => {
+  it('R7.4 â€” DRRM_Admin cross-tenant: editing a known-other-tenant agency by id \u2192 403 forbidden', async () => {
     const token = await world.tokenFor('ADMIN-1');
-    // Seed the foreign agency directly, then PATCH it by id — the admin never names
+    // Seed the foreign agency directly, then PATCH it by id â€” the admin never names
     // the foreign tenant; the service resolves the agency and sees a tenant mismatch.
     const foreignAgencyId = await seedForeignAgency('Foreign Fire', 'FF');
     const originalName = (await world.platformStore.findAgencyById(foreignAgencyId))?.name;
@@ -398,7 +396,7 @@ describe('handleAdminUpdateAgency', () => {
     expect((await world.platformStore.findAgencyById(foreignAgencyId))?.name).toBe(originalName);
   });
 
-  it('404 agency_not_found — a truly unknown agency id', async () => {
+  it('404 agency_not_found â€” a truly unknown agency id', async () => {
     const token = await world.tokenFor('ADMIN-1');
 
     const response = await handleAdminUpdateAgency(
@@ -417,7 +415,7 @@ describe('handleAdminUpdateAgency', () => {
     });
   });
 
-  it('409 agency_exists — rename collision within the admin\u2019s tenant', async () => {
+  it('409 agency_exists â€” rename collision within the admin\u2019s tenant', async () => {
     const token = await world.tokenFor('ADMIN-1');
     await seedOwnAgency('Fire One', 'F1');
     const second = await seedOwnAgency('Fire Two', 'F2');
@@ -436,7 +434,7 @@ describe('handleAdminUpdateAgency', () => {
     expect((await response.json()) as { error: string }).toMatchObject({ error: 'agency_exists' });
   });
 
-  it('401 — no responder session', async () => {
+  it('401 â€” no responder session', async () => {
     const agencyId = await seedOwnAgency('Fire Session', 'FSE');
 
     const response = await handleAdminUpdateAgency(
@@ -448,7 +446,7 @@ describe('handleAdminUpdateAgency', () => {
     expect(response.status).toBe(401);
   });
 
-  it('403 — a non-responder:manage role cannot update', async () => {
+  it('403 â€” a non-responder:manage role cannot update', async () => {
     const token = await world.tokenFor('OPCEN-01');
     const agencyId = await seedOwnAgency('Fire Role', 'FRO');
 
@@ -466,141 +464,6 @@ describe('handleAdminUpdateAgency', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// GET /api/admin/capability
-// ═══════════════════════════════════════════════════════════════════════════════
-
-describe('handleAdminReadCapability', () => {
-  it('200 — returns the total config for the admin\u2019s own tenant', async () => {
-    const token = await world.tokenFor('ADMIN-1');
-
-    const response = await handleAdminReadCapability(
-      withSession(`${BASE}/api/admin/capability`, token),
-      world.deps,
-    );
-
-    expect(response.status).toBe(200);
-    const body = (await response.json()) as {
-      ok: boolean;
-      capability: { SUNOG: string[]; MEDIKAL: string[]; KRIMEN: string[]; BAHA: string[] };
-    };
-    expect(body.ok).toBe(true);
-    expect(body.capability).toHaveProperty('SUNOG');
-    expect(body.capability).toHaveProperty('MEDIKAL');
-    expect(body.capability).toHaveProperty('KRIMEN');
-    expect(body.capability).toHaveProperty('BAHA');
-    // Default config (no stored rows): FIRE for SUNOG, MEDICAL for MEDIKAL, POLICE for KRIMEN.
-    expect(body.capability.SUNOG).toContain('FIRE');
-    expect(body.capability.MEDIKAL).toContain('MEDICAL');
-    expect(body.capability.KRIMEN).toContain('POLICE');
-  });
-
-  it('401 — no responder session', async () => {
-    const response = await handleAdminReadCapability(
-      new Request(`${BASE}/api/admin/capability`),
-      world.deps,
-    );
-    expect(response.status).toBe(401);
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// PATCH /api/admin/capability
-// ═══════════════════════════════════════════════════════════════════════════════
-
-describe('handleAdminSetCapability', () => {
-  it('200 — updates one category for the admin\u2019s own tenant', async () => {
-    const token = await world.tokenFor('ADMIN-1');
-
-    const response = await handleAdminSetCapability(
-      withSession(
-        `${BASE}/api/admin/capability`,
-        token,
-        jsonBody('PATCH', { category: 'SUNOG', agencyTypes: ['FIRE', 'DRRM'] }),
-      ),
-      world.deps,
-    );
-
-    expect(response.status).toBe(200);
-    const body = (await response.json()) as { ok: boolean; capability: { SUNOG: string[] } };
-    expect(body.ok).toBe(true);
-    expect(body.capability.SUNOG).toContain('FIRE');
-    expect(body.capability.SUNOG).toContain('DRRM');
-  });
-
-  it('400 invalid_capability — unknown category', async () => {
-    const token = await world.tokenFor('ADMIN-1');
-
-    const response = await handleAdminSetCapability(
-      withSession(
-        `${BASE}/api/admin/capability`,
-        token,
-        jsonBody('PATCH', { category: 'EARTHQUAKE', agencyTypes: ['FIRE'] }),
-      ),
-      world.deps,
-    );
-
-    expect(response.status).toBe(400);
-    expect((await response.json()) as { error: string }).toMatchObject({
-      error: 'invalid_capability',
-    });
-  });
-
-  it('R5.6 — an unauthorized update leaves the stored config unchanged', async () => {
-    // Establish a known in-tenant config as the admin.
-    const adminToken = await world.tokenFor('ADMIN-1');
-    await handleAdminSetCapability(
-      withSession(
-        `${BASE}/api/admin/capability`,
-        adminToken,
-        jsonBody('PATCH', { category: 'SUNOG', agencyTypes: ['FIRE'] }),
-      ),
-      world.deps,
-    );
-
-    // A dispatcher (no responder:manage) attempts to overwrite the category.
-    const dispatcherToken = await world.tokenFor('OPCEN-01');
-    const denied = await handleAdminSetCapability(
-      withSession(
-        `${BASE}/api/admin/capability`,
-        dispatcherToken,
-        jsonBody('PATCH', { category: 'SUNOG', agencyTypes: ['POLICE', 'MEDICAL'] }),
-      ),
-      world.deps,
-    );
-    expect(denied.status).toBe(403);
-
-    // The stored config is unchanged: still exactly ['FIRE'].
-    const after = await world.platformStore.readCapabilityConfig(TENANT_ID);
-    expect(after?.SUNOG).toEqual(['FIRE']);
-  });
-
-  it('401 — no responder session', async () => {
-    const response = await handleAdminSetCapability(
-      new Request(
-        `${BASE}/api/admin/capability`,
-        jsonBody('PATCH', { category: 'SUNOG', agencyTypes: ['FIRE'] }),
-      ),
-      world.deps,
-    );
-    expect(response.status).toBe(401);
-  });
-
-  it('403 forbidden_origin — cross-site PATCH', async () => {
-    const token = await world.tokenFor('ADMIN-1');
-
-    const response = await handleAdminSetCapability(
-      withSession(
-        `${BASE}/api/admin/capability`,
-        token,
-        crossOrigin(jsonBody('PATCH', { category: 'SUNOG', agencyTypes: ['FIRE'] })),
-      ),
-      world.deps,
-    );
-
-    expect(response.status).toBe(403);
-    expect((await response.json()) as { error: string }).toMatchObject({
-      error: 'forbidden_origin',
-    });
-  });
-});
+// NOTE: the editable capability map was removed (single-lgu-agency-network R9); routing
+// now uses the fixed built-in CATEGORY_AGENCY_DEFAULT, so the admin capability endpoint
+// and its tests are gone. Agency management + provisioning coverage remains above.

@@ -17,7 +17,7 @@ import {
 import { handleLogin } from '../src/lib/api/auth-handlers';
 import { createRateLimiter } from '../src/lib/rate-limit';
 import { createTestClock, createTestHarness, jsonBody, withSession } from './support/harness';
-import { OFFICE_ID, TEST_PASSWORD } from './support/fixtures';
+import { OFFICE_ID, TENANT_ID, TEST_PASSWORD } from './support/fixtures';
 
 const URL_BASE = 'http://localhost';
 const NEW_PASSWORD = 'correct horse battery staple';
@@ -25,6 +25,39 @@ const NEW_PASSWORD = 'correct horse battery staple';
 function createWorld() {
   const clock = createTestClock();
   const harness = createTestHarness({ clock });
+
+  // Provisioning resolves the office + agency through the PlatformStore (same DB as the
+  // apps in production). Seed the fixture tenant + LGU office there, plus a BFP agency,
+  // so handleCreateResponder (now agency-required via provisionResponder) has real ids.
+  harness.platformStore.tenants.set(TENANT_ID, {
+    id: TENANT_ID,
+    name: 'Cebu City DRRMO',
+    region: 'Region VII',
+    province: 'Cebu',
+    status: 'active',
+    createdAt: clock.now(),
+  });
+  harness.platformStore.offices.push({
+    id: OFFICE_ID,
+    tenantId: TENANT_ID,
+    tenantName: 'Cebu City DRRMO',
+    name: 'Cebu City DRRMO',
+    kind: 'LGU',
+    region: 'Region VII',
+    province: 'Cebu',
+    lat: null,
+    lon: null,
+    status: 'active',
+  });
+  harness.platformStore.agencies.set('agency-bfp', {
+    id: 'agency-bfp',
+    tenantId: TENANT_ID,
+    name: 'Bureau of Fire Protection',
+    code: 'BFP',
+    agencyType: 'FIRE',
+    active: true,
+  });
+  const SEED_AGENCY_ID = 'agency-bfp';
 
   const admin = harness.authStore.seedResponder({
     id: 'responder-admin',
@@ -65,7 +98,7 @@ function createWorld() {
     return token;
   }
 
-  return { ...harness, clock, admin, dispatcher, field, tokenFor };
+  return { ...harness, clock, admin, dispatcher, field, tokenFor, SEED_AGENCY_ID };
 }
 
 let world: ReturnType<typeof createWorld>;
@@ -128,7 +161,7 @@ describe('POST /api/admin/responders', () => {
       callsign: 'UNIT-7',
       role: 'RESPONDER',
       officeId: OFFICE_ID,
-      agencyId: null,
+      agencyId: world.SEED_AGENCY_ID,
     });
 
     expect(response.status).toBe(201);
@@ -163,23 +196,24 @@ describe('POST /api/admin/responders', () => {
       email: 'k9-01@aira.test',
       role: 'RESPONDER',
       officeId: OFFICE_ID,
+      agencyId: world.SEED_AGENCY_ID,
     });
 
     expect(response.status).toBe(409);
     expect(await response.json()).toEqual({ ok: false, error: 'email_taken' });
   });
 
-  it('rejects weak passwords supplied by the admin', async () => {
+  it('rejects a provision with no agency — agency is now required (R3.2)', async () => {
     const token = await world.tokenFor('ADMIN-1');
     const response = await create(token, {
       email: 'unit9@cebu.gov.ph',
       role: 'RESPONDER',
       officeId: OFFICE_ID,
-      password: 'short',
+      // no agencyId
     });
 
     expect(response.status).toBe(400);
-    expect(await response.json()).toMatchObject({ error: 'weak_password' });
+    expect(await response.json()).toMatchObject({ error: 'invalid_responder' });
   });
 
   it('validates the payload shape', async () => {

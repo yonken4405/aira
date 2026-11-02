@@ -15,8 +15,6 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
-
 import {
   createMemoryPlatformStore,
   type MemoryPlatformStore,
@@ -292,52 +290,28 @@ describe('setAgencyActive', () => {
   });
 });
 
-describe('capability config', () => {
-  it('readCapabilityConfig returns null when nothing is stored (R5.3)', async () => {
+describe('agency coverage (single-lgu-agency-network R5)', () => {
+  it('listCoverage/setCoverage/coversOffice round-trip with full-replace + dedupe', async () => {
     const { tenantId } = await seedTenant({ name: 'Cebu City' });
-    expect(await store.readCapabilityConfig(tenantId)).toBeNull();
-  });
+    const agency = await store.createAgency({
+      tenantId,
+      name: 'Bureau of Fire Protection',
+      code: 'BFP',
+      agencyType: 'FIRE',
+    });
+    if (agency.status !== 'ok') throw new Error('seed agency failed');
+    const agencyId = agency.agency.id;
 
-  it('setCapabilityForCategory de-duplicates and full-replaces one category (R5.4/R5.5)', async () => {
-    const { tenantId } = await seedTenant({ name: 'Cebu City' });
+    expect(await store.listCoverage(agencyId)).toEqual([]);
 
-    const category: EmergencyCategoryId = 'SUNOG';
-    const submitted: readonly AgencyType[] = ['FIRE', 'FIRE', 'POLICE'];
+    await store.setCoverage(agencyId, ['office-a', 'office-a', 'office-b']);
+    expect(new Set(await store.listCoverage(agencyId))).toEqual(new Set(['office-a', 'office-b']));
+    expect(await store.coversOffice(agencyId, 'office-a')).toBe(true);
+    expect(await store.coversOffice(agencyId, 'office-z')).toBe(false);
 
-    const config = await store.setCapabilityForCategory(tenantId, category, submitted);
-
-    // de-duplicated set-like result, order-insensitive
-    expect(new Set(config.SUNOG)).toEqual(new Set<AgencyType>(['FIRE', 'POLICE']));
-    expect(config.SUNOG).toHaveLength(2);
-
-    // only SUNOG is touched; other categories remain absent/empty
-    expect(config.MEDIKAL ?? []).toEqual([]);
-    expect(config.KRIMEN ?? []).toEqual([]);
-    expect(config.BAHA ?? []).toEqual([]);
-
-    // read-after-write reflects the stored SUNOG set
-    const read = await store.readCapabilityConfig(tenantId);
-    expect(read).not.toBeNull();
-    expect(new Set(read?.SUNOG ?? [])).toEqual(new Set<AgencyType>(['FIRE', 'POLICE']));
-
-    // idempotent on a repeated identical call
-    const again = await store.setCapabilityForCategory(tenantId, category, submitted);
-    expect(new Set(again.SUNOG)).toEqual(new Set<AgencyType>(['FIRE', 'POLICE']));
-    expect(again.SUNOG).toHaveLength(2);
-  });
-
-  it('full-replaces exactly one category, leaving others unchanged (R5.4)', async () => {
-    const { tenantId } = await seedTenant({ name: 'Cebu City' });
-
-    await store.setCapabilityForCategory(tenantId, 'SUNOG', ['FIRE']);
-    const config = await store.setCapabilityForCategory(tenantId, 'MEDIKAL', ['MEDICAL']);
-
-    expect(new Set(config.SUNOG)).toEqual(new Set<AgencyType>(['FIRE']));
-    expect(new Set(config.MEDIKAL)).toEqual(new Set<AgencyType>(['MEDICAL']));
-
-    // replacing SUNOG does not disturb MEDIKAL
-    const replaced = await store.setCapabilityForCategory(tenantId, 'SUNOG', ['FIRE', 'DRRM']);
-    expect(new Set(replaced.SUNOG)).toEqual(new Set<AgencyType>(['FIRE', 'DRRM']));
-    expect(new Set(replaced.MEDIKAL)).toEqual(new Set<AgencyType>(['MEDICAL']));
+    // Full-replace wipes prior links.
+    await store.setCoverage(agencyId, ['office-b']);
+    expect(await store.listCoverage(agencyId)).toEqual(['office-b']);
+    expect(await store.coversOffice(agencyId, 'office-a')).toBe(false);
   });
 });

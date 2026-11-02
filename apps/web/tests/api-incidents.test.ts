@@ -48,9 +48,11 @@ function candidate(overrides: Partial<RoutingCandidate> & { id: string }): Routi
     role: 'RESPONDER',
     officeId: OFFICE_ID,
     officeName: 'Cebu City DRRMO',
+    agencyId: null,
     agencyType: null,
     agencyName: null,
     base: null,
+    coversIncidentOffice: false,
     ...overrides,
   };
 }

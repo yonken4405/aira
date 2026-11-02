@@ -89,10 +89,8 @@ describe('App_Shell adoption (R3.2): no legacy headers remain', () => {
     expect(content).toContain('AppShell');
   });
 
-  it('renders AppShell from the platform layout', () => {
-    const content = readFileSync(join(APP_DIR, 'platform', 'layout.tsx'), 'utf8');
-    expect(content).toContain('AppShell');
-  });
+  // NOTE: the /platform console (and its layout) was removed with the operator UX
+  // (single-lgu-agency-network R2); there is no platform layout to assert on anymore.
 
   it('removes the inline console header from Dashboard.tsx', () => {
     // Sentinels: the inline console header is the only place Dashboard.tsx emits a raw

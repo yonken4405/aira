@@ -289,78 +289,53 @@ describe('postgres platform store — responder network', () => {
     });
   });
 
-  describe('readCapabilityConfig', () => {
-    it('folds (category, agency_type) rows into a Record<category, agencyType[]>', async () => {
+  describe('agency coverage (single-lgu-agency-network R5)', () => {
+    it('listCoverage selects the agency office ids', async () => {
       const store = createPostgresPlatformStore();
-      mockQuery.mockResolvedValueOnce([
-        { category: 'SUNOG', agencyType: 'FIRE' },
-        { category: 'SUNOG', agencyType: 'DRRM' },
-        { category: 'MEDIKAL', agencyType: 'MEDICAL' },
-      ]);
+      mockQuery.mockResolvedValueOnce([{ officeId: 'office-a' }, { officeId: 'office-b' }]);
 
-      const result = await store.readCapabilityConfig(TENANT_ID);
+      const result = await store.listCoverage('agency-1');
 
-      expect(result).not.toBeNull();
-      expect(result?.SUNOG).toEqual(['FIRE', 'DRRM']);
-      expect(result?.MEDIKAL).toEqual(['MEDICAL']);
-
+      expect(result).toEqual(['office-a', 'office-b']);
       const { text, values } = lastQueryCall();
-      expect(flat(text)).toContain('from public.tenant_capability_config');
-      expect(flat(text)).toContain('where tenant_id');
-      expect(values).toContain(TENANT_ID);
+      expect(flat(text)).toContain('from public.agency_coverage');
+      expect(flat(text)).toContain('where agency_id');
+      expect(values).toContain('agency-1');
     });
 
-    it('returns null when the tenant has zero capability rows', async () => {
+    it('coversOffice issues a bounded existence probe', async () => {
       const store = createPostgresPlatformStore();
-      mockQuery.mockResolvedValueOnce([]);
+      mockQueryOne.mockResolvedValueOnce({ one: 1 });
 
-      await expect(store.readCapabilityConfig(TENANT_ID)).resolves.toBeNull();
+      expect(await store.coversOffice('agency-1', 'office-a')).toBe(true);
+      const call = mockQueryOne.mock.calls.at(-1);
+      expect(flat(String(call?.[0]))).toContain('from public.agency_coverage');
+      expect(call?.[1]).toContain('agency-1');
+      expect(call?.[1]).toContain('office-a');
     });
-  });
 
-  describe('setCapabilityForCategory', () => {
-    it('replaces a single category inside a transaction then re-reads the full config', async () => {
+    it('setCoverage full-replaces inside a transaction (delete then insert, de-duplicated)', async () => {
       const store = createPostgresPlatformStore();
 
-      // delete-one-category, insert FIRE, insert DRRM, then re-read the config
       const { client, calls } = makeTxClient([
         { rows: [] }, // delete
-        { rows: [] }, // insert FIRE
-        { rows: [] }, // insert DRRM
-        {
-          rows: [
-            { category: 'SUNOG', agencyType: 'FIRE' },
-            { category: 'SUNOG', agencyType: 'DRRM' },
-          ],
-        }, // re-read
+        { rows: [] }, // insert office-a
+        { rows: [] }, // insert office-b
       ]);
-
       mockWithTransaction.mockImplementationOnce(async (work) => work(client) as Promise<unknown>);
 
-      const result = await store.setCapabilityForCategory(TENANT_ID, 'SUNOG', ['FIRE', 'DRRM']);
+      await store.setCoverage('agency-1', ['office-a', 'office-a', 'office-b']);
 
-      // ran through the transaction seam
       expect(mockWithTransaction).toHaveBeenCalledTimes(1);
-
       const texts = calls.map((c) => flat(c.text));
-      const deleteStmt = texts.find((t) =>
-        t.includes('delete from public.tenant_capability_config'),
-      );
-      expect(deleteStmt).toBeDefined();
-      const inserts = texts.filter((t) =>
-        t.includes('insert into public.tenant_capability_config'),
-      );
-      expect(inserts.length).toBeGreaterThanOrEqual(1);
-
-      // delete is bound to the tenant + category
+      expect(texts.some((t) => t.includes('delete from public.agency_coverage'))).toBe(true);
+      const inserts = texts.filter((t) => t.includes('insert into public.agency_coverage'));
+      // De-duplicated to two offices → exactly two inserts.
+      expect(inserts).toHaveLength(2);
       const deleteCall = calls.find((c) =>
-        flat(c.text).includes('delete from public.tenant_capability_config'),
+        flat(c.text).includes('delete from public.agency_coverage'),
       );
-      expect(deleteCall?.values).toContain(TENANT_ID);
-      expect(deleteCall?.values).toContain('SUNOG');
-
-      // the full config is returned (the SUNOG set we just wrote)
-      expect(result.SUNOG).toEqual(['FIRE', 'DRRM']);
+      expect(deleteCall?.values).toContain('agency-1');
     });
   });
 });

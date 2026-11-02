@@ -1,11 +1,10 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CitizenTracking } from '../src/components/CitizenTracking';
-import { PlatformMap } from '../src/components/PlatformMap';
 
 /**
  * Task 32.1 (RED) — Consistent loading states across async surfaces (R19.1–R19.5).
@@ -50,24 +49,6 @@ import { PlatformMap } from '../src/components/PlatformMap';
  * ──────────────────────────────────────────────────────────────────────────────────
  */
 
-// The WebGL map is not renderable in jsdom. Mirror dashboard.test.tsx's LiveMap stub:
-// stub react-map-gl/maplibre so PlatformMap mounts without a real map context.
-vi.mock('react-map-gl/maplibre', () => ({
-  default: ({ children }: { children?: React.ReactNode }) => (
-    <div data-testid="map-gl">{children}</div>
-  ),
-  Marker: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-}));
-
-const platformClient = vi.hoisted(() => ({ load: vi.fn() }));
-
-vi.mock('../src/lib/platform-client', async () => {
-  const actual = await vi.importActual<typeof import('../src/lib/platform-client')>(
-    '../src/lib/platform-client',
-  );
-  return { ...actual, loadOfficePins: platformClient.load };
-});
-
 const trackingClient = vi.hoisted(() => ({ load: vi.fn() }));
 
 vi.mock('../src/lib/tracking-client', async () => {
@@ -81,22 +62,10 @@ vi.mock('../src/lib/tracking-client', async () => {
 const pending = <T,>(): Promise<T> => new Promise<T>(() => {});
 
 beforeEach(() => {
-  platformClient.load.mockReset();
   trackingClient.load.mockReset();
 });
 
 describe('Loading states (R19)', () => {
-  describe('PlatformMap skeleton (R19.3, R19.5)', () => {
-    it('shows a layout-shaped map skeleton while office pins load', () => {
-      platformClient.load.mockReturnValue(pending());
-
-      render(<PlatformMap />);
-
-      // RED today: PlatformMap mounts an empty map with no skeleton placeholder.
-      expect(screen.getByTestId('platform-map-skeleton')).toBeTruthy();
-    });
-  });
-
   describe('CitizenTracking skeleton (R19.3, R19.5)', () => {
     it('shows a layout-shaped tracking skeleton during the loading phase', () => {
       trackingClient.load.mockReturnValue(pending());
@@ -114,17 +83,8 @@ describe('Loading states (R19)', () => {
 
       render(<CitizenTracking incidentId="i1" token="tok" />);
 
-      // RED today: the 'unavailable' phase renders text only, with no retry affordance.
+      // The 'unavailable' phase renders the shared LoadError retry affordance.
       expect(await screen.findByRole('button', { name: /retry/i })).toBeTruthy();
-    });
-
-    it('offers a retry control when the platform map fails to load its pins', async () => {
-      platformClient.load.mockRejectedValue(new Error('offices_request_failed_503'));
-
-      render(<PlatformMap />);
-
-      // RED today: on failure PlatformMap silently falls back to an empty map.
-      await waitFor(() => expect(screen.getByRole('button', { name: /retry/i })).toBeTruthy());
     });
   });
 
@@ -141,10 +101,6 @@ describe('Loading states (R19)', () => {
       'admin/audit/loading.tsx',
       'admin/profile/loading.tsx',
       'admin/settings/loading.tsx',
-      'platform/loading.tsx',
-      'platform/map/loading.tsx',
-      'platform/profile/loading.tsx',
-      'platform/settings/loading.tsx',
       'track/[id]/loading.tsx',
       'account/password/loading.tsx',
     ] as const;

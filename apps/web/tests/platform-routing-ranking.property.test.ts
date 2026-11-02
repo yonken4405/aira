@@ -24,12 +24,7 @@ import { AGENCY_TYPES } from '@aira/ui';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { CapabilityConfig } from '../src/lib/platform/types';
-import {
-  DEFAULT_CAPABILITY_CONFIG,
-  rankResponders,
-  type RoutingCandidate,
-} from '../src/lib/routing';
+import { rankResponders, type RoutingCandidate } from '../src/lib/routing';
 
 // ---------------------------------------------------------------------------
 // Arbitraries
@@ -55,11 +50,8 @@ const agencyTypeOrNullArb: fc.Arbitrary<AgencyType | null> = fc.oneof(
 
 /** Arbitrary role. Non-RESPONDER candidates are included to confirm they are excluded
  *  from results (the filter is part of the ranking pipeline). */
-const roleArb: fc.Arbitrary<'RESPONDER' | 'DISPATCHER' | 'ADMIN'> = fc.constantFrom(
-  'RESPONDER',
-  'DISPATCHER',
-  'ADMIN',
-);
+const roleArb: fc.Arbitrary<'RESPONDER' | 'DISPATCHER' | 'ADMIN' | 'AGENCY_ADMIN'> =
+  fc.constantFrom('RESPONDER', 'DISPATCHER', 'ADMIN', 'AGENCY_ADMIN');
 
 /** Arbitrary GeoPoint or null (null = unknown base position). */
 const geoPointOrNullArb: fc.Arbitrary<{ lat: number; lon: number } | null> = fc.oneof(
@@ -82,9 +74,11 @@ const candidateArb: fc.Arbitrary<RoutingCandidate> = fc.record({
   role: roleArb,
   officeId: fc.uuid(),
   officeName: fc.string({ minLength: 1, maxLength: 32 }),
+  agencyId: fc.oneof(fc.uuid(), fc.constant(null)),
   agencyType: agencyTypeOrNullArb,
   agencyName: fc.oneof(fc.string({ minLength: 1, maxLength: 32 }), fc.constant(null)),
   base: geoPointOrNullArb,
+  coversIncidentOffice: fc.boolean(),
 });
 
 /** A list of 0..12 candidates. */
@@ -107,7 +101,7 @@ describe('Property A: capable candidates always rank before non-capable candidat
   it('for any (i < j) pair in results, if result[j] is capable then result[i] is also capable', () => {
     fc.assert(
       fc.property(categoryArb, incidentArb, candidateListArb, (category, incident, candidates) => {
-        const results = rankResponders(category, incident, candidates, DEFAULT_CAPABILITY_CONFIG);
+        const results = rankResponders(category, incident, candidates);
 
         // For every pair i < j: if result[j].capable then result[i].capable.
         for (let i = 0; i < results.length; i++) {
@@ -134,10 +128,11 @@ describe('Property B: within a capability band, nearer candidates rank before fa
   it('within the capable band and within the non-capable band, nearer known-distance candidates rank first', () => {
     fc.assert(
       fc.property(categoryArb, incidentArb, candidateListArb, (category, incident, candidates) => {
-        const results = rankResponders(category, incident, candidates, DEFAULT_CAPABILITY_CONFIG);
+        const results = rankResponders(category, incident, candidates);
 
-        // Within each band (capable / non-capable), for any pair (i < j) where both
-        // have a known distance: the earlier one must not be farther.
+        // Within each band (capability + coverage), for any pair (i < j) where both
+        // have a known distance: the earlier one must not be farther. Coverage is a
+        // higher sort tier than distance, so we must hold it equal too (R5.3/R5.4).
         for (let i = 0; i < results.length; i++) {
           for (let j = i + 1; j < results.length; j++) {
             const a = results[i];
@@ -145,6 +140,8 @@ describe('Property B: within a capability band, nearer candidates rank before fa
             if (a === undefined || b === undefined) continue;
             // Only compare within the same capability band.
             if (a.capable !== b.capable) continue;
+            // Only compare within the same coverage band.
+            if (a.candidate.coversIncidentOffice !== b.candidate.coversIncidentOffice) continue;
             // Only check when both distances are known.
             if (a.distanceKm === null || b.distanceKm === null) continue;
             // a must be <= b in distance.
@@ -165,7 +162,7 @@ describe('Property C: callsign tiebreak for identical capability and identical d
   it('for two candidates with identical capability and distance, the lexicographically smaller callsign ranks first', () => {
     fc.assert(
       fc.property(categoryArb, incidentArb, candidateListArb, (category, incident, candidates) => {
-        const results = rankResponders(category, incident, candidates, DEFAULT_CAPABILITY_CONFIG);
+        const results = rankResponders(category, incident, candidates);
 
         // For any pair (i < j) in the same band with the same distance (or both null):
         // the earlier callsign must be <= the later callsign.
@@ -175,6 +172,7 @@ describe('Property C: callsign tiebreak for identical capability and identical d
             const b = results[j];
             if (a === undefined || b === undefined) continue;
             if (a.capable !== b.capable) continue;
+            if (a.candidate.coversIncidentOffice !== b.candidate.coversIncidentOffice) continue;
             if (a.distanceKm !== b.distanceKm) continue;
             // Same band, same distance (both null or identical float): callsign must not be greater.
             expect(a.candidate.callsign.localeCompare(b.candidate.callsign)).toBeLessThanOrEqual(0);
@@ -196,16 +194,10 @@ describe('Property D: determinism — identical inputs yield identical output', 
       fc.property(categoryArb, incidentArb, candidateListArb, (category, incident, candidates) => {
         // Freeze the inputs to detect any mutation-based non-determinism.
         const frozenCandidates = Object.freeze(candidates.map((c) => Object.freeze({ ...c })));
-        const frozenConfig: CapabilityConfig = Object.freeze({
-          SUNOG: Object.freeze([...DEFAULT_CAPABILITY_CONFIG.SUNOG]),
-          MEDIKAL: Object.freeze([...DEFAULT_CAPABILITY_CONFIG.MEDIKAL]),
-          KRIMEN: Object.freeze([...DEFAULT_CAPABILITY_CONFIG.KRIMEN]),
-          BAHA: Object.freeze([...DEFAULT_CAPABILITY_CONFIG.BAHA]),
-        }) as CapabilityConfig;
         const frozenIncident = Object.freeze({ ...incident });
 
-        const first = rankResponders(category, frozenIncident, frozenCandidates, frozenConfig);
-        const second = rankResponders(category, frozenIncident, frozenCandidates, frozenConfig);
+        const first = rankResponders(category, frozenIncident, frozenCandidates);
+        const second = rankResponders(category, frozenIncident, frozenCandidates);
 
         // Length must match.
         expect(first.length).toBe(second.length);
@@ -229,8 +221,8 @@ describe('Property D: determinism — identical inputs yield identical output', 
 // Property E — Purity: inputs are not mutated after a call (R6.7)
 // Validates: Requirements R6.7
 // ---------------------------------------------------------------------------
-describe('Property E: purity — input arrays and config are not mutated', () => {
-  it('the candidate array order and config values are unchanged after rankResponders runs', () => {
+describe('Property E: purity — input arrays are not mutated', () => {
+  it('the candidate array order and values are unchanged after rankResponders runs', () => {
     fc.assert(
       fc.property(categoryArb, incidentArb, candidateListArb, (category, incident, candidates) => {
         // Record the original candidate order and ids.
@@ -238,34 +230,12 @@ describe('Property E: purity — input arrays and config are not mutated', () =>
         const originalRoles = candidates.map((c) => c.role);
         const originalAgencyTypes = candidates.map((c) => c.agencyType);
 
-        // Snapshot the config values.
-        const originalConfig: CapabilityConfig = {
-          SUNOG: [...DEFAULT_CAPABILITY_CONFIG.SUNOG],
-          MEDIKAL: [...DEFAULT_CAPABILITY_CONFIG.MEDIKAL],
-          KRIMEN: [...DEFAULT_CAPABILITY_CONFIG.KRIMEN],
-          BAHA: [...DEFAULT_CAPABILITY_CONFIG.BAHA],
-        };
-
-        // Use a frozen config to ensure the function does not try to mutate it.
-        const frozenConfig: CapabilityConfig = Object.freeze({
-          SUNOG: Object.freeze([...DEFAULT_CAPABILITY_CONFIG.SUNOG]),
-          MEDIKAL: Object.freeze([...DEFAULT_CAPABILITY_CONFIG.MEDIKAL]),
-          KRIMEN: Object.freeze([...DEFAULT_CAPABILITY_CONFIG.KRIMEN]),
-          BAHA: Object.freeze([...DEFAULT_CAPABILITY_CONFIG.BAHA]),
-        }) as CapabilityConfig;
-
-        rankResponders(category, incident, candidates, frozenConfig);
+        rankResponders(category, incident, candidates);
 
         // The candidate array must retain its original order and field values.
         expect(candidates.map((c) => c.id)).toEqual(originalIds);
         expect(candidates.map((c) => c.role)).toEqual(originalRoles);
         expect(candidates.map((c) => c.agencyType)).toEqual(originalAgencyTypes);
-
-        // The config must retain its original values.
-        expect([...DEFAULT_CAPABILITY_CONFIG.SUNOG]).toEqual(originalConfig.SUNOG);
-        expect([...DEFAULT_CAPABILITY_CONFIG.MEDIKAL]).toEqual(originalConfig.MEDIKAL);
-        expect([...DEFAULT_CAPABILITY_CONFIG.KRIMEN]).toEqual(originalConfig.KRIMEN);
-        expect([...DEFAULT_CAPABILITY_CONFIG.BAHA]).toEqual(originalConfig.BAHA);
       }),
       { numRuns: RUNS },
     );

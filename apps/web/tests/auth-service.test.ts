@@ -75,6 +75,69 @@ async function signIn(email: string): Promise<SignedIn> {
   };
 }
 
+describe('agency on the principal + viewer (single-lgu-agency-network R3.3)', () => {
+  it('login principal carries agencyId and agencyName from the responder record', async () => {
+    world.harness.authStore.seedResponder({
+      id: 'responder-bfp',
+      callsign: 'BFP-01',
+      role: 'RESPONDER',
+      agencyId: 'agency-bfp',
+      agencyName: 'Bureau of Fire Protection',
+    });
+
+    const result = await login(world.deps, { email: 'bfp-01@aira.test', password: TEST_PASSWORD });
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+
+    expect(result.principal.agencyId).toBe('agency-bfp');
+    expect(result.principal.agencyName).toBe('Bureau of Fire Protection');
+  });
+
+  it('a DRRM generalist (no agency) exposes null agency fields on the principal', async () => {
+    const result = await login(world.deps, { email: FIELD_EMAIL, password: TEST_PASSWORD });
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+
+    expect(result.principal.agencyId).toBeNull();
+    expect(result.principal.agencyName).toBeNull();
+  });
+
+  it('a resolved session principal carries the agency fields', async () => {
+    world.harness.authStore.seedResponder({
+      id: 'responder-ems',
+      callsign: 'EMS-01',
+      role: 'RESPONDER',
+      agencyId: 'agency-ems',
+      agencyName: 'Emergency Medical Services',
+    });
+    const signedIn = await login(world.deps, {
+      email: 'ems-01@aira.test',
+      password: TEST_PASSWORD,
+    });
+    if (signedIn.status !== 'ok') throw new Error('login_failed');
+
+    const principal = await resolveSession(world.deps, signedIn.token);
+    expect(principal?.agencyId).toBe('agency-ems');
+    expect(principal?.agencyName).toBe('Emergency Medical Services');
+  });
+
+  it('the Viewer projection exposes agencyName for display', async () => {
+    const { viewerOfPrincipal } = await import('../src/lib/auth/view');
+    world.harness.authStore.seedResponder({
+      id: 'responder-pnp',
+      callsign: 'PNP-01',
+      role: 'DISPATCHER',
+      agencyId: 'agency-pnp',
+      agencyName: 'Philippine National Police',
+    });
+    const result = await login(world.deps, { email: 'pnp-01@aira.test', password: TEST_PASSWORD });
+    if (result.status !== 'ok') throw new Error('login_failed');
+
+    const viewer = viewerOfPrincipal(result.principal);
+    expect(viewer.agencyName).toBe('Philippine National Police');
+  });
+});
+
 describe('login', () => {
   it('issues an opaque token and never returns the password hash', async () => {
     const result = await login(world.deps, { email: FIELD_EMAIL, password: TEST_PASSWORD });
