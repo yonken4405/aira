@@ -7,16 +7,21 @@
 -- One deployment serves one LGU (PRODUCT.md §1), so exactly one LGU office exists;
 -- barangays hang off it. Category IDs are the frozen payload enum (PRODUCT.md §4).
 
-insert into public.agencies (id, name, code) values
-  ('a1000000-0000-4000-8000-000000000001', 'Bureau of Fire Protection', 'BFP'),
-  ('a1000000-0000-4000-8000-000000000002', 'Philippine National Police', 'PNP'),
-  ('a1000000-0000-4000-8000-000000000003', 'Emergency Medical Services', 'EMS')
-on conflict (id) do nothing;
-
 -- One subscribing tenant (onboarded in person). Each tenant owns one LGU office tree.
+-- Seeded first: agencies and offices are tenant-scoped and reference this row.
 insert into public.tenants (id, name, region, province, status) values
   ('7e000000-0000-4000-8000-000000000001', 'Cebu City DRRMO', 'Region VII', 'Cebu', 'active')
 on conflict (id) do nothing;
+
+-- Agencies are tenant-owned with a stable Agency_Type (tenant-responder-network). The
+-- 20261022250000 migration already seeds BFP/PNP/EMS/DRRM for this tenant; this block
+-- is kept idempotent so a seed run on top of the migration is a no-op (matches on the
+-- per-tenant case-insensitive code index rather than id).
+insert into public.agencies (tenant_id, name, code, agency_type) values
+  ('7e000000-0000-4000-8000-000000000001', 'Bureau of Fire Protection', 'BFP', 'FIRE'),
+  ('7e000000-0000-4000-8000-000000000001', 'Philippine National Police', 'PNP', 'POLICE'),
+  ('7e000000-0000-4000-8000-000000000001', 'Emergency Medical Services', 'EMS', 'MEDICAL')
+on conflict do nothing;
 
 insert into public.offices (id, tenant_id, name, kind, parent_id, lat, lon, region, province) values
   ('0f100000-0000-4000-8000-000000000001', '7e000000-0000-4000-8000-000000000001',

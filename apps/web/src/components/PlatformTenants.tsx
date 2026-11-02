@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { t } from '@aira/ui';
 import { Button, ConfirmDialog, Field, Input, cn, useToast } from '@aira/ui/web';
@@ -11,6 +11,8 @@ import { AgencyNetworkPanel } from './AgencyNetworkPanel';
 
 export interface PlatformTenantsProps {
   readonly tenants: readonly TenantRecord[];
+  /** Offices grouped by tenant id - feeds each tenant panel's staffing office picker. */
+  readonly officesByTenant?: Record<string, readonly { readonly id: string; readonly name: string }[]>;
 }
 
 interface ApiResult {
@@ -37,7 +39,7 @@ async function request(url: string, method: string, body?: unknown): Promise<Api
   }
 }
 
-export function PlatformTenants({ tenants }: PlatformTenantsProps) {
+export function PlatformTenants({ tenants, officesByTenant }: PlatformTenantsProps) {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -314,7 +316,7 @@ export function PlatformTenants({ tenants }: PlatformTenantsProps) {
                       {expanded ? (
                         <tr>
                           <td colSpan={5} className="border-t border-line bg-raised/40 p-0">
-                            <AgencyNetworkPanel tenantId={tenant.id} offices={[]} />
+                            <AgencyNetworkPanel tenantId={tenant.id} offices={officesByTenant?.[tenant.id] ?? []} />
                           </td>
                         </tr>
                       ) : null}
