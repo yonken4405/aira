@@ -1,0 +1,811 @@
+{
+  "pbtResults": {
+    "5.3 Write property test — store adapter equivalence": {
+      "status": "passed",
+      "lastRunTimestamp": 1793559323556
+    },
+    "6.6 Write property test — only RESPONDER candidates are suggested": {
+      "status": "passed",
+      "lastRunTimestamp": 1793559345813
+    },
+    "6.5 Write property test — ranking precedence and determinism": {
+      "status": "passed",
+      "lastRunTimestamp": 1793559349106
+    },
+    "6.4 Write property test — capability determination": {
+      "status": "passed",
+      "lastRunTimestamp": 1793559388281
+    },
+    "7.6 Write property test — per-tenant case-insensitive name/code uniqueness": {
+      "status": "passed",
+      "lastRunTimestamp": 1793560161564
+    },
+    "7.5 Write property test — Agency_Type validation accepts exactly the taxonomy": {
+      "status": "passed",
+      "lastRunTimestamp": 1793560246960
+    },
+    "7.7 Write property test — agency create/rename/activate round-trip + length validation": {
+      "status": "passed",
+      "lastRunTimestamp": 1793560319727
+    },
+    "7.8 Write property test — responder staffing is tenant-safe": {
+      "status": "passed",
+      "lastRunTimestamp": 1793560321219
+    },
+    "7.9 Write property test — capability update is a de-duplicated full replace": {
+      "status": "passed",
+      "lastRunTimestamp": 1793560327514
+    },
+    "7.10 Write property test — capability read is total with default fallback": {
+      "status": "passed",
+      "lastRunTimestamp": 1793560331390
+    },
+    "7.11 Write property test — capability update validation": {
+      "status": "passed",
+      "lastRunTimestamp": 1793560335056
+    },
+    "9.4 Write property test — tenant isolation on every management action": {
+      "status": "passed",
+      "lastRunTimestamp": 1793561248198
+    },
+    "9.5 Write property test — no coordinate ever leaves a management action": {
+      "status": "passed",
+      "lastRunTimestamp": 1793561274547
+    }
+  },
+  "executionHistory": {
+    "1.1 Write failing unit tests for the Agency_Type taxonomy": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558068436
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558082190
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558244728
+      }
+    ],
+    "1.2 Implement `agency-types.ts` and export it from the barrel": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558068558
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558251017
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558320515
+      }
+    ],
+    "2. Add the tenant-responder-network migration (schema file only)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558068651
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558083298
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558245457
+      }
+    ],
+    "3. Add responder-network domain types and extend the PlatformStore port": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558068727
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558325441
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558418235
+      }
+    ],
+    "4.1 Write failing tests for the in-memory store": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558068800
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558424198
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558931569
+      }
+    ],
+    "4.2 Implement the in-memory store methods": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558068916
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558937479
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559142724
+      }
+    ],
+    "5.1 Write failing tests for the postgres store methods": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558068993
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558425354
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558931884
+      }
+    ],
+    "5.2 Implement the postgres store methods": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069083
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558937746
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559142342
+      }
+    ],
+    "6.1 Write failing tests for the new routing signatures": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069178
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558426016
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558932149
+      }
+    ],
+    "6.2 Implement the routing-engine changes": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069268
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558938064
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559141760
+      }
+    ],
+    "6.3 Update the routing-candidate source and dispatcher path to the new signature": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069349
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559153784
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559176872
+      }
+    ],
+    "7.1 Write failing tests for the agency + capability service fns": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069428
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559187285
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559405284
+      }
+    ],
+    "7.2 Implement the agency + capability service fns": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069510
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559413409
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559605295
+      }
+    ],
+    "7.3 Write failing tests for `provisionResponder`": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069587
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559605539
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559799602
+      }
+    ],
+    "7.4 Implement `provisionResponder`": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069666
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559799888
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559987318
+      }
+    ],
+    "8.1 Write failing integration tests for the operator routes": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069783
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560030150
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560369563
+      }
+    ],
+    "8.2 Implement the operator-tier handlers": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069870
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560370216
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560724873
+      }
+    ],
+    "8.3 Add the operator routes": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558069954
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560725771
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560956100
+      }
+    ],
+    "9.1 Write failing integration tests for the admin routes": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070032
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560726475
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560957330
+      }
+    ],
+    "9.2 Implement the DRRM_Admin-tier handlers": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070113
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560958054
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561110864
+      }
+    ],
+    "9.3 Add the DRRM_Admin routes": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070187
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561111823
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561297231
+      }
+    ],
+    "10. Checkpoint — backend green": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070264
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561297884
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561695523
+      }
+    ],
+    "11.1 Write failing tests for the client parsers": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070346
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561696417
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561979287
+      }
+    ],
+    "11.2 Implement the client helpers + i18n keys": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070432
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561983667
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793562270628
+      }
+    ],
+    "12.1 Write failing component tests for `AgencyNetworkPanel`": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070512
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793562306269
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793562568160
+      }
+    ],
+    "12.2 Implement `AgencyNetworkPanel` and hang it off `PlatformTenants`": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070596
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793562574334
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563177942
+      }
+    ],
+    "13.1 Write failing component tests for the admin editors": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070680
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793562306913
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793562568654
+      }
+    ],
+    "13.2 Implement the DRRM_Admin editors in `AdminResponders`/admin tabs": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070765
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793562575388
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563178988
+      }
+    ],
+    "14. Checkpoint — full suite green": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070852
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563190767
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563304156
+      }
+    ],
+    "15. Update governing documentation": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558070935
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563305112
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563468458
+      }
+    ],
+    "16. Final checkpoint — run the quality gate": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558071033
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563472944
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563668685
+      }
+    ],
+    "1. Add the shared Agency_Type taxonomy to `@aira/ui`": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793558320599
+      }
+    ],
+    "5. Implement the postgres store methods (TDD)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559142443
+      }
+    ],
+    "4. Implement the in-memory store methods (TDD)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559142844
+      }
+    ],
+    "6. Re-key the Routing_Engine on Capability_Config + Agency_Type (TDD)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559176964
+      }
+    ],
+    "5.3 Write property test — store adapter equivalence": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559187810
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559404888
+      }
+    ],
+    "6.4 Write property test — capability determination": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559188251
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559404175
+      }
+    ],
+    "6.5 Write property test — ranking precedence and determinism": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559188579
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559404436
+      }
+    ],
+    "6.6 Write property test — only RESPONDER candidates are suggested": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559200488
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559403713
+      }
+    ],
+    "7. Implement agency + capability service functions (TDD)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793559987390
+      }
+    ],
+    "7.5 Write property test — Agency_Type validation accepts exactly the taxonomy": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560028100
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560359818
+      }
+    ],
+    "7.6 Write property test — per-tenant case-insensitive name/code uniqueness": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560028581
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560360249
+      }
+    ],
+    "7.7 Write property test — agency create/rename/activate round-trip + length validation": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560029271
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560360696
+      }
+    ],
+    "7.8 Write property test — responder staffing is tenant-safe": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560029562
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560361149
+      }
+    ],
+    "7.9 Write property test — capability update is a de-duplicated full replace": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560043373
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560361668
+      }
+    ],
+    "7.10 Write property test — capability read is total with default fallback": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560043594
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561814704
+      }
+    ],
+    "7.11 Write property test — capability update validation": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560043996
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561815455
+      }
+    ],
+    "8. Implement the operator-tier handlers + routes (TDD)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793560956192
+      }
+    ],
+    "9.4 Write property test — tenant isolation on every management action": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561113249
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561294930
+      }
+    ],
+    "9.5 Write property test — no coordinate ever leaves a management action": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561113944
+      },
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561296331
+      }
+    ],
+    "9. Implement the DRRM_Admin-tier handlers + routes (TDD)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793561297352
+      }
+    ],
+    "11. Add agency/capability client helpers and i18n keys (TDD)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793562270748
+      }
+    ],
+    "12. Implement the operator `AgencyNetworkPanel` (TDD)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563178060
+      }
+    ],
+    "13. Implement the DRRM_Admin agency + capability editors (TDD)": [
+      {
+        "executionId": "f2672307-1130-4c26-b121-fae6f013bf8b",
+        "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
+        "timestamp": 1793563179077
+      }
+    ]
+  }
+}

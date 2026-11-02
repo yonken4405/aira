@@ -76,6 +76,7 @@ export const DISPATCHER_VIEWER: Viewer = {
   role: 'DISPATCHER',
   tenantId: TENANT_ID,
   officeName: 'Cebu City DRRMO',
+  agencyName: null,
   mustChangePassword: false,
 };
 
@@ -87,6 +88,7 @@ export const RESPONDER_VIEWER: Viewer = {
   role: 'RESPONDER',
   tenantId: TENANT_ID,
   officeName: 'Cebu City DRRMO',
+  agencyName: null,
   mustChangePassword: false,
 };
 
@@ -98,5 +100,6 @@ export const ADMIN_VIEWER: Viewer = {
   role: 'ADMIN',
   tenantId: TENANT_ID,
   officeName: 'Cebu City DRRMO',
+  agencyName: null,
   mustChangePassword: false,
 };

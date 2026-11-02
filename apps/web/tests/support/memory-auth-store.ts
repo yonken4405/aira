@@ -38,6 +38,12 @@ export interface MemoryAuthStoreOptions {
   readonly now: () => number;
   readonly offices?: readonly OfficeSummary[];
   readonly agencies?: readonly AgencySummary[];
+  /**
+   * The tenant the seeded agencies belong to (AgencySummary has no tenant column).
+   * `listAgencies(tenantId)` returns the seeded set only for this tenant, so the R7.5
+   * tenant-filter fix is observable in-memory. Defaults to the fixture TENANT_ID.
+   */
+  readonly agencyTenantId?: string;
 }
 
 export const TEST_PASSWORD_HASH = DUMMY_PASSWORD_HASH;
@@ -64,6 +70,7 @@ export function createMemoryAuthStore(options: MemoryAuthStoreOptions): MemoryAu
   const events: AuthEventRecord[] = [];
   const offices = options.offices ?? DEFAULT_OFFICES;
   const agencies = options.agencies ?? DEFAULT_AGENCIES;
+  const agencyTenantId = options.agencyTenantId ?? TENANT_ID;
 
   function seedResponder(
     overrides: Partial<ResponderRecord> & {
@@ -284,9 +291,14 @@ export function createMemoryAuthStore(options: MemoryAuthStoreOptions): MemoryAu
       return updated;
     },
 
-    async listResponders(tenantId: string): Promise<readonly AdminResponderRow[]> {
+    async listResponders(
+      tenantId: string,
+      listOptions?: { readonly agencyId?: string | null },
+    ): Promise<readonly AdminResponderRow[]> {
+      const agencyId = listOptions?.agencyId ?? null;
       return [...responders.values()]
         .filter((responder) => responder.tenantId === tenantId)
+        .filter((responder) => agencyId === null || responder.agencyId === agencyId)
         .map((responder) => ({
           ...responder,
           sessionCount: liveSessions(responder.id),
@@ -314,8 +326,10 @@ export function createMemoryAuthStore(options: MemoryAuthStoreOptions): MemoryAu
       return offices;
     },
 
-    async listAgencies() {
-      return agencies;
+    async listAgencies(tenantId: string) {
+      // Tenant-filtered (R7.5): the seeded agencies belong to `agencyTenantId`; another
+      // tenant sees none of them.
+      return tenantId === agencyTenantId ? agencies : [];
     },
 
     async appendAuthEvent(input) {

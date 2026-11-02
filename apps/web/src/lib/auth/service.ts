@@ -94,6 +94,8 @@ function principalFrom(responder: ResponderRecord, sessionId: string): Authentic
     tenantId: responder.tenantId,
     officeId: responder.officeId,
     officeName: responder.officeName,
+    agencyId: responder.agencyId,
+    agencyName: responder.agencyName,
     mustChangePassword: responder.mustChangePassword,
   };
 }

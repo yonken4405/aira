@@ -138,7 +138,8 @@ const EN_MESSAGES = {
   signedInAs: 'Signed in as',
   roleResponder: 'Responder',
   roleDispatcher: 'Dispatcher',
-  roleAdmin: 'DRRM administrator',
+  roleAgencyAdmin: 'Agency administrator',
+  roleAdmin: 'LDRRMO coordinator',
   roleCitizen: 'Resident (app only)',
   sessionExpiredTitle: 'Session ended',
   sessionExpiredBody: 'Sign in again to continue.',
@@ -189,6 +190,9 @@ const EN_MESSAGES = {
   adminOverview: 'Live map',
   adminDashboards: 'Dashboards',
   adminAudit: 'Audit log',
+  // single-lgu-agency-network admin surfaces (R8, R5)
+  adminOrg: 'Organization',
+  adminCoverage: 'Coverage',
 
   // Admin oversight (DESIGN.md §5a)
   overviewTitle: 'Operations overview',
@@ -210,6 +214,25 @@ const EN_MESSAGES = {
   office: 'Office',
   agency: 'Agency',
   agencyNone: 'No agency',
+  agencyRequiredHint: 'Required. Every responder belongs to one agency.',
+  agencySelectPrompt: 'Select an agency…',
+  // Users / organization view (single-lgu-agency-network R8)
+  orgTitle: 'Organization',
+  orgOfficesTitle: 'Office hierarchy',
+  orgAgenciesTitle: 'Agencies',
+  orgMembersTitle: 'Members',
+  orgNoMembers: 'No members in this agency yet.',
+  orgUnavailable: 'The organization view is unavailable. Try again shortly.',
+  // Agency coverage editor (single-lgu-agency-network R5)
+  coverageTitle: 'Service coverage',
+  coverageHint:
+    'Choose the barangays your agency normally serves. Coverage prioritizes routing; your units can still respond anywhere in the LGU.',
+  coverageSave: 'Save coverage',
+  coverageSaved: 'Coverage updated',
+  coverageSaveFailed: 'Could not save coverage. Try again.',
+  coverageUnavailable: 'Coverage is unavailable right now. Try again shortly.',
+  coverageConfirmTitle: 'Replace coverage?',
+  coverageConfirmBody: 'This replaces the full set of barangays {agency} covers.',
   activeLabel: 'Status',
   activeValue: 'Active',
   inactiveValue: 'Inactive',
@@ -356,6 +379,10 @@ const EN_MESSAGES = {
   notifyTenantOnboardedBody: 'A new partner office has been onboarded to the platform.',
   notifyTenantSuspendedTitle: 'Partner office suspended',
   notifyTenantSuspendedBody: 'A partner office has been suspended on the platform.',
+  // LDRRMO coordination nudge (single-lgu-agency-network R4.4). Coordinate-free copy.
+  notifyCoordinationNudgeTitle: 'Coordination request from the LDRRMO',
+  notifyCoordinationNudgeBody:
+    'The LDRRMO operations center has requested your agency’s coordination on an active response.',
 
   // Mobile citizen account + medical profile (mobile-citizen-account spec).
   // Tier-2 enrichment surfaces reached from the SOS grid; English-primary Operate-Mode copy.
@@ -378,9 +405,13 @@ const EN_MESSAGES = {
   citizenGenericError: 'Something went wrong. Try again.',
 
   // Account hub + register/login screen copy.
+  citizenOpenAccount: 'Account',
+  citizenBack: 'Back',
   citizenAccountTitle: 'Account',
   citizenRegister: 'Create account',
+  citizenRegisterTitle: 'Create your account',
   citizenLogin: 'Sign in',
+  citizenLoginTitle: 'Sign in to your account',
   citizenUseDeviceKey: 'Continue without an email',
   citizenEmailLabel: 'Email',
   citizenPasswordLabel: 'Password',
@@ -413,32 +444,46 @@ const EN_MESSAGES = {
   citizenDeleteProfile: 'Delete profile',
   citizenDeleteProfileConfirmTitle: 'Delete medical profile?',
   citizenDeleteProfileConfirmBody: 'This removes all of your medical details.',
-
-  // Shared secondary-surface chrome and states.
-  citizenBack: 'Back',
-  citizenBackToGrid: 'Back to SOS',
-  citizenConfirmAction: 'Confirm',
-  citizenLoading: 'Loading',
-  citizenSavingProfile: 'Saving',
-  citizenSaveProfile: 'Save profile',
-  citizenTryAgainIn: 'Try again in {seconds}s',
-  citizenAddEntry: 'Add entry',
-  citizenRemove: 'Remove',
+  citizenSave: 'Save',
+  citizenRetry: 'Try again',
   citizenUnset: 'Not set',
-  citizenAccountAnonymous: 'Not signed in',
-  citizenAccountSubtitle: 'Optional. The SOS grid always works without an account.',
-  citizenRegisterTitle: 'Create an account',
-  citizenRegisterSubtitle: 'Optional. You only need an account for a medical profile.',
-  citizenLoginTitle: 'Sign in to your account',
-  citizenLoginSubtitle: 'Use the email you registered with.',
-  citizenDeviceHint: 'Create an account on this device without an email.',
-  citizenDeviceAccount: 'Device account',
-  citizenNoEmail: 'No email on this account',
-  citizenAccountDeleted: 'Account deleted',
-  citizenMedicalSubtitle: 'Only shared with responders during your emergency.',
-  citizenProfileSaved: 'Medical profile saved',
-  citizenProfileDeleted: 'Medical profile deleted',
-  citizenContactRelationHint: 'Optional',
+  citizenAddItem: 'Add',
+  citizenRemoveItem: 'Remove',
+
+  // Tenant responder network: agencies, capability config, responder provisioning
+  // (tenant-responder-network spec). Agency_Type tokens are identifiers; their human
+  // labels resolve only through these keys, never a raw token (R2.6).
+  agencyTypeFire: 'Fire',
+  agencyTypePolice: 'Police',
+  agencyTypeMedical: 'Medical',
+  agencyTypeDrrm: 'DRRM',
+  agencyTypeOther: 'Other',
+  // Agency_Type picker option: a descriptor phrase so the option text is never a
+  // bare Agency_Type label (keeps the agency list / capability rows the single
+  // source of each exact label on the admin surface). Still t()-resolved (R2.6).
+  agencyTypeOption: '{type} agency',
+  agencyNetworkTitle: 'Responder network',
+  agenciesTitle: 'Agencies',
+  addAgency: 'Add agency',
+  agencyNameLabel: 'Name',
+  agencyCodeLabel: 'Code',
+  agencyTypeLabel: 'Type',
+  agencyActiveLabel: 'Status',
+  renameAgency: 'Rename',
+  deactivateAgency: 'Deactivate',
+  deactivateAgencyTitle: 'Deactivate agency?',
+  deactivateAgencyBody: '{agency} stops receiving routing suggestions until it is reactivated.',
+  activateAgency: 'Activate',
+  agencyCreated: 'Agency added',
+  agencyCreateFailed: 'Could not add the agency. Check the name, code and type.',
+  agencyRenamed: 'Agency updated',
+  agencyUpdateFailed: 'Could not update the agency. Try again.',
+  capabilityTitle: 'Capability map',
+  capabilityCategory: 'Category',
+  capabilitySaved: 'Capability updated',
+  capabilitySaveFailed: 'Could not update the capability map. Try again.',
+  capabilityUnavailable: 'Capability settings are unavailable',
+  staffResponderTitle: 'Add responder',
 } as const;
 
 export type MessageKey = keyof typeof EN_MESSAGES;

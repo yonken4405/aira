@@ -1,10 +1,16 @@
 /**
- * Role-based access control (SECURITY.md §4).
+ * Role-based access control (SECURITY.md §4, single-lgu-agency-network §3).
  *
- * The roles mirror how Philippine LGU DRRM offices are actually organised under
- * RA 10121 §12(b): a DRRM Officer heads the office (ADMIN), the Operations & Warning
- * division runs the 24/7 Operations Center as duty dispatchers (DISPATCHER), and the
- * emergency response units in the field are the responders (RESPONDER).
+ * The roles model how a single LGU coordinates its line agencies under RA 10121's
+ * notify-and-coordinate doctrine:
+ *   - RESPONDER     — a field unit; acts only on its own assignments.
+ *   - DISPATCHER    — AGENCY-scoped: runs one agency's operations center, assigns that
+ *                     agency's units for incidents routed to that agency.
+ *   - AGENCY_ADMIN  — manages ONE agency's accounts + office↔agency coverage, and reads
+ *                     its own agency's incidents read-only. Never dispatches.
+ *   - ADMIN         — the LDRRMO coordinator: LGU-wide READ-ONLY incident/metrics
+ *                     oversight, sees ALL agencies, may send a coordination nudge. Never
+ *                     dispatches (separation of duties).
  *
  * Residents are an app-only principal: no account, no session, no database row. The
  * CITIZEN role exists here only to describe the single permission the public intake
@@ -13,7 +19,7 @@
  * Deny by default: anything not explicitly granted is refused.
  */
 
-export const ROLES = ['RESPONDER', 'DISPATCHER', 'ADMIN'] as const;
+export const ROLES = ['RESPONDER', 'DISPATCHER', 'AGENCY_ADMIN', 'ADMIN'] as const;
 export type Role = (typeof ROLES)[number];
 
 export const CITIZEN = 'CITIZEN' as const;
@@ -24,14 +30,24 @@ export const PERMISSIONS = [
   'incident:submit',
   /** Read incidents assigned to the signed-in responder. */
   'incident:read:own',
-  /** Read every incident inside the responder's office subtree. */
+  /** Read every incident inside the responder's office subtree (LDRRMO, LGU-wide read-only). */
   'incident:read:office',
-  /** Assign or reassign a unit (dispatcher routing action). */
-  'incident:assign',
+  /** Read incidents routed to the caller's own agency (dispatcher/agency-admin). */
+  'incident:read:agency',
+  /** Assign or reassign a unit within the caller's own agency (agency dispatcher). */
+  'incident:assign:agency',
   /** Advance the status of an incident assigned to the responder. */
   'incident:status:own',
-  /** Advance the status of any incident in the office subtree. */
+  /** Advance the status of any incident the caller's agency owns (agency dispatcher). */
   'incident:status:any',
+  /** Manage the caller's own agency accounts (agency admin). */
+  'agency:manage',
+  /** Manage the caller's own agency office↔agency coverage links (agency admin). */
+  'coverage:manage',
+  /** See every agency in the LGU for coordination (LDRRMO coordinator). */
+  'agency:read:all',
+  /** Send a coordination nudge / help request to another agency (LDRRMO coordinator). */
+  'coordination:nudge',
   /** Read the responder roster (needed to pick an assignee). */
   'responder:read',
   /** Create, deactivate, re-role and unlock accounts. */
@@ -52,9 +68,8 @@ export const PERMISSIONS = [
 export type Permission = (typeof PERMISSIONS)[number];
 
 /**
- * Exhaustive grant table. ADMIN deliberately holds no incident permission: the DRRM
- * officer manages accounts and audit, and the console holds no citizen data by default
- * (SECURITY.md §4).
+ * Exhaustive grant table (single-lgu-agency-network §3). DISPATCHER and AGENCY_ADMIN are
+ * agency-scoped; the ADMIN (LDRRMO coordinator) is LGU-wide read-only and never dispatches.
  */
 const ROLE_PERMISSIONS: Readonly<Record<PrincipalRole, readonly Permission[]>> = {
   [CITIZEN]: ['incident:submit'],
@@ -64,9 +79,11 @@ const ROLE_PERMISSIONS: Readonly<Record<PrincipalRole, readonly Permission[]>> =
     'session:revoke:own',
     'account:change-password',
   ],
+  // DISPATCHER = an agency's operations center. Reads/assigns ONLY its own agency's
+  // units for incidents routed to that agency (bounded at the store layer).
   DISPATCHER: [
-    'incident:read:office',
-    'incident:assign',
+    'incident:read:agency',
+    'incident:assign:agency',
     'incident:status:any',
     'responder:read',
     'metrics:read',
@@ -74,14 +91,28 @@ const ROLE_PERMISSIONS: Readonly<Record<PrincipalRole, readonly Permission[]>> =
     'account:change-password',
     'civilian-broadcast',
   ],
-  // ADMIN = DRRM officer: READ-ONLY oversight (incident:read:office + metrics:read) and
-  // account/audit management. Deliberately NO incident:assign / incident:status:* -
-  // dispatching stays with dispatchers (separation of duties, SECURITY.md §4).
+  // AGENCY_ADMIN manages ONE agency: its accounts + its office↔agency coverage, and reads
+  // its own agency's incidents read-only. No dispatch, no LGU-wide reach.
+  AGENCY_ADMIN: [
+    'agency:manage',
+    'coverage:manage',
+    'responder:read',
+    'incident:read:agency',
+    'metrics:read',
+    'audit:read',
+    'session:revoke:own',
+    'account:change-password',
+  ],
+  // ADMIN = LDRRMO coordinator: LGU-wide READ-ONLY oversight (incident:read:office +
+  // metrics:read), sees ALL agencies, may nudge. Deliberately NO incident:assign:* /
+  // incident:status:* - dispatching stays with agency dispatchers (separation of duties).
   ADMIN: [
     'incident:read:office',
     'metrics:read',
     'responder:read',
     'responder:manage',
+    'agency:read:all',
+    'coordination:nudge',
     'audit:read',
     'session:revoke:any',
     'session:revoke:own',
@@ -124,9 +155,12 @@ export function assertPermission(role: PrincipalRole, permission: Permission): v
   }
 }
 
-/** Where a role lands after signing in. ADMIN has no incident console (SECURITY.md §4). */
+/**
+ * Where a role lands after signing in. The admin surfaces (LDRRMO coordinator + agency
+ * admin) land on `/admin`; dispatch/field roles land on the `/console` (SECURITY.md §4).
+ */
 export function landingFor(role: Role): '/admin' | '/console' {
-  return role === 'ADMIN' ? '/admin' : '/console';
+  return role === 'ADMIN' || role === 'AGENCY_ADMIN' ? '/admin' : '/console';
 }
 
 /**

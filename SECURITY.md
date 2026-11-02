@@ -289,5 +289,87 @@ following rules are binding.
    the email send fails). Exactly one delivery outcome is recorded per channel per
    notification.
 
+## 14. Tenant responder network (agencies, staffing, capability) (2026-10-22)
+
+The responder-network management surface (tenant-owned agencies, tenant-safe responder staffing, and
+the per-tenant category→Agency_Type Capability_Config that drives routing) is a Tier 2 operator/admin
+feature. It never touches the frozen Tier-0 mesh path and is **coordinate-free** end to end. These
+rules are binding and extend the isolation model of §12.
+
+1. **Two-tier authority, one SQL-bounded scope.** Two tiers manage the same tenant-scoped surface and
+   stay fully isolated server-side (§12.2): a **Platform_Operator** acts across **any** Tenant via
+   `/api/platform/*` routes (the acting tenant is the explicit `tenantId` in the URL); a **DRRM_Admin**
+   acts on its **own** Tenant only, through `responder:manage` on `/api/admin/*` routes, with the
+   acting tenant read from the session principal (derived via its office) and **never** from a URL — a
+   DRRM_Admin can never even name another tenant. Both entry points call one shared service that treats
+   the acting tenant scope as the hard boundary for every read and write.
+2. **Deny-by-default RBAC.** A missing/foreign-tier session is `401`; a session lacking the required
+   permission is `403` (hidden UI is never access control, §4.1). A Platform_Operator session holds
+   management authority across tenants and is **not** rejected merely because the target resource
+   belongs to another tenant (that is its remit); a DRRM_Admin without `responder:manage` is denied.
+3. **Cross-tenant discriminant (DRRM_Admin).** For a DRRM_Admin referencing a resource outside its own
+   Tenant: a resource that **exists but is known to belong to another tenant** — reached by a
+   guessable resource id the route exposes (agency edit/activate by id, responder office id) — is
+   `403`; a resource keyed solely by the admin's own tenant (capability, agency list) that is simply
+   **not visible in-tenant** is `404`. A Platform_Operator targeting a missing resource gets a plain
+   `404`. The bound is enforced in SQL (scope carries `tenant_id`), never by UI filtering.
+4. **No coordinates anywhere on this surface.** No request, response, error message, URL, log line, or
+   audit entry on any responder-network endpoint carries a coordinate — the feature handles none (§5).
+   A successful agency or responder action appends an account-action audit entry (acting principal
+   reference, action type, target resource id) and writes no coordinate (§4.5, §8.3).
+5. **Boundary validation + generic errors.** Agency_Type is validated against the closed taxonomy
+   `{FIRE, POLICE, MEDICAL, DRRM, OTHER}` and the category against the frozen set
+   `{SUNOG, MEDIKAL, KRIMEN, BAHA}`; rejections return a generic error identifier that never echoes the
+   submitted value (§6.4), and per-tenant case-insensitive name/code collisions map to `409`.
+6. **Same-origin + schema discipline.** Every mutation runs the Same_Origin_Guard before auth
+   (`403 forbidden_origin`). The schema change is a single new SQL migration
+   (`20261022250000_tenant_responder_network.sql`) under `supabase/migrations`; the `aira_app` role
+   gets the same deny-by-default least-privilege grant as other business tables (§5.7), with no
+   Supabase Auth and no new keyed provider.
+
+## 15. Single-LGU agency network (agency-scoped roles, coordination-only LDRRMO) (2026-11-03)
+
+This supersedes the operator-UX and capability parts of §14 while **keeping every isolation boundary
+of §12/§14 intact**. AIRA is a single-LGU product under the "soft single-LGU" (S1) model: the
+multi-tenant `tenants`/`tenant_id` columns and the tenant-bounded `OFFICE_SCOPE` CTEs are **retained
+unchanged** as defense-in-depth and resolve to the one LGU. The surface stays **Tier 2** and
+**coordinate-free** end to end (§5). These rules are binding:
+
+1. **Agency as a scope.** A new scope primitive — `AGENCY_SCOPE` (`responders.agency_id =
+principal.agencyId`) — bounds the `DISPATCHER` and `AGENCY_ADMIN` tiers, nested one level inside
+   `OFFICE_SCOPE`. The authenticated principal and the browser-facing `Viewer` carry
+   `agencyId`/`agencyName`. A responder belongs to exactly one office (required) and one agency
+   (required at the service layer; the DB `agency_id` stays nullable only for the break-glass path).
+2. **Agency-scoped dispatch (deny-by-default).** A `DISPATCHER` reads/assigns only its **own** agency's
+   units for incidents routed to its agency; assigning a non-own-agency unit is `403`. A routing
+   suggestion never grants access — assignment is authorized server-side (§4.1). The queue and routing
+   candidates are bounded at the store layer by `agency_id`, never by UI filtering.
+3. **Agency-admin isolation.** An `AGENCY_ADMIN` manages **only** its own agency's accounts and
+   coverage. Cross-agency access follows the §14.3 discriminant one level down: a resource **known** to
+   belong to another agency in the LGU is `403` (`cross_agency`); one **not visible** in the caller's
+   agency scope is `404`. Provisioning is agency-required (`400 invalid_responder` when absent) and an
+   agency-bounded caller may never create an account in another agency (`403`).
+4. **LDRRMO coordinator is coordination-only.** The `ADMIN` role has **LGU-wide read-only** incident +
+   metrics oversight, sees **all** agencies, and may send a coordination **nudge** — but holds **no**
+   `incident:assign:*` / `incident:status:*` permission. Dispatching stays with agency dispatchers
+   (separation of duties, RA 10121). The nudge is coordinate-free and addresses an agency's members by
+   id only.
+5. **Office↔agency coverage is prioritization, never authorization.** `agency_coverage` affects routing
+   **order** only; it is never an access control or a hard filter, so a coverage row can neither grant
+   nor deny a read/write. Coverage edits are same-LGU validated (an office outside the LGU is rejected).
+6. **Superadmin retained as CLI-only break-glass.** The operator **console** and its tenant/office/
+   agency/capability/responder management **routes** are removed; `/login` no longer retries a platform
+   login. The superadmin **tables, session, `authenticatePlatform` guard, and `platform:create-admin`
+   CLI are retained** (the platform-tier system-notice path still uses them), but there is **no web
+   console** and the tier still holds **zero** incident/citizen access (§12).
+7. **Fixed routing map, no stored capability.** The editable per-tenant capability config is removed
+   (`tenant_capability_config` dropped); routing uses a fixed built-in `CATEGORY → AGENCY_TYPE`
+   constant, eliminating a write surface without changing behavior.
+8. **Schema discipline.** One new migration
+   (`20261022260000_single_lgu_agency_network.sql`) adds the `AGENCY_ADMIN` enum value, creates
+   `agency_coverage` (cascade FKs), drops `tenant_capability_config`, and applies the usual
+   deny-by-default least-privilege grant to the new table. Earlier migrations are unchanged; no
+   Supabase Auth, no new keyed provider.
+
 **Definition of done:** a feature that touches data, auth, or third-party boundaries also updates this
 file and is covered by tests per [TESTING.md](./TESTING.md).

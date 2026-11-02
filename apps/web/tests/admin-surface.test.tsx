@@ -75,6 +75,16 @@ vi.mock('../src/components/AdminAudit', () => ({
   AdminAudit: () => <div data-testid="tab-audit-body">audit body</div>,
 }));
 
+// The org + coverage tab bodies self-fetch on mount; mock them to opaque markers so
+// the gating assertions stay focused on tabs (single-lgu-agency-network R8/R5).
+vi.mock('../src/components/OrgView', () => ({
+  OrgView: () => <div data-testid="tab-org-body">org body</div>,
+}));
+
+vi.mock('../src/components/AgencyCoverage', () => ({
+  AgencyCoverage: () => <div data-testid="tab-coverage-body">coverage body</div>,
+}));
+
 // Minimal, shape-valid data handed through to the (mocked) tab bodies. The bodies
 // ignore it, so empty collections are enough to satisfy the named-prop contract.
 const accountsData = {
@@ -99,9 +109,13 @@ const metricsData = {
 
 const auditData = { events: [] } as const;
 
-type AdminTabId = 'accounts' | 'metrics' | 'audit';
+type AdminTabId = 'accounts' | 'org' | 'coverage' | 'metrics' | 'audit';
 
-function renderSurface(args: { viewerRole: Role; initialTab?: AdminTabId }) {
+function renderSurface(args: {
+  viewerRole: Role;
+  initialTab?: AdminTabId;
+  agency?: { id: string; name: string } | null;
+}) {
   return render(
     <AdminSurface
       viewerRole={args.viewerRole}
@@ -109,6 +123,8 @@ function renderSurface(args: { viewerRole: Role; initialTab?: AdminTabId }) {
       accounts={accountsData as never}
       metrics={metricsData as never}
       audit={auditData as never}
+      agency={args.agency ?? null}
+      offices={[]}
     />,
   );
 }
@@ -215,5 +231,36 @@ describe('AdminSurface not-authorized fallback (R4.9)', () => {
     expect(screen.queryByTestId('tab-accounts-body')).toBeNull();
     expect(screen.queryByTestId('tab-metrics-body')).toBeNull();
     expect(screen.queryByTestId('tab-audit-body')).toBeNull();
+  });
+});
+
+describe('AdminSurface role-aware tabs (single-lgu-agency-network R8/R5)', () => {
+  it('ADMIN (LDRRMO coordinator) gets an Org tab but no Coverage tab', () => {
+    renderSurface({ viewerRole: 'ADMIN', initialTab: 'accounts' });
+    expect(tab(/organization/i)).toBeTruthy();
+    // No own agency → no coverage editor.
+    expect(tab(/coverage/i)).toBeNull();
+  });
+
+  it('AGENCY_ADMIN gets Accounts, Org and Coverage tabs (with its own agency)', () => {
+    renderSurface({
+      viewerRole: 'AGENCY_ADMIN',
+      initialTab: 'accounts',
+      agency: { id: 'agency-bfp', name: 'Bureau of Fire Protection' },
+    });
+    expect(tab(/account/i)).toBeTruthy();
+    expect(tab(/organization/i)).toBeTruthy();
+    expect(tab(/coverage/i)).toBeTruthy();
+  });
+
+  it('omits the Coverage tab for an AGENCY_ADMIN with no resolved agency', () => {
+    renderSurface({ viewerRole: 'AGENCY_ADMIN', initialTab: 'accounts', agency: null });
+    expect(tab(/coverage/i)).toBeNull();
+  });
+
+  it('switches to the Org tab and shows the org body', () => {
+    renderSurface({ viewerRole: 'ADMIN', initialTab: 'accounts' });
+    fireEvent.click(screen.getByRole('tab', { name: /organization/i }));
+    expect(screen.getByTestId('tab-org-body')).toBeTruthy();
   });
 });

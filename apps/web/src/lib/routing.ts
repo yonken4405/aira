@@ -4,30 +4,30 @@
  * Pure, deterministic ranking of candidate responders for an incident. No live GPS
  * yet (that is Phase E): candidates are ranked by great-circle distance from a known
  * base position (the responder's office/barangay centroid), filtered by whether their
- * agency is capable of the incident's category and whether they fall inside the
- * incident's office jurisdiction subtree.
+ * agency is capable of the incident's category and prioritised by whether their agency
+ * covers the incident's office (coverage is prioritisation only — cross-jurisdiction
+ * response is allowed, ranked lower; R5.3/R5.4).
  *
  * This is a suggestion engine only. Authorisation still happens server-side in the
  * assign handler (SECURITY.md §4.1): a suggestion never grants access.
  */
 
-import type { EmergencyCategoryId } from '@aira/ui';
+import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
 
 import { haversineKm, type GeoPoint } from './geo';
 
 /**
- * Which agency codes are capable of responding to each category. Codes match the
- * seeded `agencies.code` (BFP / PNP / EMS); DRRM is the LGU office's own rescue teams,
- * represented by responders with no agency (agency-less = DRRM generalist).
- *
- * A responder with no agency (DRRM generalist) is capable of any category - they are
- * the fallback the office always has.
+ * The fixed, built-in mapping from an emergency category to the capable Agency_Type(s).
+ * This replaces the former editable per-tenant capability config (Requirement 9): the
+ * map was effectively write-only because the dispatch path always used the default, so
+ * collapsing it to a constant preserves today's behaviour exactly while removing a whole
+ * table + UI. DRRM generalists (agency-less responders) always respond (see `isCapable`).
  */
-export const CATEGORY_AGENCY_CAPABILITY: Readonly<Record<EmergencyCategoryId, readonly string[]>> =
+export const CATEGORY_AGENCY_DEFAULT: Readonly<Record<EmergencyCategoryId, readonly AgencyType[]>> =
   {
-    SUNOG: ['BFP'],
-    MEDIKAL: ['EMS'],
-    KRIMEN: ['PNP'],
+    SUNOG: ['FIRE'],
+    MEDIKAL: ['MEDICAL'],
+    KRIMEN: ['POLICE'],
     BAHA: [], // flood/rescue: DRRM generalists (agency-less) lead
   };
 
@@ -35,14 +35,18 @@ export const CATEGORY_AGENCY_CAPABILITY: Readonly<Record<EmergencyCategoryId, re
 export interface RoutingCandidate {
   readonly id: string;
   readonly callsign: string;
-  readonly role: 'RESPONDER' | 'DISPATCHER' | 'ADMIN';
+  readonly role: 'RESPONDER' | 'DISPATCHER' | 'ADMIN' | 'AGENCY_ADMIN';
   readonly officeId: string;
   readonly officeName: string;
-  /** Agency code (BFP/PNP/EMS) or null for a DRRM generalist. */
-  readonly agencyCode: string | null;
+  /** Owning agency id, or null for a DRRM generalist. Used by the store-layer agency filter. */
+  readonly agencyId: string | null;
+  /** Agency type or null for a DRRM generalist (no affiliated agency). */
+  readonly agencyType: AgencyType | null;
   readonly agencyName: string | null;
   /** Base position (office/barangay centroid). Null when the office has no centroid. */
   readonly base: GeoPoint | null;
+  /** True when the candidate's agency covers the incident's office (prioritisation only). */
+  readonly coversIncidentOffice: boolean;
 }
 
 export interface RoutingSuggestion {
@@ -53,21 +57,29 @@ export interface RoutingSuggestion {
   readonly capable: boolean;
 }
 
-/** True when a responder's agency can handle the category (agency-less = generalist). */
-export function isCapable(category: EmergencyCategoryId, agencyCode: string | null): boolean {
-  if (agencyCode === null) {
-    return true; // DRRM generalist responds to anything.
+/**
+ * True when a responder's agency type can handle the category under the fixed map.
+ * - null agencyType = DRRM generalist: capable of any category (R6.2).
+ * - non-null agencyType: capable iff present in `CATEGORY_AGENCY_DEFAULT[category]`.
+ * - never throws, even on an empty capability set (e.g. BAHA).
+ */
+export function isCapable(category: EmergencyCategoryId, agencyType: AgencyType | null): boolean {
+  if (agencyType === null) {
+    return true; // DRRM generalist responds to anything (R6.2).
   }
-  return CATEGORY_AGENCY_CAPABILITY[category].includes(agencyCode);
+  const capable = CATEGORY_AGENCY_DEFAULT[category] ?? [];
+  return (capable as readonly string[]).includes(agencyType);
 }
 
 /**
  * Rank candidates for an incident. Ordering (deny-by-default, most useful first):
  *   1. capable before not-capable;
- *   2. nearer before farther (unknown distance sorts last within its capability band);
- *   3. callsign as a stable tiebreak so the order is deterministic.
+ *   2. covering the incident's office before not covering (prioritisation only; R5.3/R5.4);
+ *   3. nearer before farther (unknown distance sorts last within its band);
+ *   4. callsign as a stable tiebreak so the order is deterministic.
  *
- * Only field RESPONDERs are rankable assignees; dispatchers/admins are filtered out.
+ * Only field RESPONDERs are rankable assignees; dispatchers/admins/agency-admins are
+ * filtered out. Pure and deterministic: inputs are never mutated.
  */
 export function rankResponders(
   category: EmergencyCategoryId,
@@ -79,12 +91,15 @@ export function rankResponders(
     .map((candidate) => ({
       candidate,
       distanceKm: candidate.base ? haversineKm(candidate.base, incident) : null,
-      capable: isCapable(category, candidate.agencyCode),
+      capable: isCapable(category, candidate.agencyType),
     }));
 
   return suggestions.sort((a, b) => {
     if (a.capable !== b.capable) {
       return a.capable ? -1 : 1;
+    }
+    if (a.candidate.coversIncidentOffice !== b.candidate.coversIncidentOffice) {
+      return a.candidate.coversIncidentOffice ? -1 : 1;
     }
     if (a.distanceKm !== b.distanceKm) {
       if (a.distanceKm === null) {

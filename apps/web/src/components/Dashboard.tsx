@@ -65,7 +65,7 @@ export function Dashboard({ viewer: viewerProp }: DashboardProps) {
 
   const queuedCount = incidents.filter((incident) => incident.status === 'QUEUED').length;
 
-  const canAssign = viewer ? can(viewer.role, 'incident:assign') : false;
+  const canAssign = viewer ? can(viewer.role, 'incident:assign:agency') : false;
   const canAdvanceStatus = viewer
     ? can(viewer.role, 'incident:status:any') || can(viewer.role, 'incident:status:own')
     : false;

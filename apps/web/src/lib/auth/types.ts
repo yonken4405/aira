@@ -50,6 +50,9 @@ export interface AuthenticatedPrincipal {
   readonly tenantId: string;
   readonly officeId: string;
   readonly officeName: string;
+  /** Owning agency (single-lgu-agency-network). Null for a DRRM generalist / coordinator. */
+  readonly agencyId: string | null;
+  readonly agencyName: string | null;
   readonly mustChangePassword: boolean;
 }
 
@@ -63,6 +66,8 @@ export interface Viewer {
   readonly role: Role;
   readonly tenantId: string;
   readonly officeName: string;
+  /** Owning agency name for display; null for a DRRM generalist / coordinator. */
+  readonly agencyName: string | null;
   readonly mustChangePassword: boolean;
 }
 
@@ -212,12 +217,19 @@ export interface AuthStore {
     patch: { readonly callsign: string | null },
   ): Promise<ResponderRecord | null>;
 
-  /** Responders within one tenant (admin roster). */
-  listResponders(tenantId: string): Promise<readonly AdminResponderRow[]>;
+  /**
+   * Responders within one tenant (admin roster). An optional `agencyId` scopes the
+   * roster to one agency (AGENCY_ADMIN sees only its own agency; R7.1).
+   */
+  listResponders(
+    tenantId: string,
+    options?: { readonly agencyId?: string | null },
+  ): Promise<readonly AdminResponderRow[]>;
   listAssignableResponders(officeId: string): Promise<readonly AssignableResponder[]>;
   /** Offices within one tenant (provisioning pickers). */
   listOffices(tenantId: string): Promise<readonly OfficeSummary[]>;
-  listAgencies(): Promise<readonly AgencySummary[]>;
+  /** Agencies within one tenant (provisioning pickers). Tenant-filtered (R7.5). */
+  listAgencies(tenantId: string): Promise<readonly AgencySummary[]>;
 
   appendAuthEvent(input: AuthEventInput): Promise<void>;
   listAuthEvents(input: {

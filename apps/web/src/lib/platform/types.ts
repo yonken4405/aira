@@ -6,6 +6,8 @@
  * tenant's first DRRM admin. Never place `incident:*` or responder fields here.
  */
 
+import type { AgencyType } from '@aira/ui';
+
 export interface PlatformAdminRecord {
   readonly id: string;
   readonly email: string;
@@ -59,6 +61,23 @@ export interface OfficePin {
   readonly status: TenantStatus;
 }
 
+/** A responder agency within a tenant. Its `agencyType` keys the fixed category→type routing map. */
+export interface AgencyRecord {
+  readonly id: string;
+  readonly tenantId: string;
+  readonly name: string;
+  readonly code: string;
+  readonly agencyType: AgencyType;
+  readonly active: boolean;
+}
+
+export interface CreateAgencyStoreInput {
+  readonly tenantId: string;
+  readonly name: string;
+  readonly code: string;
+  readonly agencyType: AgencyType;
+}
+
 export interface CreateTenantInput {
   readonly name: string;
   readonly region: string;
@@ -101,4 +120,29 @@ export interface PlatformStore {
   listOfficePins(): Promise<readonly OfficePin[]>;
   /** The LGU office id for a tenant (used to bootstrap its first admin). */
   lguOfficeIdForTenant(tenantId: string): Promise<string | null>;
+
+  // Responder network: agencies
+  createAgency(
+    input: CreateAgencyStoreInput,
+  ): Promise<
+    | { readonly status: 'ok'; readonly agency: AgencyRecord }
+    | { readonly status: 'tenant_not_found' }
+  >; // throws { code: '23505' } on a per-tenant name/code collision
+  listAgenciesForTenant(tenantId: string): Promise<readonly AgencyRecord[]>;
+  findAgencyById(agencyId: string): Promise<AgencyRecord | null>;
+  renameAgency(
+    agencyId: string,
+    patch: { readonly name?: string; readonly code?: string },
+  ): Promise<AgencyRecord | null>; // throws { code: '23505' } on collision
+  setAgencyActive(agencyId: string, active: boolean): Promise<AgencyRecord | null>;
+  findOfficeTenantId(officeId: string): Promise<string | null>;
+
+  // Agency coverage (single-lgu-agency-network R5): office↔agency prioritisation links.
+  // Coverage affects routing ORDER only — it is never an access control or hard filter.
+  /** The office ids an agency currently covers. */
+  listCoverage(agencyId: string): Promise<readonly string[]>;
+  /** Full-replace the agency's coverage set with the given (de-duplicated) office ids. */
+  setCoverage(agencyId: string, officeIds: readonly string[]): Promise<void>;
+  /** True when the agency covers the given office. */
+  coversOffice(agencyId: string, officeId: string): Promise<boolean>;
 }

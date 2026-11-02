@@ -48,9 +48,11 @@ function candidate(overrides: Partial<RoutingCandidate> & { id: string }): Routi
     role: 'RESPONDER',
     officeId: OFFICE_ID,
     officeName: 'Cebu City DRRMO',
-    agencyCode: null,
+    agencyId: null,
+    agencyType: null,
     agencyName: null,
     base: null,
+    coversIncidentOffice: false,
     ...overrides,
   };
 }
@@ -59,21 +61,21 @@ const CANDIDATES: readonly RoutingCandidate[] = [
   candidate({
     id: 'far-fire',
     callsign: 'FIRE-FAR',
-    agencyCode: 'BFP',
+    agencyType: 'FIRE',
     agencyName: 'Bureau of Fire Protection',
     base: { lat: 10.4, lon: 123.95 },
   }),
   candidate({
     id: 'near-fire',
     callsign: 'FIRE-NEAR',
-    agencyCode: 'BFP',
+    agencyType: 'FIRE',
     agencyName: 'Bureau of Fire Protection',
     base: { lat: 10.3158, lon: 123.8855 },
   }),
   candidate({
     id: 'cop',
     callsign: 'PNP-01',
-    agencyCode: 'PNP',
+    agencyType: 'POLICE',
     agencyName: 'Philippine National Police',
     base: { lat: 10.316, lon: 123.886 },
   }),

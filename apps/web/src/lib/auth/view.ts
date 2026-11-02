@@ -51,6 +51,7 @@ export function viewerOfPrincipal(principal: AuthenticatedPrincipal): Viewer {
     role: principal.role,
     tenantId: principal.tenantId,
     officeName: principal.officeName,
+    agencyName: principal.agencyName,
     mustChangePassword: principal.mustChangePassword,
   };
 }

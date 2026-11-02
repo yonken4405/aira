@@ -324,7 +324,12 @@ export function createPostgresAuthStore(): AuthStore {
       return row ? findResponderById(row.id) : null;
     },
 
-    async listResponders(tenantId: string): Promise<readonly AdminResponderRow[]> {
+    async listResponders(
+      tenantId: string,
+      options?: { readonly agencyId?: string | null },
+    ): Promise<readonly AdminResponderRow[]> {
+      // When an agencyId is given, the roster is scoped to that one agency (R7.1).
+      const agencyId = options?.agencyId ?? null;
       const rows = await query<AdminResponderSqlRow>(
         `select ${RESPONDER_COLUMNS},
                 (select count(*)
@@ -336,8 +341,9 @@ export function createPostgresAuthStore(): AuthStore {
            join public.offices o on o.id = r.office_id
            left join public.agencies a on a.id = r.agency_id
           where o.tenant_id = $1
+            and ($2::uuid is null or r.agency_id = $2::uuid)
           order by r.active desc, r.email asc`,
-        [tenantId],
+        [tenantId, agencyId],
       );
 
       return rows.map((row) => ({
@@ -404,9 +410,12 @@ export function createPostgresAuthStore(): AuthStore {
       }));
     },
 
-    async listAgencies(): Promise<readonly AgencySummary[]> {
+    async listAgencies(tenantId: string): Promise<readonly AgencySummary[]> {
+      // Tenant-filtered (R7.5 bug fix): the admin roster picker must only ever see the
+      // acting LGU's agencies, never another tenant's.
       return query<AgencySummary>(
-        `select id, name, code from public.agencies where active order by name asc`,
+        `select id, name, code from public.agencies where active and tenant_id = $1 order by name asc`,
+        [tenantId],
       );
     },
 

@@ -224,6 +224,29 @@ RESOLVED`) with the current step emphasised by weight/contrast, plus a map showi
 - A position that has gone stale (past its TTL) is shown muted with a "last seen HH:MM" label, never as
   a live fix.
 
+**Tenant responder network: agencies + capability editors (Tier 2 - PRODUCT.md §1c).**
+
+- **Operator surface:** a per-tenant `AgencyNetworkPanel` hangs off the existing expandable tenant panel
+  in `PlatformTenants` (same toggle pattern as `OfficeTreePanel`). **DRRM_Admin surface:** an
+  `AdminAgencyNetwork` editor in the `/admin` accounts tab, scoped to the session's tenant (no tenant
+  picker). Both render the same three sub-sections and obey Operate Mode (§1): no gradients/glass/glow,
+  Lucide icons via `@aira/ui/web` (e.g. `Building2`, `ShieldCheck`, `Plus`, `ShieldOff`), tokens from
+  `@aira/tailwind-config`, state never by color alone.
+- **Agencies list + form:** name · code · Agency_Type label · active badge, an add-agency form
+  (name/code `Input`, an Agency_Type `Select`), inline rename, and an activate/deactivate toggle.
+- **Capability editor:** one row per Emergency_Category (`SUNOG/MEDIKAL/KRIMEN/BAHA`), each with
+  per-Agency_Type `Checkbox` toggles; toggling submits a full-replace for that category. The **empty set
+  is allowed** (DRRM generalists then lead) and shown as an explicit state, never a blank.
+- **Agency_Type is an identifier, never raw display text.** Every human-facing Agency_Type label
+  resolves only through `t()` (keys `agencyTypeFire` / `agencyTypePolice` / `agencyTypeMedical` /
+  `agencyTypeDrrm` / `agencyTypeOther`); the five tokens are never printed directly (§2 rule 8,
+  PRODUCT.md §3). All copy is via `t()` — no hardcoded strings, no emoji.
+- **UI states (§6) are mandatory:** a layout-shaped `Skeleton` on first load of the agencies/roster/
+  capability data; every outcome through `useToast()` with **coordinate-free** messages (this surface
+  has no coordinates); deactivating an agency or responder is gated behind `ConfirmDialog` (cancel
+  leaves data unchanged); a failed/slow/offline call surfaces an "unavailable" toast and never blocks
+  the Tier-0 SOS path.
+
 **Responder mobile mode (specced now, built later - PRODUCT.md §5).**
 
 - Same Operate-Mode tokens and `@aira/ui` primitives as the console. Screens: assigned-incident list,
@@ -232,6 +255,43 @@ RESOLVED`) with the current step emphasised by weight/contrast, plus a map showi
   Maps (coordinates only, SECURITY.md §11).
 - Background location while en route is a documented permission + battery consideration; the position
   stream is Tier 2 and pauses when the assignment resolves. No in-app turn-by-turn (we hand off).
+
+UI primitives for all of the above live in `@aira/ui/web`; do not re-implement them per surface.
+
+---
+
+## 5c. Single-LGU admin surfaces (2026-11-03, SUPERSEDES the §5a operator + capability editors)
+
+The single-LGU model (PRODUCT.md §1d) retires the operator console and the capability editor and
+reshapes the `/admin` surface. All surfaces stay in Operate Mode (§1): no gradients/glass/glow/bounce,
+Lucide icons via `@aira/ui/web`, tokens from `@aira/tailwind-config`, copy only via `t()`, state never
+by color alone, and **coordinate-free** throughout (this surface handles no coordinates).
+
+- **Role-aware admin tabs.** `AdminSurface` gates each tab by permission (a tab and its body are omitted
+  when the permission is absent). The **LDRRMO coordinator** (`ADMIN`) sees **Accounts · Organization ·
+  Metrics · Audit**; an **AGENCY_ADMIN** sees **Accounts (own agency) · Organization (own agency) ·
+  Coverage · Metrics · Audit**. The Coverage tab appears only when the viewer has a resolved own agency.
+  One tablist instance stays mounted across switches (§5b pattern).
+- **Users / Organization view (`OrgView`).** Lists accounts with their role, agency and office, and
+  presents the hierarchy: the office tree and each agency with its members grouped by role. Scoped to
+  the viewer's authority (an AGENCY_ADMIN sees only its own agency; the LDRRMO coordinator sees all).
+  First load shows a layout-shaped `Skeleton`; a failed/slow/offline load degrades to an honest
+  "unavailable" state and never blocks the Tier-0 SOS. Lucide `Building2` / `Users`; role + office via
+  `t()` / `roleLabel()`.
+- **Coverage editor (`AgencyCoverage`).** A barangay **checklist** for the acting agency; saving
+  **full-replaces** that agency's coverage set behind a `ConfirmDialog` (cancel leaves data unchanged),
+  with the outcome announced through `useToast()`. First load shows a `Skeleton`; failure shows an
+  "unavailable" state. Copy makes the semantics explicit: coverage **prioritizes routing but never
+  restricts** where units may respond (PRODUCT.md §1d).
+- **Accounts (`AdminResponders`).** The provisioning form now makes **Agency a required field** (the
+  submit stays disabled until an agency is chosen); the former "No agency" option is gone. The roster
+  shows each account's office + agency.
+- **Dispatch console (`/console`).** Unchanged shell; routing suggestions and the assignee picker are
+  agency-scoped **server-side** (no UI contract change), and a "covers area" affordance may surface the
+  coverage-first ordering.
+- **Removed:** the operator `PlatformTenants` / `AgencyNetworkPanel`, the nationwide `PlatformMap`, and
+  the `AdminAgencyNetwork` capability editor of §5a — along with the capability checklist UI and its
+  dead i18n keys.
 
 UI primitives for all of the above live in `@aira/ui/web`; do not re-implement them per surface.
 

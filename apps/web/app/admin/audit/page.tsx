@@ -26,7 +26,7 @@ export default async function AdminAuditPage() {
   const [responders, offices, agencies, incidents, events] = await Promise.all([
     store.listResponders(principal.tenantId),
     store.listOffices(principal.tenantId),
-    store.listAgencies(),
+    store.listAgencies(principal.tenantId),
     createPostgresIncidentsStore().listForOffice(principal.officeId),
     store.listAuthEvents({ limit: 100 }),
   ]);

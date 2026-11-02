@@ -31,7 +31,9 @@ const CONSOLE_NAV: readonly NavEntry[] = [
 export default async function ConsoleLayout({ children }: { readonly children: ReactNode }) {
   const principal = await requirePagePrincipal();
 
-  if (!holdsAny(principal, ['incident:assign', 'incident:status:any', 'incident:status:own'])) {
+  if (
+    !holdsAny(principal, ['incident:assign:agency', 'incident:status:any', 'incident:status:own'])
+  ) {
     return <Forbidden />;
   }
 

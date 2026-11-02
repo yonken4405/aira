@@ -4,6 +4,7 @@
 
 import { DUMMY_PASSWORD_HASH } from '../../src/lib/auth/password';
 import type {
+  AgencyRecord,
   CreateTenantInput,
   OfficePin,
   PlatformAdminRecord,
@@ -18,6 +19,10 @@ export interface MemoryPlatformStore extends PlatformStore {
   readonly sessions: Map<string, PlatformSessionRecord>;
   readonly tenants: Map<string, TenantRecord>;
   readonly offices: OfficePin[];
+  /** Agency rows keyed by agency id. */
+  readonly agencies: Map<string, AgencyRecord>;
+  /** Agency coverage: agency id → set of covered office ids. */
+  readonly coverage: Map<string, Set<string>>;
   seedAdmin(
     overrides: Partial<PlatformAdminRecord> & { readonly email: string },
   ): PlatformAdminRecord;
@@ -37,6 +42,9 @@ export function createMemoryPlatformStore(
   const sessions = new Map<string, PlatformSessionRecord>();
   const tenants = new Map<string, TenantRecord>();
   const offices: OfficePin[] = [];
+  const agencies = new Map<string, AgencyRecord>();
+  /** agency id → set of covered office ids (single-lgu-agency-network R5). */
+  const coverage = new Map<string, Set<string>>();
 
   function seedAdmin(
     overrides: Partial<PlatformAdminRecord> & { readonly email: string },
@@ -59,6 +67,8 @@ export function createMemoryPlatformStore(
     sessions,
     tenants,
     offices,
+    agencies,
+    coverage,
     seedAdmin,
 
     async findAdminByEmail(email) {
@@ -187,6 +197,113 @@ export function createMemoryPlatformStore(
 
     async lguOfficeIdForTenant(tenantId) {
       return offices.find((o) => o.tenantId === tenantId && o.kind === 'LGU')?.id ?? null;
+    },
+
+    // ── Responder-network: agencies ─────────────────────────────────────────
+
+    async createAgency(input) {
+      // Prove tenant existence
+      if (!tenants.has(input.tenantId)) {
+        return { status: 'tenant_not_found' };
+      }
+
+      // Trim name and code
+      const name = input.name.trim();
+      const code = input.code.trim();
+
+      // Enforce per-tenant case-insensitive uniqueness
+      for (const existing of agencies.values()) {
+        if (existing.tenantId === input.tenantId) {
+          if (existing.name.toLowerCase() === name.toLowerCase()) {
+            throw Object.assign(new Error('dup'), { code: '23505' });
+          }
+          if (existing.code.toLowerCase() === code.toLowerCase()) {
+            throw Object.assign(new Error('dup'), { code: '23505' });
+          }
+        }
+      }
+
+      const agency: AgencyRecord = {
+        id: nextId('agency'),
+        tenantId: input.tenantId,
+        name,
+        code,
+        agencyType: input.agencyType,
+        active: true,
+      };
+      agencies.set(agency.id, agency);
+      return { status: 'ok', agency };
+    },
+
+    async listAgenciesForTenant(tenantId) {
+      const result: AgencyRecord[] = [];
+      for (const agency of agencies.values()) {
+        if (agency.tenantId === tenantId) {
+          result.push(agency);
+        }
+      }
+      return result;
+    },
+
+    async findAgencyById(agencyId) {
+      return agencies.get(agencyId) ?? null;
+    },
+
+    async renameAgency(agencyId, patch) {
+      const agency = agencies.get(agencyId);
+      if (!agency) {
+        return null;
+      }
+
+      const newName = patch.name !== undefined ? patch.name : agency.name;
+      const newCode = patch.code !== undefined ? patch.code : agency.code;
+
+      // Enforce per-tenant uniqueness against other agencies (exclude self)
+      for (const other of agencies.values()) {
+        if (other.id === agencyId || other.tenantId !== agency.tenantId) {
+          continue;
+        }
+        if (patch.name !== undefined && other.name.toLowerCase() === newName.toLowerCase()) {
+          throw Object.assign(new Error('dup'), { code: '23505' });
+        }
+        if (patch.code !== undefined && other.code.toLowerCase() === newCode.toLowerCase()) {
+          throw Object.assign(new Error('dup'), { code: '23505' });
+        }
+      }
+
+      const updated: AgencyRecord = { ...agency, name: newName, code: newCode };
+      agencies.set(agencyId, updated);
+      return updated;
+    },
+
+    async setAgencyActive(agencyId, active) {
+      const agency = agencies.get(agencyId);
+      if (!agency) {
+        return null;
+      }
+      const updated: AgencyRecord = { ...agency, active };
+      agencies.set(agencyId, updated);
+      return updated;
+    },
+
+    async findOfficeTenantId(officeId) {
+      const office = offices.find((o) => o.id === officeId);
+      return office?.tenantId ?? null;
+    },
+
+    // ── Agency coverage (R5) ─────────────────────────────────────────────────
+
+    async listCoverage(agencyId) {
+      return [...(coverage.get(agencyId) ?? new Set<string>())];
+    },
+
+    async setCoverage(agencyId, officeIds) {
+      // Full-replace with a de-duplicated set (mirrors the Postgres delete-then-insert).
+      coverage.set(agencyId, new Set(officeIds));
+    },
+
+    async coversOffice(agencyId, officeId) {
+      return coverage.get(agencyId)?.has(officeId) ?? false;
     },
   };
 }

@@ -4,7 +4,7 @@
 
 import type { IncidentsStore } from '../../src/lib/incidents-store';
 import type { Incident } from '../../src/lib/incidents';
-import type { RoutingCandidate } from '../../src/lib/routing';
+import { CATEGORY_AGENCY_DEFAULT, type RoutingCandidate } from '../../src/lib/routing';
 import { OFFICE_ID } from './fixtures';
 
 export interface MemoryIncidentsStore extends IncidentsStore {
@@ -21,6 +21,12 @@ export interface MemoryIncidentsStoreOptions {
   readonly responders?: Readonly<Record<string, string>>;
   /** Routing candidates returned by `listRoutingCandidates`. */
   readonly candidates?: readonly RoutingCandidate[];
+  /**
+   * Agency coverage seed: agency id → covered office ids. Used to project
+   * `coversIncidentOffice` on candidates relative to the incident office
+   * (single-lgu-agency-network R5), mirroring the Postgres `agency_coverage` join.
+   */
+  readonly coverage?: Readonly<Record<string, readonly string[]>>;
 }
 
 let sequence = 0;
@@ -32,6 +38,7 @@ export function createMemoryIncidentsStore(
   const incidents: Incident[] = [...(options.incidents ?? [])];
   const responders = options.responders ?? {};
   const candidates = options.candidates ?? [];
+  const coverage = options.coverage ?? {};
   const assignments: Array<{ incidentId: string; responderId: string; actorId: string }> = [];
   const medicalAccesses: Array<{ incidentId: string; actorId: string }> = [];
   const trackingTokens: Array<{ incidentId: string; tokenHash: string; expiresAt: number }> = [];
@@ -73,8 +80,31 @@ export function createMemoryIncidentsStore(
       return incident !== null && incident.officeId === scopeOfficeId;
     },
 
-    async listRoutingCandidates() {
-      return candidates;
+    async listRoutingCandidates(incidentOfficeId, listOptions) {
+      const agencyId = listOptions?.agencyId ?? null;
+      return candidates
+        .filter((candidate) => agencyId === null || candidate.agencyId === agencyId)
+        .map((candidate) => {
+          // Project coversIncidentOffice from the seeded coverage relative to the
+          // incident's office (mirrors the Postgres agency_coverage join).
+          const covered =
+            candidate.agencyId !== null &&
+            (coverage[candidate.agencyId] ?? []).includes(incidentOfficeId);
+          return { ...candidate, coversIncidentOffice: covered };
+        });
+    },
+
+    async listForAgency(requestedOfficeId, agencyType) {
+      const capable = (category: Incident['category']): boolean => {
+        if (agencyType === null) {
+          return true;
+        }
+        return (CATEGORY_AGENCY_DEFAULT[category] as readonly string[]).includes(agencyType);
+      };
+      // Office-scoped (mirrors listForOffice's flat equality) AND category-capable.
+      return incidents.filter(
+        (incident) => incident.officeId === requestedOfficeId && capable(incident.category),
+      );
     },
 
     async create(input) {

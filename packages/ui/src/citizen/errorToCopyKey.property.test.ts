@@ -59,9 +59,11 @@ const apiErrorArb: fc.Arbitrary<ApiError> = fc.record(
     }),
     code: fc.option(fc.oneof(fc.constantFrom(...DOCUMENTED_CODES), fc.string()), { nil: null }),
     afterRetry: fc.boolean(),
-    clientValidation: fc.option(fc.constantFrom<'medical' | 'contact'>('medical', 'contact'), {
-      nil: undefined,
-    }),
+    clientValidation: fc.constantFrom<ApiError['clientValidation']>(
+      'medical',
+      'contact',
+      undefined,
+    ),
   },
   { requiredKeys: ['kind'] },
 );

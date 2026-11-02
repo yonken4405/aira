@@ -43,16 +43,12 @@ describe('LoginForm', () => {
     expect(button.disabled).toBe(false);
   });
 
-  it('shows one generic message after both tiers reject the credentials', async () => {
-    // Responder tier says "invalid" (401), so the form retries the platform tier,
-    // which also rejects. Only then does the generic message appear.
-    fetchSpy
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: false, error: 'invalid_credentials' }), { status: 401 }),
-      )
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: false, error: 'invalid_credentials' }), { status: 401 }),
-      );
+  it('shows one generic message when the responder login rejects the credentials', async () => {
+    // single-lgu-agency-network R2.3: /login posts ONLY the responder login and never
+    // retries a platform login (the break-glass superadmin has no web entry point).
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ ok: false, error: 'invalid_credentials' }), { status: 401 }),
+    );
 
     renderLogin();
     submit();
@@ -62,36 +58,26 @@ describe('LoginForm', () => {
       'Email or password is incorrect.',
     );
     expect(nav.replace).not.toHaveBeenCalled();
+    // Exactly one request — to the responder login, never the platform login.
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(fetchSpy).toHaveBeenNthCalledWith(
       1,
       '/api/auth/login',
       expect.objectContaining({ method: 'POST', credentials: 'same-origin' }),
     );
-    expect(fetchSpy).toHaveBeenNthCalledWith(
-      2,
-      '/api/platform/login',
-      expect.objectContaining({ method: 'POST', credentials: 'same-origin' }),
-    );
   });
 
-  it('signs in a platform operator through the same form', async () => {
-    // Not a responder (401), but a valid platform operator on the retry.
-    fetchSpy
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: false, error: 'invalid_credentials' }), { status: 401 }),
-      )
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: true, admin: { email: 'admin@aira.dev' } }), {
-          status: 200,
-        }),
-      );
+  it('never calls the platform login endpoint (no platform retry, R2.3)', async () => {
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ ok: false, error: 'invalid_credentials' }), { status: 401 }),
+    );
 
     renderLogin();
     submit('admin@aira.dev');
 
-    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith('/platform'));
-    expect(nav.refresh).toHaveBeenCalled();
-    expect(fetchSpy).toHaveBeenNthCalledWith(2, '/api/platform/login', expect.anything());
+    await screen.findByRole('alert');
+    const calledUrls = fetchSpy.mock.calls.map((call) => (call as unknown[])[0]);
+    expect(calledUrls).not.toContain('/api/platform/login');
   });
 
   it('treats a lockout as authoritative and does not retry the other tier', async () => {

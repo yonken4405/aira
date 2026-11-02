@@ -7,16 +7,21 @@
 -- One deployment serves one LGU (PRODUCT.md §1), so exactly one LGU office exists;
 -- barangays hang off it. Category IDs are the frozen payload enum (PRODUCT.md §4).
 
-insert into public.agencies (id, name, code) values
-  ('a1000000-0000-4000-8000-000000000001', 'Bureau of Fire Protection', 'BFP'),
-  ('a1000000-0000-4000-8000-000000000002', 'Philippine National Police', 'PNP'),
-  ('a1000000-0000-4000-8000-000000000003', 'Emergency Medical Services', 'EMS')
-on conflict (id) do nothing;
-
 -- One subscribing tenant (onboarded in person). Each tenant owns one LGU office tree.
+-- Seeded first: agencies and offices are tenant-scoped and reference this row.
 insert into public.tenants (id, name, region, province, status) values
   ('7e000000-0000-4000-8000-000000000001', 'Cebu City DRRMO', 'Region VII', 'Cebu', 'active')
 on conflict (id) do nothing;
+
+-- Agencies are tenant-owned with a stable Agency_Type (tenant-responder-network). The
+-- 20261022250000 migration already seeds BFP/PNP/EMS/DRRM for this tenant; this block
+-- is kept idempotent so a seed run on top of the migration is a no-op (matches on the
+-- per-tenant case-insensitive code index rather than id).
+insert into public.agencies (tenant_id, name, code, agency_type) values
+  ('7e000000-0000-4000-8000-000000000001', 'Bureau of Fire Protection', 'BFP', 'FIRE'),
+  ('7e000000-0000-4000-8000-000000000001', 'Philippine National Police', 'PNP', 'POLICE'),
+  ('7e000000-0000-4000-8000-000000000001', 'Emergency Medical Services', 'EMS', 'MEDICAL')
+on conflict do nothing;
 
 insert into public.offices (id, tenant_id, name, kind, parent_id, lat, lon, region, province) values
   ('0f100000-0000-4000-8000-000000000001', '7e000000-0000-4000-8000-000000000001',
@@ -28,6 +33,25 @@ insert into public.offices (id, tenant_id, name, kind, parent_id, lat, lon, regi
   ('0f100000-0000-4000-8000-000000000004', '7e000000-0000-4000-8000-000000000001',
    'Barangay Talamban', 'BARANGAY', '0f100000-0000-4000-8000-000000000001', 10.3600, 123.9100, 'Region VII', 'Cebu')
 on conflict (id) do nothing;
+
+-- Agency coverage (single-lgu-agency-network R5): the office<->agency prioritisation
+-- links. Coverage affects ranking only — cross-jurisdiction response is still allowed,
+-- ranked lower. Agency ids are generated, so links are resolved by joining agencies by
+-- code to offices. Realistic shape for the one LGU:
+--   BFP (fire)    covers every barangay;
+--   PNP (police)  covers every barangay;
+--   EMS (medical) covers the LGU root (city-wide station).
+insert into public.agency_coverage (agency_id, office_id)
+select a.id, o.id
+  from public.agencies a
+  join public.offices o
+    on o.tenant_id = a.tenant_id
+ where a.tenant_id = '7e000000-0000-4000-8000-000000000001'
+   and (
+     (a.code in ('BFP', 'PNP') and o.kind = 'BARANGAY')
+     or (a.code = 'EMS' and o.kind = 'LGU')
+   )
+on conflict (agency_id, office_id) do nothing;
 
 -- Queue demo rows: 4 dp coordinates, closed category enum, no citizen text.
 insert into public.incidents (id, category, lat, lon, status, source, reported_at, office_id) values

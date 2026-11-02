@@ -26,20 +26,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { handleLogin } from '../src/lib/api/auth-handlers';
 import { handleUpdateResponder } from '../src/lib/api/admin-handlers';
 import { handleAssignIncident } from '../src/lib/api/incidents-handlers';
-import {
-  handleCreateTenant,
-  handlePlatformLogin,
-  handleSetTenantStatus,
-} from '../src/lib/api/platform-handlers';
-import { hashPassword } from '../src/lib/auth/password';
-import { PLATFORM_SESSION_COOKIE } from '../src/lib/platform/session';
 import type { AppDeps } from '../src/lib/api/deps';
 import type { MemoryNotificationStore } from './support/memory-notification-store';
 import { createMemoryIncidentsStore } from './support/memory-incidents-store';
 import { createTestClock, createTestHarness, jsonBody, withSession } from './support/harness';
 import { TEST_PASSWORD, makeIncident } from './support/fixtures';
-
-const PLATFORM_PASSWORD = 'correct horse battery staple';
 
 /**
  * A notification store whose `createNotification` always rejects, wrapping a real
@@ -284,116 +275,6 @@ describe('event hook: account events notify the affected responder only (R11.2, 
 // fail-soft (R10.5).
 // ---------------------------------------------------------------------------
 
-describe('event hook: tenant events notify platform admins (R12.1, R12.2, R12.4, R10.5)', () => {
-  let world: ReturnType<typeof createTestHarness>;
-
-  beforeEach(async () => {
-    world = createTestHarness();
-    world.platformStore.seedAdmin({
-      id: 'ops-1',
-      email: 'ops@aira.ph',
-      passwordHash: await hashPassword(PLATFORM_PASSWORD),
-    });
-    // The hook resolves recipients via store.listPlatformAdmins(); seed that set so a
-    // wired hook has an addressee. Until 28.2 wires it, nothing is created.
-    world.notificationStore.seedPlatformAdmins([{ tier: 'platform_admins', principalId: 'ops-1' }]);
-  });
-
-  async function opsToken(deps: AppDeps): Promise<string> {
-    const response = await handlePlatformLogin(
-      new Request(
-        'http://localhost/api/platform/login',
-        jsonBody('POST', { email: 'ops@aira.ph', password: PLATFORM_PASSWORD }),
-      ),
-      deps,
-    );
-    const cookie = response.headers.get('set-cookie') ?? '';
-    const token = new RegExp(`${PLATFORM_SESSION_COOKIE}=([A-Za-z0-9_-]+)`).exec(cookie)?.[1];
-    if (!token) {
-      throw new Error('platform_login_failed');
-    }
-    return token;
-  }
-
-  const withPlatform = (url: string, token: string, init: RequestInit = {}): Request => {
-    const headers = new Headers(init.headers);
-    headers.set('cookie', `${PLATFORM_SESSION_COOKIE}=${token}`);
-    return new Request(url, { ...init, headers });
-  };
-
-  const createTenant = (deps: AppDeps, token: string, name: string): Promise<Response> =>
-    handleCreateTenant(
-      withPlatform(
-        'http://localhost/api/platform/tenants',
-        token,
-        jsonBody('POST', {
-          name,
-          region: 'Region VII',
-          province: 'Cebu',
-          lguName: name,
-          lat: 10.3234,
-          lon: 123.9222,
-        }),
-      ),
-      deps,
-    );
-
-  const platformNotifications = (store: MemoryNotificationStore) =>
-    store.notifications.filter((n) => n.recipient.tier === 'platform_admins');
-
-  it('onboarding a tenant notifies platform admins with no incident/citizen data', async () => {
-    const token = await opsToken(world.deps);
-
-    const created = await createTenant(world.deps, token, 'Mandaue City DRRMO');
-    expect(created.status).toBe(201);
-
-    const platformNotifs = platformNotifications(world.notificationStore);
-    expect(platformNotifs.length).toBeGreaterThanOrEqual(1);
-    expect(platformNotifs.some((n) => n.recipient.principalId === 'ops-1')).toBe(true);
-
-    // R12.4: platform notifications carry no incident/citizen fields.
-    for (const notif of platformNotifs) {
-      const serialized = JSON.stringify(notif);
-      expect(serialized).not.toContain('reporterCitizenId');
-      expect(serialized).not.toContain('citizenId');
-      expect(serialized).not.toContain('incidentId');
-    }
-  });
-
-  it('suspending a tenant notifies platform admins', async () => {
-    const token = await opsToken(world.deps);
-
-    const created = await createTenant(world.deps, token, 'Lapu City DRRMO');
-    const { tenant } = (await created.json()) as { tenant: { id: string } };
-
-    // Count platform notifications created by onboarding, then assert suspend adds one.
-    const before = platformNotifications(world.notificationStore).length;
-
-    const suspended = await handleSetTenantStatus(
-      withPlatform(
-        `http://localhost/api/platform/tenants/${tenant.id}`,
-        token,
-        jsonBody('PATCH', { status: 'suspended' }),
-      ),
-      world.deps,
-      tenant.id,
-    );
-    expect(suspended.status).toBe(200);
-
-    const after = platformNotifications(world.notificationStore).length;
-    expect(after).toBeGreaterThan(before);
-  });
-
-  it('still onboards the tenant (201) when the notification store throws (fail-soft, R10.5)', async () => {
-    const token = await opsToken(world.deps);
-    const deps = depsWithFailingNotifications(world.deps, world.notificationStore);
-
-    const created = await createTenant(deps, token, 'Resilient City DRRMO');
-
-    // R10.5: onboarding commits even when notifying platform admins fails.
-    expect(created.status).toBe(201);
-    const payload = (await created.json()) as { ok: boolean; tenant: { name: string } };
-    expect(payload.ok).toBe(true);
-    expect(payload.tenant.name).toBe('Resilient City DRRMO');
-  });
-});
+// NOTE: the tenant onboard/suspend notification hooks were removed with the operator
+// console (single-lgu-agency-network R2). Their handlers no longer exist, so those
+// event-hook cases are gone; the incident + account hooks above are unaffected.

@@ -6,12 +6,13 @@
  * The web layer never receives a query it can widen.
  */
 
-import type { EmergencyCategoryId } from '@aira/ui';
+import type { AgencyType, EmergencyCategoryId } from '@aira/ui';
+import { isAgencyType } from '@aira/ui';
 import type { PoolClient } from 'pg';
 
 import { query, queryOne, withTransaction } from './db';
 import type { Incident, IncidentSource, IncidentStatus } from './incidents';
-import type { RoutingCandidate } from './routing';
+import { CATEGORY_AGENCY_DEFAULT, type RoutingCandidate } from './routing';
 
 export type AssignOutcome =
   | { readonly status: 'ok'; readonly incident: Incident }
@@ -35,8 +36,26 @@ export interface IncidentsStore {
   /**
    * Active field responders inside the office subtree, with their office centroid as a
    * base position and agency code - the inputs the routing engine ranks (PRODUCT.md §5).
+   *
+   * When `options.agencyId` is set, candidates are restricted to that agency (an agency
+   * dispatcher only sees its own units; R6.3). `coversIncidentOffice` is projected from
+   * `agency_coverage` relative to the incident's office (prioritisation only; R5.3).
    */
-  listRoutingCandidates(officeId: string): Promise<readonly RoutingCandidate[]>;
+  listRoutingCandidates(
+    officeId: string,
+    options?: { readonly agencyId?: string | null },
+  ): Promise<readonly RoutingCandidate[]>;
+  /**
+   * The agency queue (R6.5): incidents in the office subtree whose capable agency type
+   * matches `agencyType`. Coverage is used for ORDER only, never as a filter, so the
+   * caller supplies the agency's `coverageOfficeIds` to influence ranking downstream;
+   * this method returns the full matching set.
+   */
+  listForAgency(
+    officeId: string,
+    agencyType: AgencyType | null,
+    options?: { readonly coverageOfficeIds?: readonly string[] },
+  ): Promise<readonly Incident[]>;
   create(input: {
     readonly category: EmergencyCategoryId;
     readonly lat: number;
@@ -220,17 +239,22 @@ export function createPostgresIncidentsStore(): IncidentsStore {
       return row !== null;
     },
 
-    async listRoutingCandidates(officeId) {
+    async listRoutingCandidates(officeId, options) {
+      // $1 = the incident's office (also the OFFICE_SCOPE seed). $2 = optional agency
+      // filter. coversIncidentOffice is true when the candidate's agency covers $1.
+      const agencyId = options?.agencyId ?? null;
       const rows = await query<{
         id: string;
         callsign: string;
         role: string;
         officeId: string;
         officeName: string;
-        agencyCode: string | null;
+        agencyId: string | null;
+        agencyType: string | null;
         agencyName: string | null;
         lat: number | null;
         lon: number | null;
+        coversIncidentOffice: boolean;
       }>(
         `${OFFICE_SCOPE}
          select r.id,
@@ -238,18 +262,24 @@ export function createPostgresIncidentsStore(): IncidentsStore {
                 r.role,
                 r.office_id as "officeId",
                 o.name as "officeName",
-                a.code as "agencyCode",
+                r.agency_id as "agencyId",
+                a.agency_type as "agencyType",
                 a.name as "agencyName",
                 o.lat,
-                o.lon
+                o.lon,
+                exists (
+                  select 1 from public.agency_coverage c
+                   where c.agency_id = r.agency_id and c.office_id = $1
+                ) as "coversIncidentOffice"
            from public.responders r
            join public.offices o on o.id = r.office_id
            left join public.agencies a on a.id = r.agency_id
           where r.active
             and r.role = 'RESPONDER'
             and r.office_id in (select id from scope)
+            and ($2::uuid is null or r.agency_id = $2::uuid)
           order by r.callsign asc`,
-        [officeId],
+        [officeId, agencyId],
       );
 
       return rows.map((row) => ({
@@ -260,13 +290,50 @@ export function createPostgresIncidentsStore(): IncidentsStore {
             ? 'RESPONDER'
             : row.role === 'DISPATCHER'
               ? 'DISPATCHER'
-              : 'ADMIN',
+              : row.role === 'AGENCY_ADMIN'
+                ? 'AGENCY_ADMIN'
+                : 'ADMIN',
         officeId: row.officeId,
         officeName: row.officeName,
-        agencyCode: row.agencyCode,
+        agencyId: row.agencyId,
+        agencyType: isAgencyType(row.agencyType) ? (row.agencyType as AgencyType) : null,
         agencyName: row.agencyName,
         base: row.lat !== null && row.lon !== null ? { lat: row.lat, lon: row.lon } : null,
+        coversIncidentOffice: row.coversIncidentOffice === true,
       }));
+    },
+
+    async listForAgency(officeId, agencyType, _options) {
+      // The agency queue: incidents in the office subtree whose capable agency type
+      // matches `agencyType`. A null agencyType is a DRRM generalist — capable of every
+      // category (so it sees the whole subtree). Coverage affects ORDER downstream only,
+      // never membership (R6.5), so coverageOfficeIds is not applied as a filter here.
+      void _options;
+      const capableCategories = agencyType
+        ? (Object.keys(CATEGORY_AGENCY_DEFAULT) as EmergencyCategoryId[]).filter((category) =>
+            (CATEGORY_AGENCY_DEFAULT[category] as readonly string[]).includes(agencyType),
+          )
+        : (Object.keys(CATEGORY_AGENCY_DEFAULT) as EmergencyCategoryId[]);
+
+      if (capableCategories.length === 0) {
+        return [];
+      }
+
+      // The category list comes exclusively from the frozen CATEGORY_AGENCY_DEFAULT keys
+      // (a closed constant, never user input), so inlining it as a quoted IN-list is safe
+      // and avoids an array bind (SqlParam is scalar-only).
+      const categoryInList = capableCategories.map((category) => `'${category}'`).join(', ');
+      const rows = await query<IncidentRow>(
+        `${OFFICE_SCOPE}
+         select ${INCIDENT_COLUMNS}
+           ${INCIDENT_FROM}
+          where i.office_id in (select id from scope)
+            and i.category in (${categoryInList})
+          order by i.reported_at desc
+          limit ${QUEUE_LIMIT}`,
+        [officeId],
+      );
+      return rows.map(mapIncident);
     },
 
     async create(input) {

@@ -17,12 +17,12 @@ const EMAIL_MAX = 254;
 const PASSWORD_MAX = 128;
 
 /**
- * Unified sign-in (SECURITY.md §4).
+ * Responder sign-in (SECURITY.md §4).
  *
- * One front door for both identity tiers. The form submits to the responder login;
- * if that email isn't a responder (a generic 401), it retries the platform-operator
- * login. The two tiers stay fully isolated on the server (separate tables, sessions
- * and cookies) - this only spares the user from having to know which page they need.
+ * The single front door for the whole product: responders, dispatchers, agency admins
+ * and the LDRRMO coordinator all sign in here. The break-glass superadmin tier has no
+ * web entry point (single-lgu-agency-network R2) — it is CLI-only — so there is no
+ * platform-login retry.
  *
  * Failures are inline and generic; there is no "account not found" distinction and
  * no toast spam on a form the user is already looking at.
@@ -34,12 +34,8 @@ export function LoginForm({ next }: LoginFormProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Maps a non-ok login response to an inline error. Returns the lockout/rate-limit/
-   * unavailable message when the tier is known, or `null` for a plain 401 so the caller
-   * can try the other tier before giving up.
-   */
-  async function messageFor(response: Response): Promise<string | null> {
+  /** Maps a non-ok login response to an inline error message. */
+  async function messageFor(response: Response): Promise<string> {
     if (response.status === 423) {
       const payload = (await response.json().catch(() => ({}))) as { retryAfterSeconds?: number };
       const minutes = Math.max(1, Math.ceil((payload.retryAfterSeconds ?? 60) / 60));
@@ -51,7 +47,7 @@ export function LoginForm({ next }: LoginFormProps) {
     if (response.status === 503) {
       return t('loginUnavailable');
     }
-    return null;
+    return t('loginInvalid');
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -68,7 +64,8 @@ export function LoginForm({ next }: LoginFormProps) {
         body,
       };
 
-      // Tier 1: responder / dispatcher / DRRM admin.
+      // The single responder tier (responder / dispatcher / agency admin / LDRRMO
+      // coordinator). The break-glass superadmin has no web login (R2).
       const responderRes = await fetch('/api/auth/login', init);
       if (responderRes.ok) {
         const payload = (await responderRes.json()) as { viewer: Viewer };
@@ -77,24 +74,7 @@ export function LoginForm({ next }: LoginFormProps) {
         return;
       }
 
-      const responderMessage = await messageFor(responderRes);
-      if (responderMessage) {
-        // A lockout / rate-limit / outage is authoritative - don't mask it by retrying.
-        setError(responderMessage);
-        setPending(false);
-        return;
-      }
-
-      // Tier 2: platform operator (superadmin). Only reached on a plain "invalid" 401,
-      // i.e. this email is not a responder - it may be a platform admin instead.
-      const platformRes = await fetch('/api/platform/login', init);
-      if (platformRes.ok) {
-        router.replace('/platform');
-        router.refresh();
-        return;
-      }
-
-      setError((await messageFor(platformRes)) ?? t('loginInvalid'));
+      setError(await messageFor(responderRes));
     } catch {
       setError(t('loginUnavailable'));
     }

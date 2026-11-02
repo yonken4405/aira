@@ -105,6 +105,86 @@ pnpm --filter @aira/db db:reset   # apply supabase/migrations/*.sql
 
 ## Change log (architectural decisions)
 
+### 2026-11-03: **Single-LGU agency network (first-class agencies, coverage, coordination-only LDRRMO)**
+
+- **Decision:** AIRA is repositioned as a **single-LGU product** (not a multi-tenant SaaS UI) in which
+  **responding agencies are first-class organizations** cooperating under the LDRRMO's RA 10121
+  **notify-and-coordinate** model. This is the **"soft single-LGU" (S1)** approach: the multi-tenant
+  `tenants` / `tenant_id` columns and the tenant-bounded `OFFICE_SCOPE` CTEs are **retained unchanged**
+  as defense-in-depth and simply resolve to the one LGU; only the multi-tenant **UX** is retired.
+- **New role `AGENCY_ADMIN`** (added to the `responder_role` enum). The role model is now:
+  `RESPONDER` (own assignments) · `DISPATCHER` (**agency-scoped**: reads/assigns only its own agency's
+  units for incidents routed to that agency) · `AGENCY_ADMIN` (manages ONE agency's accounts + coverage,
+  reads its own agency's incidents read-only, never dispatches) · `ADMIN` = **LDRRMO coordinator**
+  (LGU-wide READ-ONLY oversight, sees all agencies, may send a coordination nudge, **never dispatches** —
+  separation of duties). The principal + `Viewer` now carry `agencyId`/`agencyName`. UI copy relabels
+  `ADMIN` as "LDRRMO coordinator".
+- **A responder belongs to exactly one office (required) and one agency.** Agency is **required at the
+  service layer** for every provisioned account (`provisionResponder`); the DB `agency_id` stays nullable
+  to preserve the "DRRM generalist = null" routing semantics and the break-glass path.
+- **Office↔agency coverage** (`agency_coverage(agency_id, office_id)`, new table) drives routing
+  **prioritization only** — cross-jurisdiction response is allowed, ranked lower. Coverage is never an
+  access control or hard filter.
+- **Removed the editable capability map** (`tenant_capability_config` dropped; its UI, routes, client
+  helpers, and i18n keys deleted). Routing now uses a **fixed built-in `CATEGORY_AGENCY_DEFAULT`** in
+  `apps/web/src/lib/routing.ts` (`SUNOG→[FIRE], MEDIKAL→[MEDICAL], KRIMEN→[POLICE], BAHA→[]`), preserving
+  today's default behavior exactly.
+- **Retired the operator (platform) UX.** The `/platform` console pages and the operator
+  tenant/office/agency/capability/responder **management** routes are removed, and `/login` no longer
+  retries a platform login. The **break-glass superadmin tier is kept**: `platform_admins` /
+  `platform_sessions`, the `platform:create-admin` CLI, and the `/api/platform/{login,session}` plumbing
+  stay (the shipped notification / system-notice tier still authenticates through `authenticatePlatform`),
+  but there is **no web console**.
+- **New surfaces:** agency-scoped dispatch (routing suggestions + assign bounded to the dispatcher's own
+  agency), a users/**org view** (`GET /api/admin/org`, scoped), a **coverage editor**
+  (`GET/PUT /api/admin/agencies/[id]/coverage`), and an LDRRMO **coordination nudge**
+  (`POST /api/admin/coordination/nudge`, coordinate-free). Fixed a latent bug: the admin roster's agency
+  list is now **tenant-filtered** (`listAgencies(tenantId)`).
+- **Schema:** one new migration
+  `packages/db/supabase/migrations/20261022260000_single_lgu_agency_network.sql` (adds `AGENCY_ADMIN`,
+  creates `agency_coverage`, drops `tenant_capability_config`, deny-by-default grants). Earlier migrations
+  left byte-for-byte unchanged; verified under `db:reset`.
+- **Impact recorded in docs:** PRODUCT.md, SECURITY.md, DESIGN.md, this log.
+- **Not done (deliberately):** no second LGU / cross-LGU flows, no change to the frozen mesh payload or
+  anonymous Tier-0 intake, and nothing from the out-of-scope tracks (WebSockets/SSE, real radio, responder
+  mobile app, billing). TanStack Query was not introduced (not yet a dependency; existing hand-rolled
+  client loaders retained per the web-data-fetching steering).
+
+### 2026-10-22: **Tenant responder network (agencies, staffing, per-tenant capability)**
+
+- **Decision:** a tenant now owns **its own agencies** and configures **its own** category→agency
+  routing capability, instead of a flat global agency list and a hardcoded map. `public.agencies` is
+  **recreated** tenant-scoped (`tenant_id NOT NULL`, per-tenant case-insensitive `name`/`code`
+  uniqueness) and carries an **Agency_Type** from a stable closed taxonomy
+  `{FIRE, POLICE, MEDICAL, DRRM, OTHER}` defined once in `packages/ui/src/agency-types.ts` and mirrored
+  by a DB `CHECK`. A responder is staffed into a specific office + optional agency (both must share the
+  acting tenant; an inactive/cross-tenant agency is refused); a no-agency responder is a DRRM
+  generalist (`agency_id null`) capable of every category.
+- **Capability_Config:** a per-tenant `tenant_capability_config` table maps each Emergency_Category to
+  a set of capable Agency_Types; the pure `Routing_Engine` reads it plus each candidate's Agency_Type.
+  The shipped **DEFAULT equals the legacy hardcoded mapping** (`SUNOG→[FIRE]`, `MEDIKAL→[MEDICAL]`,
+  `KRIMEN→[POLICE]`, `BAHA→[]`), so **routing is unchanged under defaults**; an empty set means only
+  DRRM generalists respond.
+- **Two-tier authority, isolated server-side:** a **Platform_Operator** manages any tenant via
+  `/api/platform/*` (acting tenant = explicit URL `tenantId`); a **DRRM_Admin** manages its own tenant
+  only via `responder:manage` on `/api/admin/*` (acting tenant from the session, never a URL). Both
+  call one shared tenant-scoped service; scope is deny-by-default and SQL-bounded. Cross-tenant rules:
+  operator allowed across tenants; DRRM_Admin known-other-tenant → `403`, not-visible-in-tenant →
+  `404`. The whole surface is **coordinate-free** (no coordinates in any request/response/error/log/
+  audit) and Tier 2 (degrades to "unavailable" offline, never blocks Tier-0 SOS).
+- **UI:** operator `AgencyNetworkPanel` (per-tenant, off `PlatformTenants`) and DRRM_Admin
+  `AdminAgencyNetwork` (admin accounts tab), both Operate Mode: Skeleton on first load, unified toast
+  outcomes, `ConfirmDialog`-gated deactivate, Lucide icons via `@aira/ui/web`, copy via `t()`.
+  Agency_Type tokens are identifiers; labels resolve only through `t()`.
+- **Schema:** one new migration `packages/db/supabase/migrations/20261022250000_tenant_responder_network.sql`
+  (sorts after the prior latest on this branch, `20261022230000_...`); earlier migrations left
+  byte-for-byte unchanged; `aira_app` gets the usual deny-by-default least-privilege grant; no Supabase
+  Auth, no new keyed provider.
+- **Impact recorded in docs:** PRODUCT.md §1c/§5, SECURITY.md §14, DESIGN.md §5a, this log.
+- **Not done (deliberately):** no second LGU per tenant, no cross-tenant move/reparent, no change to the
+  frozen mesh payload or anonymous Tier-0 intake (still resolves the first active LGU), and nothing from
+  the out-of-scope tracks (WebSockets/SSE, real radio, responder mobile app, billing).
+
 ### 2026-10-22: **Web UX overhaul + three-channel notifications**
 
 - **Decision:** the `apps/web` console gets a UI/IA overhaul plus a full notification system.

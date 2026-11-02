@@ -85,6 +85,69 @@ with a mock implementation today; the real LoRa (paired radio module) + Bluetoot
 a separate, flagged **hardware track** that never blocks app/console work. The frontend never blocks
 on the mesh.
 
+### 1c. Tenant-owned responder network + per-tenant capability (2026-10-22)
+
+Each tenant now owns **its own agencies** (the responding stations: BFP/fire, PNP/police, EMS/medical,
+DRRM rescue) instead of one flat global list. An agency belongs to exactly one tenant, carries a
+human name + code (per-tenant case-insensitive unique), an active flag, and an **Agency_Type** drawn
+from a stable **closed five-value taxonomy** `{FIRE, POLICE, MEDICAL, DRRM, OTHER}`. The type is the
+routing capability key; the human-named rows are per-tenant. Responders are staffed into a specific
+office and optionally affiliated with one of that tenant's agencies; a responder with no agency is a
+**DRRM generalist** capable of every category (the always-present fallback).
+
+The category→agency mapping that drives routing is now a **per-tenant Capability_Config**: each
+Emergency_Category maps to a set of capable Agency_Types, editable per tenant (an empty set is allowed,
+and means only DRRM generalists respond). The shipped **default equals the legacy hardcoded mapping**
+(`SUNOG→{FIRE}`, `MEDIKAL→{MEDICAL}`, `KRIMEN→{POLICE}`, `BAHA→∅`), so routing behavior is **unchanged
+out of the box**. This is a Tier 2 operator/admin surface (§1b) — it degrades to "unavailable" offline
+and never blocks the frozen Tier-0 mesh SOS. It changes neither the frozen mesh payload (§4) nor the
+one-LGU-per-tenant office shape (§1-multitenant).
+
+### 1d. Single-LGU product + first-class agencies (2026-11-03, SUPERSEDES §1-multitenant UX and §1c)
+
+AIRA is now sold and operated as a **single-LGU product**: one deployment serves one LGU. The
+multi-tenant **schema** of §1-multitenant is **retained internally** as defense-in-depth (the `tenants`
+row, every `tenant_id` column, and the tenant-bounded `OFFICE_SCOPE` recursion are unchanged and simply
+resolve to the one LGU — the **"soft single-LGU" / S1** approach), but the product **never presents a
+"tenant", "onboard office", or multi-tenant concept** in the UI.
+
+**Agencies are first-class organizations.** Each responding agency (BFP/fire, PNP/police, EMS/medical,
+LGU DRRM rescue, …) is a real organization with its own members and its own administrator, cooperating
+under the LDRRMO operations center per RA 10121's **notify-and-coordinate** doctrine. The role model:
+
+- **RESPONDER** — a field unit; acts only on its own assignments.
+- **DISPATCHER** — **agency-scoped**: runs one agency's operations center; reads and assigns only that
+  agency's units, for incidents routed to that agency.
+- **AGENCY_ADMIN** (new) — manages exactly one agency: its accounts and its office↔agency coverage;
+  reads its own agency's incidents read-only; **never dispatches**.
+- **ADMIN = the LDRRMO coordinator** — LGU-wide **read-only** incident/metrics oversight; sees **all**
+  agencies; may send a **coordination nudge / help request**; **never dispatches** (separation of
+  duties). UI copy labels this role "LDRRMO coordinator".
+
+A responder belongs to **exactly one office (required) and exactly one agency (required)**. Agency is
+enforced at the service layer; a no-agency responder remains possible only on the break-glass/legacy
+path (and routes as a DRRM generalist).
+
+**Office↔agency coverage** records which barangays an agency normally serves. Coverage drives routing
+**prioritization only** — a covering unit ranks above an equally-suitable non-covering one — but units
+may still respond **anywhere in the LGU** (cross-jurisdiction response is allowed, ranked lower).
+Coverage is never an access control or a hard filter.
+
+**Per-agency dispatch.** An incident's capable agency type(s) come from a **fixed built-in**
+`CATEGORY → AGENCY_TYPE` map (`SUNOG→FIRE`, `MEDIKAL→MEDICAL`, `KRIMEN→POLICE`, `BAHA→∅`; DRRM
+generalists lead for flood). The **editable per-tenant capability map of §1c is removed** — its default
+is now the frozen constant, so routing behavior is unchanged. A dispatcher's queue and routing
+suggestions are bounded to its own agency; assigning a non-own-agency unit is refused.
+
+**Operator UX retired, superadmin kept as CLI break-glass.** The `/platform` console and its tenant/
+office/agency/capability/responder management screens are removed; `/login` is the single front door
+and no longer retries a platform login. The superadmin tier itself (tables, CLI
+`platform:create-admin`, session plumbing) is **retained** for recovery and for the platform-tier
+system-notice path, but has **no web console**.
+
+All of the above is **Tier 2** (§1b): it degrades to an honest "unavailable" state offline and never
+blocks the frozen Tier-0 mesh SOS, which is unchanged (§4).
+
 ---
 
 ## 2. Architectural pivot: REMOVED FEATURES (authoritative)
@@ -197,7 +260,9 @@ English label (§3 language policy). Never localize the IDs themselves.
 - `MeshTransport` abstraction + mock implementation; offline-aware citizen app (outbox queue, "no
   signal" states, local receive/relay store).
 - Dispatcher **nearest-responder routing suggestions** (ranked by distance + category→agency
-  capability + barangay jurisdiction, using office/responder base positions).
+  capability + barangay jurisdiction, using office/responder base positions). The category→agency
+  capability is now **per-tenant configurable** (§1c), not hardcoded; routing is **unchanged** under
+  the shipped default.
 - Optional **citizen accounts** (email/device-key identity, mock email verification, no telco) with an
   opt-in **medical profile** + emergency contacts, encrypted at rest.
 - **On-incident, need-to-know medical access:** revealed to the assigned responder only while they
