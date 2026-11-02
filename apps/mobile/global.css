@@ -1,3 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Theme color tokens for NativeWind (mobile is dark-only: Operate Mode,
+ * StatusBar light, no theme toggle). The shared Tailwind preset emits colors as
+ * rgb(var(--color-NAME) / <alpha-value>); the web app declares the channels in
+ * apps/web/app/globals.css, but mobile has no such file in its Metro pipeline.
+ * Without these the token utilities compile against an undefined variable and
+ * NativeWind cannot resolve them. We mirror only the web dark palette here.
+ * Values are space-separated RGB channels so opacity modifiers keep working.
+ */
+@layer base {
+  :root {
+    --color-ink: 11 15 20; /* #0B0F14 app background */
+    --color-surface: 18 24 31; /* #12181F panels, sidebar */
+    --color-raised: 26 34 44; /* #1A222C cards, elevated rows */
+    --color-line: 42 52 65; /* #2A3441 hairline borders */
+    --color-fg: 242 245 248; /* #F2F5F8 primary text */
+    --color-muted: 147 161 176; /* #93A1B0 secondary text */
+
+    --color-emergency-sunog: 255 59 31; /* #FF3B1F fire */
+    --color-emergency-medikal: 0 208 138; /* #00D08A medical */
+    --color-emergency-krimen: 255 197 61; /* #FFC53D crime */
+    --color-emergency-baha: 76 194 255; /* #4CC2FF flood */
+
+    --color-status-queued: 255 197 61; /* #FFC53D */
+    --color-status-dispatched: 76 194 255; /* #4CC2FF */
+    --color-status-enroute: 94 211 192; /* #5ED3C0 */
+    --color-status-onscene: 255 176 32; /* #FFB020 */
+    --color-status-resolved: 0 208 138; /* #00D08A */
+    --color-status-success: 0 208 138; /* #00D08A */
+    --color-status-error: 255 59 31; /* #FF3B1F */
+    --color-status-info: 76 194 255; /* #4CC2FF */
+  }
+}
