@@ -27,3 +27,4 @@ minimumReleaseAgeExclude:
   - '@turbo/windows-arm64@2.11.10'
   - turbo@2.11.10
   - lucide-react@1.61.0
+  - lucide-react-native@1.61.0

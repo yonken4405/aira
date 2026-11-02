@@ -2,11 +2,19 @@
   "pbtResults": {
     "2.3 Write property test — client bounds never exceed server bounds": {
       "status": "passed",
-      "lastRunTimestamp": 1792743294928
+      "lastRunTimestamp": 1793641870742
     },
     "4.3 Write property test — session-restore maps each launch outcome correctly": {
       "status": "passed",
       "lastRunTimestamp": 1792743314391
+    },
+    "2.6 Write property test — validation accepts iff within bounds, and gates the PUT": {
+      "status": "passed",
+      "lastRunTimestamp": 1793641881078
+    },
+    "3.3 Write property test — every known API error maps to a defined copy key": {
+      "status": "passed",
+      "lastRunTimestamp": 1793641887324
     }
   },
   "executionHistory": {
@@ -355,6 +363,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826305
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793641934848
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642090191
       }
     ],
     "7.4 Implement `handleCitizenAccountDelete` and the route": [
@@ -362,6 +380,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826403
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642104727
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642219468
       }
     ],
     "8. Checkpoint — shared helpers + backend endpoint": [
@@ -369,6 +397,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826506
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642229843
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642277237
       }
     ],
     "9. Add the mobile dependencies (justified per AGENTS.md rule 10)": [
@@ -376,6 +414,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826614
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793641514263
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793641760812
       }
     ],
     "10.1 Write failing tests for `SessionStore`": [
@@ -383,6 +431,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826724
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642283699
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642368887
       }
     ],
     "10.2 Implement `SessionStore`": [
@@ -390,6 +448,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826832
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642369685
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642463527
       }
     ],
     "11.1 Write failing tests for the client (mocked `fetch` recorder)": [
@@ -397,6 +465,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741826939
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642468443
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642700945
       }
     ],
     "11.2 Implement `CitizenApiClient`": [
@@ -404,6 +482,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827036
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642701683
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642977588
       }
     ],
     "12.1 Write failing tests for the auth provider": [
@@ -411,6 +499,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827129
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642978568
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793643148351
       }
     ],
     "12.2 Implement `CitizenAuthProvider` and `useCitizenAuth`": [
@@ -418,6 +516,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827222
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793643149174
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793644687145
       }
     ],
     "13.1 Write the grid-invariance test FIRST": [
@@ -425,6 +533,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827323
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793644694289
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793644874808
       }
     ],
     "13.2 Implement `AppNavigator`": [
@@ -432,6 +550,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827441
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793644875615
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793645335035
       }
     ],
     "14.1 Write failing tests for the account hub": [
@@ -439,6 +567,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827637
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793645335911
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793645617328
       }
     ],
     "14.2 Implement `AccountHubScreen`": [
@@ -446,6 +584,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827756
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793645618036
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793645887107
       }
     ],
     "15.1 Write failing tests for registration": [
@@ -453,6 +601,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827876
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793645887758
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793646049863
       }
     ],
     "15.2 Implement `RegisterScreen`": [
@@ -460,6 +618,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741827992
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793646050500
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793648447989
       }
     ],
     "16.1 Write failing tests for login": [
@@ -467,6 +635,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828195
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793648774001
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793649012773
       }
     ],
     "16.2 Implement `LoginScreen`": [
@@ -474,6 +652,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828279
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793649013375
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793649427218
       }
     ],
     "17.1 Write failing tests for the medical screen": [
@@ -481,6 +669,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828388
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793649426756
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793649961476
       }
     ],
     "17.2 Implement `MedicalProfileScreen` + contacts sub-editor": [
@@ -488,6 +686,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828499
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793649962125
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793650641714
       }
     ],
     "18.1 Write a failing test asserting grid behaviour is retained": [
@@ -495,6 +703,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828609
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793650642463
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793650749941
       }
     ],
     "18.2 Render `AppNavigator` from `App.tsx`": [
@@ -502,6 +720,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828726
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793650750904
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793650851560
       }
     ],
     "20.1 Grid regression and no-permission / no-AI / privacy structural assertions": [
@@ -509,6 +737,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828820
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793650861898
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793651085584
       }
     ],
     "21. Final checkpoint — run the quality gate": [
@@ -516,6 +754,16 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792741828928
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793651086224
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793651113285
       }
     ],
     "1. Add the citizen copy keys and device-key generator to `@aira/ui`": [
@@ -565,6 +813,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743222769
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793641905171
       }
     ],
     "2.3 Write property test — client bounds never exceed server bounds": [
@@ -572,6 +825,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743224176
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793641906330
       }
     ],
     "2.6 Write property test — validation accepts iff within bounds, and gates the PUT": [
@@ -579,6 +837,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743225103
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793641907277
       }
     ],
     "3.3 Write property test — every known API error maps to a defined copy key": [
@@ -586,6 +849,11 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743226487
+      },
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793641908149
       }
     ],
     "4.3 Write property test — session-restore maps each launch outcome correctly": [
@@ -593,6 +861,83 @@
         "executionId": "f3ed485b-9d96-4872-951c-0dd9782f1cdb",
         "chatSessionId": "sess_ba8ac02b-17c9-4eba-8f6a-cefc4bba7325",
         "timestamp": 1792743227337
+      }
+    ],
+    "7. Implement the account-delete service and handler": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642219537
+      }
+    ],
+    "10. Implement the `SessionStore` over `expo-secure-store`": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642463664
+      }
+    ],
+    "11. Implement the `CitizenApiClient`": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793642977920
+      }
+    ],
+    "12. Implement `CitizenAuthProvider` + `useCitizenAuth`": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793644687253
+      }
+    ],
+    "13. Implement `AppNavigator` (grid is the never-gated root)": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793645335132
+      }
+    ],
+    "14. Implement `AccountHubScreen`": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793645887209
+      }
+    ],
+    "15. Implement `RegisterScreen`": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793648448322
+      }
+    ],
+    "16. Implement `LoginScreen`": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793649427469
+      }
+    ],
+    "17. Implement `MedicalProfileScreen` + contacts sub-editor": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793650641851
+      }
+    ],
+    "18. Wire `App.tsx` to render `AppNavigator`": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793650851644
+      }
+    ],
+    "20. Structural guards — grid regression + no-permission / no-AI / tier-isolation": [
+      {
+        "executionId": "30dd7ccf-bd98-416d-94f3-db149bdef2e9",
+        "chatSessionId": "sess_8d2ece2c-e617-4ae5-ad21-01166ebc8416",
+        "timestamp": 1793651085713
       }
     ]
   }

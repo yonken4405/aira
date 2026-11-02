@@ -1,6 +1,6 @@
 ﻿---
 inclusion: fileMatch
-fileMatchPattern: "apps/web/**"
+fileMatchPattern: 'apps/web/**'
 ---
 
 # Web data fetching & caching (apps/web)
@@ -13,9 +13,10 @@ offline-first under a 30 MB budget and is NOT covered by this rule.
 When adding or substantially reworking **client-side** data access in `apps/web`, use
 **TanStack Query (`@tanstack/react-query`)** as the default fetching + caching layer
 whenever it is available in the workspace. This is crucial: ad-hoc `useEffect` + `fetch`
-+ `useState` loaders (the pattern in older components) should not be the default for new
-work — they re-implement caching, de-duplication, loading/error state, and refetch-on-focus
-that Query already provides correctly.
+
+- `useState` loaders (the pattern in older components) should not be the default for new
+  work — they re-implement caching, de-duplication, loading/error state, and refetch-on-focus
+  that Query already provides correctly.
 
 "Whenever it is available" means: if `@tanstack/react-query` is already a dependency of
 `apps/web`, use it. If it is not yet installed, it MAY be added following AGENTS.md rule 10
@@ -25,7 +26,7 @@ hand-rolled loaders are NOT required to be rewritten just to adopt it.
 
 ## Non-negotiable caching policy (unchanged)
 
-TanStack Query is the *mechanism*; it does not change AIRA's caching *policy*. Whatever
+TanStack Query is the _mechanism_; it does not change AIRA's caching _policy_. Whatever
 fetching layer is used MUST preserve the guarantees already in AGENTS.md rule 14 and
 SECURITY.md §5:
 
