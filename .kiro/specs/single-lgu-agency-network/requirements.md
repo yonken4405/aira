@@ -141,7 +141,7 @@ scoped to my agency where appropriate, with clear separation of duties.
    oversight, SHALL see **all agencies**, and SHALL be able to send a coordination nudge/help
    request; it SHALL NOT assign or advance incident status (no dispatch — separation of duties,
    RA 10121).
-4a. THE `ADMIN` role MAY retain account/audit management as today, subject to Requirement 7 scoping.
+   4a. THE `ADMIN` role MAY retain account/audit management as today, subject to Requirement 7 scoping.
 5. THE `RESPONDER` role SHALL read and advance only incidents assigned to it (unchanged).
 6. THE System SHALL deny by default: any action whose permission is not granted to the caller's role
    SHALL return `403`.

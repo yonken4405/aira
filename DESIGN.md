@@ -260,6 +260,43 @@ UI primitives for all of the above live in `@aira/ui/web`; do not re-implement t
 
 ---
 
+## 5c. Single-LGU admin surfaces (2026-11-03, SUPERSEDES the §5a operator + capability editors)
+
+The single-LGU model (PRODUCT.md §1d) retires the operator console and the capability editor and
+reshapes the `/admin` surface. All surfaces stay in Operate Mode (§1): no gradients/glass/glow/bounce,
+Lucide icons via `@aira/ui/web`, tokens from `@aira/tailwind-config`, copy only via `t()`, state never
+by color alone, and **coordinate-free** throughout (this surface handles no coordinates).
+
+- **Role-aware admin tabs.** `AdminSurface` gates each tab by permission (a tab and its body are omitted
+  when the permission is absent). The **LDRRMO coordinator** (`ADMIN`) sees **Accounts · Organization ·
+  Metrics · Audit**; an **AGENCY_ADMIN** sees **Accounts (own agency) · Organization (own agency) ·
+  Coverage · Metrics · Audit**. The Coverage tab appears only when the viewer has a resolved own agency.
+  One tablist instance stays mounted across switches (§5b pattern).
+- **Users / Organization view (`OrgView`).** Lists accounts with their role, agency and office, and
+  presents the hierarchy: the office tree and each agency with its members grouped by role. Scoped to
+  the viewer's authority (an AGENCY_ADMIN sees only its own agency; the LDRRMO coordinator sees all).
+  First load shows a layout-shaped `Skeleton`; a failed/slow/offline load degrades to an honest
+  "unavailable" state and never blocks the Tier-0 SOS. Lucide `Building2` / `Users`; role + office via
+  `t()` / `roleLabel()`.
+- **Coverage editor (`AgencyCoverage`).** A barangay **checklist** for the acting agency; saving
+  **full-replaces** that agency's coverage set behind a `ConfirmDialog` (cancel leaves data unchanged),
+  with the outcome announced through `useToast()`. First load shows a `Skeleton`; failure shows an
+  "unavailable" state. Copy makes the semantics explicit: coverage **prioritizes routing but never
+  restricts** where units may respond (PRODUCT.md §1d).
+- **Accounts (`AdminResponders`).** The provisioning form now makes **Agency a required field** (the
+  submit stays disabled until an agency is chosen); the former "No agency" option is gone. The roster
+  shows each account's office + agency.
+- **Dispatch console (`/console`).** Unchanged shell; routing suggestions and the assignee picker are
+  agency-scoped **server-side** (no UI contract change), and a "covers area" affordance may surface the
+  coverage-first ordering.
+- **Removed:** the operator `PlatformTenants` / `AgencyNetworkPanel`, the nationwide `PlatformMap`, and
+  the `AdminAgencyNetwork` capability editor of §5a — along with the capability checklist UI and its
+  dead i18n keys.
+
+UI primitives for all of the above live in `@aira/ui/web`; do not re-implement them per surface.
+
+---
+
 ## 5b. App_Shell & information architecture (web, all tiers)
 
 One shared **App_Shell** header wraps every authenticated `apps/web` view. It replaces the four

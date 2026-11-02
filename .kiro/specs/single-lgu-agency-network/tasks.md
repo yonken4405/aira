@@ -41,7 +41,7 @@ HEAD (contains the committed fixes) before starting.
     - Update `apps/web/tests/routing.test.ts`: assert `CATEGORY_AGENCY_DEFAULT` equals
       `{SUNOG:['FIRE'],MEDIKAL:['MEDICAL'],KRIMEN:['POLICE'],BAHA:[]}`; `isCapable(category, type)`
       (no config arg) matches the legacy result for every pair; `rankResponders(category, incident,
-      candidates)` (no config arg) orders capable→covering→nearer→callsign; `RoutingCandidate` gains
+candidates)` (no config arg) orders capable→covering→nearer→callsign; `RoutingCandidate` gains
       `coversIncidentOffice: boolean`; purity/determinism preserved.
     - _Requirements: 6.2, 6.3, 6.7, 9.3_
   - [ ] 1.2 Implement the fixed map + coverage-aware ranking
@@ -61,8 +61,8 @@ HEAD (contains the committed fixes) before starting.
     `alter type public.responder_role add value if not exists 'AGENCY_ADMIN'` (first statement);
     create `public.agency_coverage (agency_id, office_id, created_at, pk(agency_id, office_id))` with
     `on delete cascade` FKs + `agency_coverage_office_idx`; `drop table if exists
-    public.tenant_capability_config`; deny-by-default grants + `grant select, insert, delete on
-    public.agency_coverage to aira_app`. If the combined file trips the enum "unsafe use" rule under
+public.tenant_capability_config`; deny-by-default grants + `grant select, insert, delete on
+public.agency_coverage to aira_app`. If the combined file trips the enum "unsafe use" rule under
     `db:reset`, split into `...260000_add_agency_admin_role.sql` + `...261000_agency_coverage_...sql`.
     Verify with `pnpm --filter @aira/db db:reset` (Docker).
   - Update `packages/db/supabase/seed.sql`: keep the one tenant/offices/agencies; add realistic

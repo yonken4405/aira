@@ -33,11 +33,11 @@ removing the operator-tier branch of that spine and the editable capability map.
 
 ### Identity tiers after this feature
 
-| Tier | Table / cookie | Web entry | Purpose |
-|------|----------------|-----------|---------|
-| Responder (all roles) | `responders` / `aira_session` | `/login` → `/console` or `/admin` | The whole product UX |
-| Citizen | `citizens` / `aira_citizen_session` | mobile app | Unchanged |
-| Superadmin (break-glass) | `platform_admins` / `platform_sessions` | **CLI only** | Recovery/bootstrap; no web console |
+| Tier                     | Table / cookie                          | Web entry                         | Purpose                            |
+| ------------------------ | --------------------------------------- | --------------------------------- | ---------------------------------- |
+| Responder (all roles)    | `responders` / `aira_session`           | `/login` → `/console` or `/admin` | The whole product UX               |
+| Citizen                  | `citizens` / `aira_citizen_session`     | mobile app                        | Unchanged                          |
+| Superadmin (break-glass) | `platform_admins` / `platform_sessions` | **CLI only**                      | Recovery/bootstrap; no web console |
 
 The superadmin tier's **tables, service, store, and CLI remain**; its **web routes and pages are
 removed**. The shared `PlatformStore` persists as an internal module (office pins, agency reads,
@@ -93,12 +93,13 @@ LDRRMO ADMIN: read-only across the whole LGU; sees all agencies; may send a nudg
 
 ```ts
 // routing.ts
-export const CATEGORY_AGENCY_DEFAULT: Readonly<Record<EmergencyCategoryId, readonly AgencyType[]>> = {
-  SUNOG: ['FIRE'],
-  MEDIKAL: ['MEDICAL'],
-  KRIMEN: ['POLICE'],
-  BAHA: [], // DRRM generalists (agency-less or DRRM type) lead
-};
+export const CATEGORY_AGENCY_DEFAULT: Readonly<Record<EmergencyCategoryId, readonly AgencyType[]>> =
+  {
+    SUNOG: ['FIRE'],
+    MEDIKAL: ['MEDICAL'],
+    KRIMEN: ['POLICE'],
+    BAHA: [], // DRRM generalists (agency-less or DRRM type) lead
+  };
 
 export function isCapable(category: EmergencyCategoryId, agencyType: AgencyType | null): boolean;
 // null agencyType = DRRM generalist → always capable
@@ -146,12 +147,12 @@ Collapsing to a fixed constant preserves exact current behavior and removes a wh
 export const ROLES = ['RESPONDER', 'DISPATCHER', 'AGENCY_ADMIN', 'ADMIN'] as const;
 
 // New permissions
-'incident:read:agency'   // dispatcher/agency-admin: incidents routed to own agency
-'incident:assign:agency' // dispatcher: assign own-agency units (replaces bare incident:assign check at the agency layer)
-'agency:manage'          // agency-admin: manage own agency's accounts
-'coverage:manage'        // agency-admin: manage own agency's coverage
-'agency:read:all'        // LDRRMO admin: see all agencies (coordination)
-'coordination:nudge'     // LDRRMO admin: send a help-request/nudge
+('incident:read:agency'); // dispatcher/agency-admin: incidents routed to own agency
+('incident:assign:agency'); // dispatcher: assign own-agency units (replaces bare incident:assign check at the agency layer)
+('agency:manage'); // agency-admin: manage own agency's accounts
+('coverage:manage'); // agency-admin: manage own agency's coverage
+('agency:read:all'); // LDRRMO admin: see all agencies (coordination)
+('coordination:nudge'); // LDRRMO admin: send a help-request/nudge
 ```
 
 Grant table (summary):
@@ -247,12 +248,14 @@ New / changed methods (both Postgres and in-memory adapters, kept behavior-ident
 ### 7. HTTP routes
 
 Removed (Requirement 2/9):
+
 - `apps/web/app/api/platform/**` operator routes (tenants, offices, agencies, capability,
   responders, login/session for the console) — except the retained CLI path has no HTTP route anyway.
 - `apps/web/app/api/admin/capability/**`.
 - Platform login retry in `/login`.
 
 Added / changed:
+
 - `GET/PUT /api/admin/agencies/[id]/coverage` — agency coverage (AGENCY_ADMIN own agency; ADMIN
   read-only all).
 - `GET /api/admin/org` — the users/org view (scoped).
@@ -266,12 +269,14 @@ Retained: all responder/citizen/incident/tracking/notification routes not listed
 ### 8. UI
 
 Removed:
+
 - `/platform` pages, `PlatformTenants.tsx`, `AgencyNetworkPanel.tsx` (operator), the capability editor
   (`AdminAgencyNetwork` capability section + operator capability UI), and their client helpers +
   dead i18n keys.
 
 Added / changed (Operate Mode throughout: Skeleton, `useToast`, `ConfirmDialog`, Lucide via
 `@aira/ui/web`, copy via `t()`, no coordinates):
+
 - **Admin surface** (`AdminSurface.tsx`) tabs adapt to role:
   - `ADMIN` (LDRRMO): Accounts (all), Org view, Agencies (read-all + nudge), Metrics, Audit.
   - `AGENCY_ADMIN`: Accounts (own agency), Coverage editor (own agency), Org view (own agency),

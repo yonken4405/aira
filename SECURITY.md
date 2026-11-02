@@ -327,5 +327,49 @@ rules are binding and extend the isolation model of §12.
    gets the same deny-by-default least-privilege grant as other business tables (§5.7), with no
    Supabase Auth and no new keyed provider.
 
+## 15. Single-LGU agency network (agency-scoped roles, coordination-only LDRRMO) (2026-11-03)
+
+This supersedes the operator-UX and capability parts of §14 while **keeping every isolation boundary
+of §12/§14 intact**. AIRA is a single-LGU product under the "soft single-LGU" (S1) model: the
+multi-tenant `tenants`/`tenant_id` columns and the tenant-bounded `OFFICE_SCOPE` CTEs are **retained
+unchanged** as defense-in-depth and resolve to the one LGU. The surface stays **Tier 2** and
+**coordinate-free** end to end (§5). These rules are binding:
+
+1. **Agency as a scope.** A new scope primitive — `AGENCY_SCOPE` (`responders.agency_id =
+principal.agencyId`) — bounds the `DISPATCHER` and `AGENCY_ADMIN` tiers, nested one level inside
+   `OFFICE_SCOPE`. The authenticated principal and the browser-facing `Viewer` carry
+   `agencyId`/`agencyName`. A responder belongs to exactly one office (required) and one agency
+   (required at the service layer; the DB `agency_id` stays nullable only for the break-glass path).
+2. **Agency-scoped dispatch (deny-by-default).** A `DISPATCHER` reads/assigns only its **own** agency's
+   units for incidents routed to its agency; assigning a non-own-agency unit is `403`. A routing
+   suggestion never grants access — assignment is authorized server-side (§4.1). The queue and routing
+   candidates are bounded at the store layer by `agency_id`, never by UI filtering.
+3. **Agency-admin isolation.** An `AGENCY_ADMIN` manages **only** its own agency's accounts and
+   coverage. Cross-agency access follows the §14.3 discriminant one level down: a resource **known** to
+   belong to another agency in the LGU is `403` (`cross_agency`); one **not visible** in the caller's
+   agency scope is `404`. Provisioning is agency-required (`400 invalid_responder` when absent) and an
+   agency-bounded caller may never create an account in another agency (`403`).
+4. **LDRRMO coordinator is coordination-only.** The `ADMIN` role has **LGU-wide read-only** incident +
+   metrics oversight, sees **all** agencies, and may send a coordination **nudge** — but holds **no**
+   `incident:assign:*` / `incident:status:*` permission. Dispatching stays with agency dispatchers
+   (separation of duties, RA 10121). The nudge is coordinate-free and addresses an agency's members by
+   id only.
+5. **Office↔agency coverage is prioritization, never authorization.** `agency_coverage` affects routing
+   **order** only; it is never an access control or a hard filter, so a coverage row can neither grant
+   nor deny a read/write. Coverage edits are same-LGU validated (an office outside the LGU is rejected).
+6. **Superadmin retained as CLI-only break-glass.** The operator **console** and its tenant/office/
+   agency/capability/responder management **routes** are removed; `/login` no longer retries a platform
+   login. The superadmin **tables, session, `authenticatePlatform` guard, and `platform:create-admin`
+   CLI are retained** (the platform-tier system-notice path still uses them), but there is **no web
+   console** and the tier still holds **zero** incident/citizen access (§12).
+7. **Fixed routing map, no stored capability.** The editable per-tenant capability config is removed
+   (`tenant_capability_config` dropped); routing uses a fixed built-in `CATEGORY → AGENCY_TYPE`
+   constant, eliminating a write surface without changing behavior.
+8. **Schema discipline.** One new migration
+   (`20261022260000_single_lgu_agency_network.sql`) adds the `AGENCY_ADMIN` enum value, creates
+   `agency_coverage` (cascade FKs), drops `tenant_capability_config`, and applies the usual
+   deny-by-default least-privilege grant to the new table. Earlier migrations are unchanged; no
+   Supabase Auth, no new keyed provider.
+
 **Definition of done:** a feature that touches data, auth, or third-party boundaries also updates this
 file and is covered by tests per [TESTING.md](./TESTING.md).
