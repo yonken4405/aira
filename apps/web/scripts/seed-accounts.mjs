@@ -2,8 +2,10 @@
  * DEV-ONLY account seeding. Provisions a known set of accounts for local development so
  * you can sign in immediately after `db:reset`:
  *
- *   - 1 platform operator (superadmin)        -> /platform
- *   - 1 DRRM admin, 1 dispatcher, 1 responder -> /admin and /console
+ *   - 1 platform operator (superadmin)          -> CLI break-glass only (no web console)
+ *   - 1 LDRRMO coordinator (ADMIN, read-only)   -> /admin
+ *   - per agency: 1 AGENCY_ADMIN, 1 DISPATCHER  -> /admin, /console
+ *     and 1 field RESPONDER                     -> /console
  *
  * Passwords are hashed with argon2id here (never stored in SQL/source). The dev password
  * is printed once below. REFUSES to run against a non-local database unless
@@ -90,10 +92,27 @@ try {
     );
   }
 
-  const bfp = (await client.query(`select id from public.agencies where code = 'BFP' limit 1`))
-    .rows[0];
+  // The LGU's agencies (single-lgu-agency-network). Each gets its own admin, dispatcher,
+  // and field responder below. Keyed by code so station/display labels are stable.
+  const agencyRows = (
+    await client.query(`select id, code from public.agencies where tenant_id = $1 order by code`, [
+      tenantId,
+    ])
+  ).rows;
+  const agencyByCode = new Map(agencyRows.map((a) => [a.code, a.id]));
 
-  // 1) Platform operator (superadmin).
+  // A barangay office to station field responders in (coverage realism). Falls back to
+  // the LGU root when no barangay is seeded.
+  const barangay = (
+    await client.query(
+      `select id from public.offices where tenant_id = $1 and kind = 'BARANGAY' order by name limit 1`,
+      [tenantId],
+    )
+  ).rows[0];
+  const fieldOfficeId = barangay?.id ?? office.id;
+
+  // 1) Platform operator (superadmin). Retained as a CLI break-glass tier; it has no web
+  //    console after this feature, but the dev seed keeps a recovery account available.
   await client.query(
     `insert into public.platform_admins (email, password_hash)
      values ($1, $2)
@@ -101,28 +120,64 @@ try {
     ['admin@aira.dev', passwordHash],
   );
 
-  // 2-4) DRRM admin, dispatcher, field responder (email login; callsign = display label).
-  const responders = [
-    { email: 'drrm@aira.dev', callsign: null, role: 'ADMIN', agency: null },
-    { email: 'dispatch@aira.dev', callsign: 'OPCEN-01', role: 'DISPATCHER', agency: null },
-    { email: 'responder@aira.dev', callsign: 'BFP-01', role: 'RESPONDER', agency: bfp?.id ?? null },
+  // 2) LDRRMO coordinator (the existing ADMIN role): tenant-wide, read-only, sees all
+  //    agencies, no dispatch. Agency-less by design (coordination, not a line agency).
+  const accounts = [
+    { email: 'drrm@aira.dev', callsign: 'LDRRMO', role: 'ADMIN', agency: null, office: office.id },
   ];
 
-  for (const r of responders) {
+  // 3) Per agency: an AGENCY_ADMIN + DISPATCHER (stationed at the LGU root) and a field
+  //    RESPONDER (stationed at a barangay). Agency is required for these roles (R3).
+  for (const { code, id } of agencyRows) {
+    const slug = code.toLowerCase();
+    accounts.push(
+      {
+        email: `${slug}.admin@aira.dev`,
+        callsign: `${code}-ADMIN`,
+        role: 'AGENCY_ADMIN',
+        agency: id,
+        office: office.id,
+      },
+      {
+        email: `${slug}.dispatch@aira.dev`,
+        callsign: `${code}-OPCEN`,
+        role: 'DISPATCHER',
+        agency: id,
+        office: office.id,
+      },
+      {
+        email: `${slug}.responder@aira.dev`,
+        callsign: `${code}-01`,
+        role: 'RESPONDER',
+        agency: id,
+        office: fieldOfficeId,
+      },
+    );
+  }
+
+  for (const a of accounts) {
     await client.query(
       `insert into public.responders (email, callsign, role, password_hash, office_id, agency_id, must_change_password)
        values ($1, $2, $3::responder_role, $4, $5, $6, false)
-       on conflict (lower(email)) do update set password_hash = excluded.password_hash, role = excluded.role`,
-      [r.email, r.callsign, r.role, passwordHash, office.id, r.agency],
+       on conflict (lower(email)) do update
+         set password_hash = excluded.password_hash,
+             role = excluded.role,
+             office_id = excluded.office_id,
+             agency_id = excluded.agency_id`,
+      [a.email, a.callsign, a.role, passwordHash, a.office, a.agency],
     );
   }
 
   console.log('\nSeeded dev accounts:\n');
   console.log(`  Password (all accounts): ${password}\n`);
-  console.log('  Platform operator  admin@aira.dev      -> /platform');
-  console.log('  DRRM admin         drrm@aira.dev       -> /admin');
-  console.log('  Dispatcher         dispatch@aira.dev   -> /console');
-  console.log('  Responder          responder@aira.dev  -> /console');
+  console.log('  Platform operator  admin@aira.dev            (CLI break-glass only)');
+  console.log('  LDRRMO coordinator drrm@aira.dev             -> /admin  (read-only)');
+  for (const { code } of agencyRows) {
+    const slug = code.toLowerCase();
+    console.log(`  ${code} agency admin   ${`${slug}.admin@aira.dev`.padEnd(24)} -> /admin`);
+    console.log(`  ${code} dispatcher     ${`${slug}.dispatch@aira.dev`.padEnd(24)} -> /console`);
+    console.log(`  ${code} responder      ${`${slug}.responder@aira.dev`.padEnd(24)} -> /console`);
+  }
   console.log('\nThese are DEV credentials. Never use this script against production.\n');
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));

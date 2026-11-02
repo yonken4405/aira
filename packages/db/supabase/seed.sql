@@ -34,6 +34,25 @@ insert into public.offices (id, tenant_id, name, kind, parent_id, lat, lon, regi
    'Barangay Talamban', 'BARANGAY', '0f100000-0000-4000-8000-000000000001', 10.3600, 123.9100, 'Region VII', 'Cebu')
 on conflict (id) do nothing;
 
+-- Agency coverage (single-lgu-agency-network R5): the office<->agency prioritisation
+-- links. Coverage affects ranking only — cross-jurisdiction response is still allowed,
+-- ranked lower. Agency ids are generated, so links are resolved by joining agencies by
+-- code to offices. Realistic shape for the one LGU:
+--   BFP (fire)    covers every barangay;
+--   PNP (police)  covers every barangay;
+--   EMS (medical) covers the LGU root (city-wide station).
+insert into public.agency_coverage (agency_id, office_id)
+select a.id, o.id
+  from public.agencies a
+  join public.offices o
+    on o.tenant_id = a.tenant_id
+ where a.tenant_id = '7e000000-0000-4000-8000-000000000001'
+   and (
+     (a.code in ('BFP', 'PNP') and o.kind = 'BARANGAY')
+     or (a.code = 'EMS' and o.kind = 'LGU')
+   )
+on conflict (agency_id, office_id) do nothing;
+
 -- Queue demo rows: 4 dp coordinates, closed category enum, no citizen text.
 insert into public.incidents (id, category, lat, lon, status, source, reported_at, office_id) values
   ('1c100000-0000-4000-8000-000000000001', 'SUNOG',   10.3157, 123.8854, 'QUEUED',
